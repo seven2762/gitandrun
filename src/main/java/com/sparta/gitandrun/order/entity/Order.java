@@ -35,21 +35,18 @@ public class Order {
         this.orderType = type;
     }
 
-    // == 연관관계 메서드 == //
-    public void addOrderMenu(OrderMenu orderMenu) {
-        orderMenus.add(orderMenu);
-        orderMenu.updateOrder(this);
+    public void addOrderMenus(List<OrderMenu> orderMenus) {
+        this.orderMenus.addAll(orderMenus);
+        orderMenus.forEach(orderMenu -> orderMenu.updateOrder(this));
     }
 
     // == 생성 메서드 == //
-    public static Order createOrder(boolean type, OrderMenu... orderMenus) {
+    public static Order createOrder(boolean type, List<OrderMenu> orderMenus) {
         Order order = Order.builder()
                 .type(type ? OrderType.DELIVERY : OrderType.VISIT)
                 .build();
 
-        for (OrderMenu orderMenu : orderMenus) {
-            order.addOrderMenu(orderMenu);
-        }
+        order.addOrderMenus(orderMenus);
 
         return order;
     }

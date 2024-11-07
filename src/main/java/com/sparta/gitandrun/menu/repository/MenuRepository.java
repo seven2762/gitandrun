@@ -5,13 +5,13 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import java.util.Optional;
+import java.util.List;
 
 
 public interface MenuRepository extends JpaRepository<Menu, Long> {
 
-    @Query("select m from Menu m where m.id = :menuId and m.isDeleted = false ")
-    Optional<Menu> findByIdAndIsDeletedFalse(@Param("menuId") Long menuId);
+    @Query("select m from Menu m where m.id in :menuIds and m.isDeleted = false")
+    List<Menu> findByIdsAndIsDeletedFalse(@Param("menuIds") List<Long> menuIds);
 
 
 //    List<Menu> findAllBy(Menu menu);
