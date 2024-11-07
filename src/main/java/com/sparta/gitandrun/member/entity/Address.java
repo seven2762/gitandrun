@@ -14,10 +14,10 @@ public class Address {
     @Column(nullable = false, length = 255)
     private String address;
 
-    @Column(length = 255)
+    @Column(name = "address_detail", length = 255)
     private String addressDetail;
 
-    @Column(nullable = false, length = 255)
+    @Column(name = "zip_code", nullable = false, length = 255)
     private String zipCode;
 
     @Builder
