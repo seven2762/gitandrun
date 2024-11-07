@@ -1,8 +1,8 @@
 package com.sparta.gitandrun.order.entity;
 
-import com.sparta.gitandrun.common.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -15,7 +15,7 @@ import static jakarta.persistence.CascadeType.PERSIST;
 @Getter
 @Table(name = "p_order")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Order extends BaseEntity {
+public class Order {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -29,4 +29,28 @@ public class Order extends BaseEntity {
 
     @OneToMany(mappedBy = "order", cascade = PERSIST, orphanRemoval = true)
     private List<OrderMenu> orderMenus = new ArrayList<>();
+
+    @Builder
+    public Order (OrderType type) {
+        this.orderType = type;
+    }
+
+    // == 연관관계 메서드 == //
+    public void addOrderMenu(OrderMenu orderMenu) {
+        orderMenus.add(orderMenu);
+        orderMenu.updateOrder(this);
+    }
+
+    // == 생성 메서드 == //
+    public static Order createOrder(boolean type, OrderMenu... orderMenus) {
+        Order order = Order.builder()
+                .type(type ? OrderType.DELIVERY : OrderType.VISIT)
+                .build();
+
+        for (OrderMenu orderMenu : orderMenus) {
+            order.addOrderMenu(orderMenu);
+        }
+
+        return order;
+    }
 }

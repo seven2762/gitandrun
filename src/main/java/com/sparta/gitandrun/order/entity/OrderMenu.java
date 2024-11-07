@@ -3,6 +3,7 @@ package com.sparta.gitandrun.order.entity;
 import com.sparta.gitandrun.menu.entity.Menu;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -30,4 +31,25 @@ public class OrderMenu {
     @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "p_menu_id")
     private Menu menu;
+
+    @Builder
+    public OrderMenu(Menu menu, int orderCount, int orderPrice) {
+        this.menu = menu;
+        this.orderCount = orderCount;
+        this.orderPrice = orderPrice;
+    }
+
+    // == 연관관계 메서드 == //
+    public void updateOrder(Order order) {
+        this.order = order;
+    }
+
+    // == 생성 메서드 == //
+    public static OrderMenu createOrderMenu(Menu findMenu, int price, int count) {
+        return OrderMenu.builder()
+                .menu(findMenu)
+                .orderCount(count)
+                .orderPrice(price)
+                .build();
+    }
 }
