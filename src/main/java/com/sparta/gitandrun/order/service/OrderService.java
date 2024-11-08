@@ -67,10 +67,27 @@ public class OrderService {
 //            }
 //        }
 //
-        Order findOrder = orderRepository.findOrderById(orderId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 항목입니다."));
+        Order findOrder = getOrder(orderId);
 
         findOrder.cancelOrder();
+    }
+
+    // 주문 거절
+    @Transactional
+    public void rejectOrder(Long orderId) {
+
+        Order findOrder = getOrder(orderId);
+
+        /*
+            본인 가게 주문 검증 메서드 구현 필요
+        */
+
+        findOrder.rejectOrder();
+    }
+
+    private Order getOrder(Long orderId) {
+        return orderRepository.findOrderById(orderId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 항목입니다."));
     }
 
     private List<Menu> getMenus(CreateOrderReqDto dto) {
