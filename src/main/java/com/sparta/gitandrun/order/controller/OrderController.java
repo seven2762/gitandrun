@@ -40,4 +40,17 @@ public class OrderController {
 
         return ResponseEntity.ok().body(new ApiResDto("주문 취소 완료", HttpStatus.OK.value()));
     }
+
+    /*
+       주문거절 메서드
+       1. @Secured("OWNER, MANAGER") 추후 접근 권한 처리
+       2. 매개변수로 User 추가할 것
+   */
+    @PatchMapping("/{orderId}/reject")
+    private ResponseEntity<ApiResDto> rejectOrder(@PathVariable("orderId") Long orderId) {
+
+        orderService.rejectOrder(orderId);
+
+        return ResponseEntity.ok().body(new ApiResDto("주문 거절 완료", HttpStatus.OK.value()));
+    }
 }
