@@ -30,7 +30,7 @@ public class MenuController {
     //CREATE
     @PostMapping
     public ResponseEntity<ApiResDto> createMenu(@RequestBody MenuRequestDto requestDto) {
-        menuservice.createMenu(requestDto); // store 추가되면 store 정보 가져와서
+        menuservice.createMenu(requestDto);
         return ResponseEntity.ok().body(new ApiResDto("주문 완료", HttpStatus.OK.value()));
     }
 
@@ -44,7 +44,6 @@ public class MenuController {
     //DELETE
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResDto> deleteMenu(@PathVariable("id") Long id){
-        System.out.println("id값은 + " + id);
         menuservice.deleteMenu(id);
         return ResponseEntity.ok().body(new ApiResDto("삭제 완료", HttpStatus.OK.value()));
     }
@@ -53,6 +52,12 @@ public class MenuController {
     @GetMapping
     public List<MenuResponseDto> getAllMenus(){
         return menuservice.getAllMenus();
+    }
+
+    //READ ony One
+    @GetMapping("/{id}")
+    public MenuResponseDto getOneMenu(@PathVariable("id") Long id){
+        return menuservice.getOneMenu(id);
     }
 
 }

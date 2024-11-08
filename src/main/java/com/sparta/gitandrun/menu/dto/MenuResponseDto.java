@@ -1,10 +1,6 @@
 package com.sparta.gitandrun.menu.dto;
 
 import com.sparta.gitandrun.menu.entity.Menu;
-import jakarta.persistence.Column;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -24,7 +20,7 @@ public class MenuResponseDto {
     private String createBy;
     private LocalDateTime updatedAt;
     private String updatedBy;
-    private Boolean isDeleted;
+    private boolean isDeleted;
     private LocalDateTime deletedAt;
     private String deletedBy;
 
@@ -38,9 +34,9 @@ public class MenuResponseDto {
         this.price = menu.getPrice();
         this.content = menu.getContent();
         this.createdAt = menu.getCreatedAt();
-        this.createBy = "test create";
+        this.createBy = "test create user";
         this.updatedAt = menu.getUpdatedAt();
-        this.updatedBy = "test update";
+        this.updatedBy = "test update user";
 //        this.isDeleted = menu.getIsDeleted();
 //        this.deletedAt = menu.getDeletedAt();
 //        this.deletedBy = menu.getDeletedBy();
