@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import static jakarta.persistence.CascadeType.PERSIST;
 
@@ -55,5 +56,13 @@ public class Order {
         order.addOrderMenus(orderMenus);
 
         return order;
+    }
+
+    // == 주문 취소 메서드 == //
+    public void cancelOrder() {
+        if (Objects.equals(this.getOrderStatus().status, OrderStatus.CANCEL.status)) {
+            throw new IllegalArgumentException("이미 취소가 된 주문입니다.");
+        }
+        this.orderStatus = OrderStatus.CANCEL;
     }
 }

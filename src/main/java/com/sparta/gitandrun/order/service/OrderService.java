@@ -1,14 +1,15 @@
 package com.sparta.gitandrun.order.service;
 
+
 import com.sparta.gitandrun.menu.entity.Menu;
 import com.sparta.gitandrun.menu.repository.MenuRepository;
 import com.sparta.gitandrun.order.dto.req.CreateOrderReqDto;
 import com.sparta.gitandrun.order.entity.Order;
 import com.sparta.gitandrun.order.entity.OrderMenu;
 import com.sparta.gitandrun.order.repository.OrderRepository;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
@@ -21,6 +22,7 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final MenuRepository menuRepository;
 
+    // 주문 생성
     @Transactional
     public void createOrder(CreateOrderReqDto dto) {
 
@@ -52,6 +54,24 @@ public class OrderService {
         orderRepository.save(order);
     }
 
+    // 주문 취소
+    @Transactional
+    public void cancelOrder(Long orderId) {
+        /*
+            본인 검증 메서드 추후 구현 예정
+        */
+//        private void checkOrderAccessPermission (User user, Order findOrder){
+//            if (!user.getId().equals(findOrder.getUser().getId())) {
+//                Objects.equals();
+//                throw new IllegalArgumentException("해당 주문에 대한 접근 권한이 없습니다.");
+//            }
+//        }
+//
+        Order findOrder = orderRepository.findOrderById(orderId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 항목입니다."));
+
+        findOrder.cancelOrder();
+    }
 
     private List<Menu> getMenus(CreateOrderReqDto dto) {
         List<Menu> findMenus = menuRepository.findByIdsAndIsDeletedFalse(dto.getMenuIds());
