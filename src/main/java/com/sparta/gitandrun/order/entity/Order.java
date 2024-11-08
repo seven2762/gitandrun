@@ -23,6 +23,10 @@ public class Order {
 
     @Column(nullable = false)
     @Enumerated(value = EnumType.STRING)
+    private OrderStatus orderStatus;
+
+    @Column(nullable = false)
+    @Enumerated(value = EnumType.STRING)
     private OrderType orderType;
 
     private boolean isDeleted;
@@ -31,7 +35,8 @@ public class Order {
     private List<OrderMenu> orderMenus = new ArrayList<>();
 
     @Builder
-    public Order (OrderType type) {
+    public Order (OrderStatus status, OrderType type) {
+        this.orderStatus = status;
         this.orderType = type;
     }
 
@@ -43,6 +48,7 @@ public class Order {
     // == 생성 메서드 == //
     public static Order createOrder(boolean type, List<OrderMenu> orderMenus) {
         Order order = Order.builder()
+                .status(OrderStatus.PENDING)
                 .type(type ? OrderType.DELIVERY : OrderType.VISIT)
                 .build();
 
