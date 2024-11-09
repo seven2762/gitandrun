@@ -1,6 +1,7 @@
 package com.sparta.gitandrun.user.controller;
 
 
+import com.sparta.gitandrun.common.entity.ApiResDto;
 import com.sparta.gitandrun.user.dto.SignUpReqDTO;
 import com.sparta.gitandrun.user.dto.SignUpResDTO;
 import com.sparta.gitandrun.user.dto.UserResDTO;
@@ -19,29 +20,29 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping("/signup")
-    public ResponseEntity<ApiResponse> signup(@RequestBody SignUpReqDTO signUpReqDTO) {
+    public ResponseEntity<ApiResDto> signup(@RequestBody SignUpReqDTO signUpReqDTO) {
 
         SignUpResDTO signUpResDTO = userService.signUp(signUpReqDTO);
 
-        return ResponseEntity.ok(ApiResponse.of("회원 가입이 완료되었습니다.", 200, signUpResDTO));
+        return ResponseEntity.ok(new ApiResDto("회원 가입이 완료되었습니다.", 200));
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse> getAllUsers() {
+    public ResponseEntity<ApiResDto> getAllUsers() {
         List<UserResDTO> users = userService.getAllActiveUsers();
-        return ResponseEntity.ok(ApiResponse.of("회원 목록 조회 성공", 200, users));
+        return ResponseEntity.ok(new ApiResDto("회원 목록 조회 성공", 200));
     }
 
     @PutMapping("/password")
-    public ResponseEntity<ApiResponse> updateUser(@RequestParam String phone, @RequestParam String password) {
+    public ResponseEntity<ApiResDto> updateUser(@RequestParam String phone, @RequestParam String password) {
         userService.updatePassword(phone, password);
-        return ResponseEntity.ok(ApiResponse.of("비밀번호가 성공적으로 변경되었습니다.", 200, null));
+        return ResponseEntity.ok(new ApiResDto("비밀번호가 성공적으로 변경되었습니다.", 200));
     }
 
     @DeleteMapping("/delete")
-    public ResponseEntity<ApiResponse> softDeleteUser(@RequestParam String phone) {
+    public ResponseEntity<ApiResDto> softDeleteUser(@RequestParam String phone) {
         userService.softDeleteUser(phone);
-        return ResponseEntity.ok(ApiResponse.of("회원 소프트 딜리트 완료", 200, phone));
+        return ResponseEntity.ok(new ApiResDto("회원 소프트 딜리트 완료", 200));
     }
 
 }
