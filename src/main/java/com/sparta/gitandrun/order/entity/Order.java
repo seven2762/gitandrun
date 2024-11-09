@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import static jakarta.persistence.CascadeType.PERSIST;
 
@@ -35,7 +36,7 @@ public class Order {
     private List<OrderMenu> orderMenus = new ArrayList<>();
 
     @Builder
-    public Order (OrderStatus status, OrderType type) {
+    public Order(OrderStatus status, OrderType type) {
         this.orderStatus = status;
         this.orderType = type;
     }
@@ -55,5 +56,21 @@ public class Order {
         order.addOrderMenus(orderMenus);
 
         return order;
+    }
+
+    // == 주문 취소 메서드 == //
+    public void cancelOrder() {
+        if (Objects.equals(this.getOrderStatus().status, OrderStatus.CANCEL.status)) {
+            throw new IllegalArgumentException("이미 취소가 된 주문입니다.");
+        }
+        this.orderStatus = OrderStatus.CANCEL;
+    }
+
+    // == 주문 거절 메서드 == //
+    public void rejectOrder() {
+        if (!Objects.equals(this.getOrderStatus().status, OrderStatus.PENDING.status)) {
+            throw new IllegalArgumentException("해당 주문은 이미 취소, 완료 또는 거절된 상태입니다.");
+        }
+        this.orderStatus = OrderStatus.REJECT;
     }
 }
