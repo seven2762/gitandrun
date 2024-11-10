@@ -1,16 +1,24 @@
 package com.sparta.gitandrun.store.controller;
 
 import com.sparta.gitandrun.common.entity.ApiResDto;
-import com.sparta.gitandrun.store.dto.StoreResponseDto;
+import com.sparta.gitandrun.store.dto.FullStoreResponse;
+import com.sparta.gitandrun.store.dto.LimitedStoreResponse;
+import com.sparta.gitandrun.store.dto.StoreRequestDto;
 import com.sparta.gitandrun.store.entity.Store;
+import com.sparta.gitandrun.store.repository.StoreRepository;
 import com.sparta.gitandrun.store.service.StoreService;
+import com.sparta.gitandrun.user.entity.Role;
+import com.sparta.gitandrun.user.entity.User;
+import com.sparta.gitandrun.user.repository.UserRepository;
+import com.sparta.gitandrun.user.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @RestController
@@ -18,30 +26,48 @@ import java.util.UUID;
 public class StoreController {
 
     private final StoreService storeService;
+    private final UserRepository userRepository;
+    private final StoreRepository storeRepository;
 
-    @Autowired
-    public StoreController(StoreService storeService) {
+    public StoreController(StoreService storeService, UserRepository userRepository, StoreRepository storeRepository) {
         this.storeService = storeService;
+        this.userRepository = userRepository;
+        this.storeRepository = storeRepository;
     }
 
-    // 가게 생성 (ADMIN, OWNER, MASTER만 가능)
     @PostMapping
-    public ResponseEntity<?> createStore(
-            @RequestParam UUID userId,
-            @RequestBody Store newStore
-    ) {
-        try {
-            Store createdStore = storeService.createStore(userId, newStore);
-            return ResponseEntity.ok(createdStore);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body(new ApiResDto("생성 권한이 없습니다.", 403));
+    @Transactional
+    public Store createStore(UUID userId, @RequestBody StoreRequestDto storeRequestDto) {
+        User user = userRepository.findByUserId(userId)
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+
+        if (user.getRole() != Role.ADMIN && user.getRole() != Role.OWNER) {
+            throw new IllegalArgumentException("생성 권한이 없습니다.");
         }
+
+        Store newStore = new Store();
+        newStore.setStoreName(storeRequestDto.getStoreName());
+        newStore.setPhone(storeRequestDto.getPhone());
+        newStore.setCategory(storeRequestDto.getCategory());
+        newStore.setAddress(storeRequestDto.getAddress());
+        newStore.setAddressDetail(storeRequestDto.getAddressDetail());
+        newStore.setZipCode(storeRequestDto.getZipCode());
+
+        // 카테고리가 설정되었을 경우 category_id 자동 할당
+        if (newStore.getCategory() != null) {
+            newStore.setCategoryId(newStore.getCategory().getUuid());
+        }
+
+        newStore.setCreatedBy(user.getUserId().toString());
+        newStore.setUpdatedBy(user.getUserId().toString());
+        newStore.setCreatedAt(LocalDateTime.now());
+        newStore.setUpdatedAt(LocalDateTime.now());
+
+        return storeRepository.save(newStore);
     }
 
 
 
-    // 가게 조회 (역할에 따라 필드 필터링)
     @GetMapping("/{storeId}")
     public ResponseEntity<?> getStoreDetails(
             @PathVariable UUID storeId,
@@ -50,20 +76,18 @@ public class StoreController {
         return storeService.getStoreDetails(storeId, userId);
     }
 
-    // 전체 가게 조회
-    @GetMapping()
+    @GetMapping
     public ResponseEntity<?> getAllStores(@RequestParam UUID userId) {
         List<?> stores = storeService.getAllStores(userId);
         return ResponseEntity.ok(stores);
     }
 
-    // 가게 수정
     @PatchMapping("/{storeId}")
     public ResponseEntity<?> updateStore(@PathVariable UUID storeId,
                                          @RequestParam UUID userId,
-                                         @RequestBody Store updatedStore) {
+                                         @RequestBody StoreRequestDto updatedStoreDto) {
         try {
-            storeService.updateStore(storeId, userId, updatedStore);
+            storeService.updateStore(storeId, userId, updatedStoreDto);
             return ResponseEntity.ok(new ApiResDto("가게 정보가 성공적으로 수정되었습니다.", 200));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
@@ -71,7 +95,6 @@ public class StoreController {
         }
     }
 
-    // 가게 삭제 (soft delete)
     @DeleteMapping("/{storeId}")
     public ResponseEntity<ApiResDto> deleteStore(
             @PathVariable UUID storeId,
@@ -85,6 +108,4 @@ public class StoreController {
                     .body(new ApiResDto("삭제 권한이 없습니다.", 403));
         }
     }
-
-
 }

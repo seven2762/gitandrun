@@ -17,3 +17,4 @@ public class ApiResDto {
         this.msg = msg;
         this.statusCode = statusCode;
     }
+}

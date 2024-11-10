@@ -1,8 +1,10 @@
 package com.sparta.gitandrun.user.entity;
 
+import com.sparta.gitandrun.store.entity.Store;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -39,6 +41,10 @@ public class User  {
 
     @Column(nullable = false, length = 15, unique = true)
     private String phone;
+
+    // User가 Store 정보를 가져올 수 있게 추가
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)  // Store와의 관계 설정
+    private List<Store> stores;
 
     @Column(name = "is_deleted", nullable = false)
     private boolean isDeleted = Boolean.FALSE;

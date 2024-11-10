@@ -10,5 +10,6 @@ import java.util.UUID;
 
 public interface StoreRepository extends JpaRepository<Store, UUID> {
     List<Store> findByisDeletedFalse();
-    // 추가적인 메소드
+    Optional<Store> findById(UUID storeId); // Store의 ID로 조회하는 메서드
+    List<Store> findByUser_UserId(UUID userId);  // userId로 Store 조회
 }
