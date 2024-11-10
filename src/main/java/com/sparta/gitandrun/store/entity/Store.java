@@ -3,6 +3,7 @@ package com.sparta.gitandrun.store.entity;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+import com.sparta.gitandrun.user.entity.User;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -64,6 +65,11 @@ public class Store {
     @Column(name = "zip_code", nullable = false, length = 255)
     private String zipCode;
 
+    // User와의 ManyToOne 관계 설정
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)  // Store 테이블에 user_id 컬럼 추가
+    private User user;
+
     @PrePersist
     public void prePersist() {
         if (this.storeId == null) {
@@ -89,5 +95,12 @@ public class Store {
         this.isDeleted = true;
         this.deletedAt = LocalDateTime.now();
         this.deletedBy = deletedBy;
+    }
+
+    public void setCategory(Category category) {
+        this.category = category;
+        if (category != null) {
+            this.categoryId = category.getUuid();  // 카테고리의 UUID를 자동 설정
+        }
     }
 }
