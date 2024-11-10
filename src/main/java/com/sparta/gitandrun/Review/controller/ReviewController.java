@@ -1,11 +1,14 @@
 package com.sparta.gitandrun.Review.controller;
 
 import com.sparta.gitandrun.Review.dto.ReviewRequestDto;
+import com.sparta.gitandrun.Review.dto.ReviewResponseDto;
 import com.sparta.gitandrun.Review.entity.Review;
 import com.sparta.gitandrun.Review.service.ReviewService;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -24,6 +27,12 @@ public class ReviewController {
         String username = "testUser"; // 임시로 설정한 사용자 이름
         Review review = reviewService.createReview(requestDto, username);
         return new ResponseEntity<>(review, HttpStatus.CREATED);
+    }
+
+    @GetMapping
+    public ResponseEntity<List<ReviewResponseDto>> getAllReviews() {
+        List<ReviewResponseDto> reviews = reviewService.getAllReviews();
+        return ResponseEntity.ok(reviews);
     }
 }
 
