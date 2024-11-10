@@ -34,5 +34,4 @@ public class BaseEntity {
     private String updatedBy;
 
     private String deletedBy;
-
 }
