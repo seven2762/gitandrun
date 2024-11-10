@@ -55,4 +55,15 @@ public class ReviewService {
         review.setUpdatedAt(LocalDateTime.now());
         reviewRepository.save(review);
     }
+
+    //리뷰 삭제
+    @Transactional
+    public void deleteReview(UUID reviewId) {
+        Review review = reviewRepository.findById(reviewId)
+                .orElseThrow(() -> new IllegalArgumentException("리뷰가 존재하지 않습니다."));
+        review.setIsDeleted(true);
+        review.setDeletedAt(LocalDateTime.now());
+        review.setDeletedBy(review.getUsername());
+        reviewRepository.save(review);
+    }
 }

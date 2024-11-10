@@ -9,6 +9,7 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -52,6 +53,13 @@ public class ReviewController {
                                                @RequestBody ReviewRequestDto requestDto) {
         reviewService.updateReview(reviewId, requestDto);
         return ResponseEntity.ok("리뷰가 성공적으로 수정되었습니다.");
+    }
+
+    //리뷰 삭제
+    @DeleteMapping("{reviewId}")
+    public ResponseEntity<String> deleteReview(@PathVariable UUID reviewId) {
+        reviewService.deleteReview(reviewId);
+        return ResponseEntity.ok("리뷰가 삭제되었습니다.");
     }
 }
 

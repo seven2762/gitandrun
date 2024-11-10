@@ -18,6 +18,9 @@ public class ReviewResponseDto {
     private Short reviewRating;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private Boolean isDeleted;
+    private LocalDateTime deletedAt;
+    private String deletedBy;
 
     public ReviewResponseDto(Review review) {
         this.reviewId = review.getReviewId();
@@ -26,5 +29,8 @@ public class ReviewResponseDto {
         this.reviewRating = review.getReviewRating();
         this.createdAt = review.getCreatedAt();
         this.updatedAt = review.getUpdatedAt();
+        this.deletedAt = review.getDeletedAt();
+        this.deletedBy = review.getDeletedBy();
+        this.isDeleted = review.getIsDeleted();
     }
 }
