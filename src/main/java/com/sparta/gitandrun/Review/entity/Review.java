@@ -1,5 +1,6 @@
 package com.sparta.gitandrun.Review.entity;
 
+import com.sparta.gitandrun.Review.dto.ReviewRequestDto;
 import com.sparta.gitandrun.order.entity.Order;
 import com.sparta.gitandrun.store.entity.Store;
 import com.sparta.gitandrun.user.entity.User;
@@ -34,17 +35,18 @@ public class Review {
     @Column(name = "review_id")
     private UUID reviewId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user; //회원별 조회
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "store_id", nullable = false)
-    private Store store; //가게별 조회
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "order_id", nullable = false)
-    private Order order; //주문과 리뷰 연결
+//    @ManyToOne(fetch = FetchType.LAZY)
+//    @JoinColumn(name = "user_id", nullable = false)
+    @Column(name = "username", nullable = false)
+    private String username; //회원별 조회
+//
+//    @ManyToOne(fetch = FetchType.LAZY)
+//    @JoinColumn(name = "store_id", nullable = false)
+//    private Store store; //가게별 조회
+//
+//    @ManyToOne(fetch = FetchType.LAZY)
+//    @JoinColumn(name = "order_id", nullable = false)
+//    private Order order; //주문과 리뷰 연결
 
     @Column(name = "review_content", nullable = false, length = 500)
     private String reviewContent;
@@ -74,4 +76,15 @@ public class Review {
 
     @Column(name = "deleted_by", length = 30)
     private String deletedBy;
+
+    public Review(ReviewRequestDto requestDto, String username) {
+//        this.user = user;
+//        this.store = store;
+//        this.order = order;
+        this.username = username;
+        this.reviewContent = requestDto.getReviewContent();
+        this.reviewRating = requestDto.getReviewRating();
+        this.createdBy = username;
+        this.updatedBy = username;
+    }
 }
