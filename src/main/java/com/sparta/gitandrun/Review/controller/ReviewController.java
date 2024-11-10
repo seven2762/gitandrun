@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -31,6 +32,7 @@ public class ReviewController {
         return new ResponseEntity<>(review, HttpStatus.CREATED);
     }
 
+    //리뷰 전체 조회
     @GetMapping
     public ResponseEntity<List<ReviewResponseDto>> getAllReviews() {
         List<ReviewResponseDto> reviews = reviewService.getAllReviews();
@@ -42,6 +44,14 @@ public class ReviewController {
     public ResponseEntity<ReviewResponseDto> getOneReview(@PathVariable UUID reviewId) {
         ReviewResponseDto review = reviewService.getOneReview(reviewId);
         return ResponseEntity.ok(review);
+    }
+
+    //리뷰 수정
+    @PatchMapping("/{reviewId}")
+    public ResponseEntity<String> updateReview(@PathVariable UUID reviewId,
+                                               @RequestBody ReviewRequestDto requestDto) {
+        reviewService.updateReview(reviewId, requestDto);
+        return ResponseEntity.ok("리뷰가 성공적으로 수정되었습니다.");
     }
 }
 

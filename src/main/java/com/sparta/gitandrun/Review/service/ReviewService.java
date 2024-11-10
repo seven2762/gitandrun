@@ -4,11 +4,13 @@ import com.sparta.gitandrun.Review.dto.ReviewRequestDto;
 import com.sparta.gitandrun.Review.dto.ReviewResponseDto;
 import com.sparta.gitandrun.Review.entity.Review;
 import com.sparta.gitandrun.Review.repository.ReviewRepository;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -34,5 +36,23 @@ public class ReviewService {
         Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(() -> new IllegalArgumentException("리뷰를 찾을 수 없습니다."));
         return new ReviewResponseDto(review);
+    }
+
+    //리뷰 수정
+    @Transactional
+    public void updateReview(UUID reviewId, ReviewRequestDto requestDto) {
+        Review review = reviewRepository.findById(reviewId)
+                .orElseThrow(() -> new IllegalArgumentException("리뷰가 존재하지 않습니다."));
+
+        if (requestDto.getReviewContent() != null && !requestDto.getReviewContent().isEmpty()) {
+            review.setReviewContent(requestDto.getReviewContent());
+        }
+
+        if (requestDto.getReviewRating() != null) {
+            review.setReviewRating(requestDto.getReviewRating());
+        }
+
+        review.setUpdatedAt(LocalDateTime.now());
+        reviewRepository.save(review);
     }
 }
