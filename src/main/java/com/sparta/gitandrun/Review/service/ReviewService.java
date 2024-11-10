@@ -5,6 +5,7 @@ import com.sparta.gitandrun.Review.dto.ReviewResponseDto;
 import com.sparta.gitandrun.Review.entity.Review;
 import com.sparta.gitandrun.Review.repository.ReviewRepository;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -26,5 +27,12 @@ public class ReviewService {
         return reviewRepository.findAll().stream()
                 .map(ReviewResponseDto::new)
                 .collect(Collectors.toList());
+    }
+
+    //리뷰 단일 조회
+    public ReviewResponseDto getOneReview(UUID reviewId) {
+        Review review = reviewRepository.findById(reviewId)
+                .orElseThrow(() -> new IllegalArgumentException("리뷰를 찾을 수 없습니다."));
+        return new ReviewResponseDto(review);
     }
 }
