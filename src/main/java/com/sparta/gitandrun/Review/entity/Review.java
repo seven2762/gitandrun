@@ -1,18 +1,12 @@
 package com.sparta.gitandrun.Review.entity;
 
 import com.sparta.gitandrun.Review.dto.ReviewRequestDto;
-import com.sparta.gitandrun.order.entity.Order;
-import com.sparta.gitandrun.store.entity.Store;
-import com.sparta.gitandrun.user.entity.User;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
 import java.util.UUID;
