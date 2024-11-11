@@ -17,7 +17,7 @@ public class MenuResponseDto {
     private int price;
     private String content;
     private LocalDateTime createdAt;
-    private String createBy;
+    private String createdBy;
     private LocalDateTime updatedAt;
     private String updatedBy;
     private boolean isDeleted;
@@ -34,7 +34,7 @@ public class MenuResponseDto {
         this.price = menu.getPrice();
         this.content = menu.getContent();
         this.createdAt = menu.getCreatedAt();
-        this.createBy = "test create user";
+        this.createdBy = "test create user";
         this.updatedAt = menu.getUpdatedAt();
         this.updatedBy = "test update user";
 //        this.isDeleted = menu.getIsDeleted();
