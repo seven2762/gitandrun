@@ -15,7 +15,7 @@ import java.util.UUID;
 public interface StoreRepository extends JpaRepository<Store, UUID> {
     List<Store> findByisDeletedFalse();
     Optional<Store> findById(UUID storeId); // Store의 ID로 조회하는 메서드
-    List<Store> findByUser_UserId(UUID userId);  // userId로 Store 조회
+    List<Store> findByUser_UserId(Long userId);
 
     @Query("SELECT s FROM Store s WHERE s.storeName LIKE %:keyword% OR s.address LIKE %:keyword% ORDER BY " +
             "CASE WHEN :sort = 'createdAt' THEN s.createdAt END DESC, " +

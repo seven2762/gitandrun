@@ -1,5 +1,6 @@
 package com.sparta.gitandrun.user.entity;
 
+import com.sparta.gitandrun.common.entity.BaseEntity;
 import com.sparta.gitandrun.store.entity.Store;
 import jakarta.persistence.*;
 import lombok.*;
@@ -13,12 +14,11 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "p_user")
-public class User  {
-
+public class User extends BaseEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(name = "user_id", columnDefinition = "UUID")
-    private UUID userId;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "user_id" )
+    private Long userId;
 
     @Column(nullable = false, length = 20)
     private String username;
@@ -49,6 +49,11 @@ public class User  {
     @Column(name = "is_deleted", nullable = false)
     private boolean isDeleted = Boolean.FALSE;
     //Auditing 추후 구현 예정
+
+    @PostPersist
+    public void prePersistCreatedBy() {
+        setCreatedBy(String.valueOf(this.userId));
+    }
 
 
     public void updatePassword(String password) {

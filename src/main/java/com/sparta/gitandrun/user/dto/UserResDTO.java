@@ -11,7 +11,7 @@ import java.util.UUID;
 @Builder
 public class UserResDTO {
 
-    private UUID userId;
+    private Long userId;
     private String username;
     private String nickName;
     private String email;
