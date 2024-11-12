@@ -37,7 +37,7 @@ public class StoreService {
 
     // 가게 생성
     @Transactional
-    public Store createStore(UUID userId, StoreRequestDto storeRequestDto) {
+    public Store createStore(Long userId, StoreRequestDto storeRequestDto) {
         User user = userRepository.findByUserId(userId)
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
 
@@ -69,7 +69,7 @@ public class StoreService {
 
 
     // 전체 가게 조회
-    public List<?> getAllStores(UUID userId) {
+    public List<?> getAllStores(Long userId) {
         User user = userRepository.findByUserId(userId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
 
@@ -89,7 +89,7 @@ public class StoreService {
     }
 
     // 가게 상세 정보 조회
-    public ResponseEntity<?> getStoreDetails(UUID storeId, UUID userId) {
+    public ResponseEntity<?> getStoreDetails(UUID storeId, Long userId) {
         User user = userRepository.findByUserId(userId)
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
         Store store = storeRepository.findById(storeId)
@@ -111,7 +111,7 @@ public class StoreService {
 
     // 가게 수정
     @Transactional
-    public void updateStore(UUID storeId, UUID userId, StoreRequestDto updatedStore) {
+    public void updateStore(UUID storeId, Long userId, StoreRequestDto updatedStore) {
         Store existingStore = storeRepository.findById(storeId)
                 .orElseThrow(() -> new IllegalArgumentException("가게를 찾을 수 없습니다."));
         User user = userRepository.findByUserId(userId)
@@ -147,7 +147,7 @@ public class StoreService {
 
     // 가게 삭제 (soft delete 방식)
     @Transactional
-    public boolean deleteStore(UUID storeId, UUID userId) {
+    public boolean deleteStore(UUID storeId, Long userId) {
         User user = userRepository.findByUserId(userId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
 
