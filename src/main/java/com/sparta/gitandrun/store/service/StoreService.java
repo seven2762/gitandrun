@@ -163,36 +163,29 @@ public class StoreService {
     }
 
     // 페이징 및 조건부 정렬 구현
-    public Page<?> searchStores(UUID categoryId, String sortField, int page, int size, String role) {
-//        // sortField가 없으면 기본값 "createdAt" 사용함
-//        sortField = (sortField == null || sortField.isBlank()) ? "createdAt" : sortField;
-//        Sort sort = Sort.by(sortField).ascending();
-//
-//        // size는 10, 30, 50 중 하나로 제한하고, 기본값으로 10 사용
-//        size = (size == 10 || size == 30 || size == 50) ? size : 10;
+    public Page<?> searchStores(UUID categoryId, String sortField, int page, int size, Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
 
         Pageable pageable = PageRequest.of(page, size, Sort.by(sortField).descending());
         Page<Store> stores = storeRepository.findByCategoryId(categoryId, pageable);
 
-        if ("ADMIN".equalsIgnoreCase(role)) {
+        if (user.getRole() == Role.ADMIN) {
             return stores.map(FullStoreResponse::new); // 관리자: 모든 정보 표시
         } else {
             return stores.map(LimitedStoreResponse::new); // 소유자 및 고객: 제한된 정보만 표시
         }
-
-
     }
 
     // 키워드 검색 및 권한에 따른 응답 제어
-    public Page<?> searchStoresByKeyword(String keyword, String sortField, int page, int size, String role) {
-//        // 기본값 설정
-//        sortField = (sortField == null || sortField.isBlank()) ? "createdAt" : sortField;
-//        Sort sort = Sort.by(sortField).descending();
+    public Page<?> searchStoresByKeyword(String keyword, String sortField, int page, int size, Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
 
         Pageable pageable = PageRequest.of(page, size, Sort.by(sortField).descending());
         Page<Store> stores = storeRepository.searchByKeyword(keyword, pageable);
 
-        if ("ADMIN".equalsIgnoreCase(role)) {
+        if (user.getRole() == Role.ADMIN) {
             return stores.map(FullStoreResponse::new); // 관리자: 모든 정보 표시
         } else {
             return stores.map(LimitedStoreResponse::new); // 소유자 및 고객: 제한된 정보만 표시
