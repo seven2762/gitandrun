@@ -53,7 +53,7 @@ public class Store {
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
 
-    @Column(name = "is_deleted", nullable = false)
+    @Column(name = "is_deleted")
     private boolean isDeleted = false;
 
     @Column(name = "address", nullable = false, length = 255)
@@ -69,6 +69,7 @@ public class Store {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)  // Store 테이블에 user_id 컬럼 추가
     private User user;
+    
 
     @PrePersist
     public void prePersist() {

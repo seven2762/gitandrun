@@ -3,11 +3,16 @@ package com.sparta.gitandrun.store.service;
 import com.sparta.gitandrun.store.dto.FullStoreResponse;
 import com.sparta.gitandrun.store.dto.LimitedStoreResponse;
 import com.sparta.gitandrun.store.dto.StoreRequestDto;
+import com.sparta.gitandrun.store.dto.StoreSearchRequestDto;
 import com.sparta.gitandrun.store.entity.Store;
 import com.sparta.gitandrun.store.repository.StoreRepository;
 import com.sparta.gitandrun.user.entity.Role;
 import com.sparta.gitandrun.user.entity.User;
 import com.sparta.gitandrun.user.repository.UserRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -61,7 +66,6 @@ public class StoreService {
 
         return storeRepository.save(newStore);
     }
-
 
 
     // 전체 가게 조회
@@ -156,5 +160,42 @@ public class StoreService {
         store.markAsDeleted(user.getUserId().toString());
         storeRepository.save(store);
         return true;
+    }
+
+    // 페이징 및 조건부 정렬 구현
+    public Page<?> searchStores(UUID categoryId, String sortField, int page, int size, String role) {
+//        // sortField가 없으면 기본값 "createdAt" 사용함
+//        sortField = (sortField == null || sortField.isBlank()) ? "createdAt" : sortField;
+//        Sort sort = Sort.by(sortField).ascending();
+//
+//        // size는 10, 30, 50 중 하나로 제한하고, 기본값으로 10 사용
+//        size = (size == 10 || size == 30 || size == 50) ? size : 10;
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sortField).descending());
+        Page<Store> stores = storeRepository.findByCategoryId(categoryId, pageable);
+
+        if ("ADMIN".equalsIgnoreCase(role)) {
+            return stores.map(FullStoreResponse::new); // 관리자: 모든 정보 표시
+        } else {
+            return stores.map(LimitedStoreResponse::new); // 소유자 및 고객: 제한된 정보만 표시
+        }
+
+
+    }
+
+    // 키워드 검색 및 권한에 따른 응답 제어
+    public Page<?> searchStoresByKeyword(String keyword, String sortField, int page, int size, String role) {
+//        // 기본값 설정
+//        sortField = (sortField == null || sortField.isBlank()) ? "createdAt" : sortField;
+//        Sort sort = Sort.by(sortField).descending();
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sortField).descending());
+        Page<Store> stores = storeRepository.searchByKeyword(keyword, pageable);
+
+        if ("ADMIN".equalsIgnoreCase(role)) {
+            return stores.map(FullStoreResponse::new); // 관리자: 모든 정보 표시
+        } else {
+            return stores.map(LimitedStoreResponse::new); // 소유자 및 고객: 제한된 정보만 표시
+        }
     }
 }

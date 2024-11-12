@@ -4,6 +4,7 @@ import com.sparta.gitandrun.common.entity.ApiResDto;
 import com.sparta.gitandrun.store.dto.FullStoreResponse;
 import com.sparta.gitandrun.store.dto.LimitedStoreResponse;
 import com.sparta.gitandrun.store.dto.StoreRequestDto;
+import com.sparta.gitandrun.store.dto.StoreSearchRequestDto;
 import com.sparta.gitandrun.store.entity.Store;
 import com.sparta.gitandrun.store.repository.StoreRepository;
 import com.sparta.gitandrun.store.service.StoreService;
@@ -12,6 +13,10 @@ import com.sparta.gitandrun.user.entity.User;
 import com.sparta.gitandrun.user.repository.UserRepository;
 import com.sparta.gitandrun.user.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,6 +40,7 @@ public class StoreController {
         this.storeRepository = storeRepository;
     }
 
+    // 가게 등록
     @PostMapping
     @Transactional
     public Store createStore(UUID userId, @RequestBody StoreRequestDto storeRequestDto) {
@@ -66,8 +72,7 @@ public class StoreController {
         return storeRepository.save(newStore);
     }
 
-
-
+    // ID로 조회
     @GetMapping("/{storeId}")
     public ResponseEntity<?> getStoreDetails(
             @PathVariable UUID storeId,
@@ -76,12 +81,14 @@ public class StoreController {
         return storeService.getStoreDetails(storeId, userId);
     }
 
+    // 전체 가게 조회
     @GetMapping
     public ResponseEntity<?> getAllStores(@RequestParam UUID userId) {
         List<?> stores = storeService.getAllStores(userId);
         return ResponseEntity.ok(stores);
     }
 
+    // 가게 수정
     @PatchMapping("/{storeId}")
     public ResponseEntity<?> updateStore(@PathVariable UUID storeId,
                                          @RequestParam UUID userId,
@@ -95,6 +102,7 @@ public class StoreController {
         }
     }
 
+    // 삭제 기능
     @DeleteMapping("/{storeId}")
     public ResponseEntity<ApiResDto> deleteStore(
             @PathVariable UUID storeId,
@@ -107,5 +115,32 @@ public class StoreController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body(new ApiResDto("삭제 권한이 없습니다.", 403));
         }
+    }
+
+    // 카테고리로 검색
+    @GetMapping("/search")
+    public ResponseEntity<Page<?>> searchStores(
+            @RequestParam(required = false) UUID categoryId,
+            @RequestParam(defaultValue = "createdAt") String sortField,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam String role) {
+
+        Page<?> stores = storeService.searchStores(categoryId, sortField, page, size, role);
+        return ResponseEntity.ok(stores);
+    }
+
+    // 키워드로 검색
+    @GetMapping("/search/keyword")
+    public ResponseEntity<Page<?>> searchStoresByKeyword(
+            @RequestParam String keyword,
+            @RequestParam(defaultValue = "createdAt") String sortField,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false, defaultValue = "asc") String sortDirection,
+            @RequestParam String role) {
+
+        Page<?> stores = storeService.searchStoresByKeyword(keyword, sortField, page, size, role); // Page<Store>로 리턴
+        return ResponseEntity.ok(stores);
     }
 }
