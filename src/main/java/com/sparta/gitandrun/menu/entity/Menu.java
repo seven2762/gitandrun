@@ -59,11 +59,9 @@ public class Menu extends BaseEntity {
     @Column(nullable = true, length = 100)
     private String deletedBy;
 
-/*  Store Entity 생성시 ManyToOne관계로 조인하여 연결
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "store_id", nullable = false)
     private Store store;
-*/
 
 //    @PrePersist
 //    public void PrePersist() {
