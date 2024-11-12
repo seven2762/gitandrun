@@ -111,7 +111,7 @@ public class OrderService {
         return findMenus.stream()
                 .collect(Collectors.toMap(
                         menu -> menu,
-                        menu -> idsCountingMap.get(menu.getId())
+                        menu -> idsCountingMap.get(menu.getMenuId())
                 ));
     }
 

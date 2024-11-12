@@ -58,7 +58,7 @@ public class OrderMenu {
                             return OrderMenu.builder()
                                     .menu(menu)
                                     .orderCount(count)
-                                    .orderPrice(menu.getPrice() * count)
+                                    .orderPrice(menu.getMenuPrice() * count)
                                     .build();
                         }
                 )

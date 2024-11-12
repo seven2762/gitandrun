@@ -7,17 +7,18 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Getter
 @NoArgsConstructor
 public class MenuResponseDto {
 
-    private Long id;
-    private String name;
-    private int price;
-    private String content;
+    private UUID menuId;
+    private String menuName;
+    private int menuPrice;
+    private String menuContent;
     private LocalDateTime createdAt;
-    private String createBy;
+    private String createdBy;
     private LocalDateTime updatedAt;
     private String updatedBy;
     private boolean isDeleted;
@@ -29,12 +30,12 @@ public class MenuResponseDto {
     private List<MenuResponseDto> menuList = new ArrayList<>();
 
     public MenuResponseDto(Menu menu) {
-        this.id = menu.getId();
-        this.name = menu.getName();
-        this.price = menu.getPrice();
-        this.content = menu.getContent();
+        this.menuId = menu.getMenuId();
+        this.menuName = menu.getMenuName();
+        this.menuPrice = menu.getMenuPrice();
+        this.menuContent = menu.getMenuContent();
         this.createdAt = menu.getCreatedAt();
-        this.createBy = "test create user";
+        this.createdBy = "test create user";
         this.updatedAt = menu.getUpdatedAt();
         this.updatedBy = "test update user";
 //        this.isDeleted = menu.getIsDeleted();

@@ -7,17 +7,9 @@ import com.sparta.gitandrun.menu.dto.MenuResponseDto;
 import com.sparta.gitandrun.menu.service.MenuService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-
-import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -25,39 +17,49 @@ import java.util.List;
 @RequiredArgsConstructor
 public class MenuController {
 
-    private final MenuService menuservice;
+    private final MenuService menuService;
 
     //CREATE
     @PostMapping
     public ResponseEntity<ApiResDto> createMenu(@RequestBody MenuRequestDto requestDto) {
-        menuservice.createMenu(requestDto);
-        return ResponseEntity.ok().body(new ApiResDto("주문 완료", HttpStatus.OK.value()));
+        menuService.createMenu(requestDto);
+        return ResponseEntity.ok().body(new ApiResDto("메뉴 생성 완료", HttpStatus.OK.value()));
     }
 
     //UPDATE
     @PatchMapping("/{id}")
     public ResponseEntity<ApiResDto> updateMenu(@RequestBody MenuRequestDto requestDto, @PathVariable("id") Long id) {
-        menuservice.updateMenu(id, requestDto);
-        return ResponseEntity.ok().body(new ApiResDto("수정 완료", HttpStatus.OK.value()));
+        menuService.updateMenu(id, requestDto);
+        return ResponseEntity.ok().body(new ApiResDto("메뉴 수정 완료", HttpStatus.OK.value()));
 
     }
     //DELETE
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResDto> deleteMenu(@PathVariable("id") Long id){
-        menuservice.deleteMenu(id);
+        menuService.deleteMenu(id);
         return ResponseEntity.ok().body(new ApiResDto("삭제 완료", HttpStatus.OK.value()));
     }
 
     //READ
     @GetMapping
     public List<MenuResponseDto> getAllMenus(){
-        return menuservice.getAllMenus();
+        return menuService.getAllMenus();
     }
 
     //READ ony One
     @GetMapping("/{id}")
     public MenuResponseDto getOneMenu(@PathVariable("id") Long id){
-        return menuservice.getOneMenu(id);
+        return menuService.getOneMenu(id);
+    }
+
+    //메뉴 페이징
+    @GetMapping("/paging")
+    public Page<MenuResponseDto> getMenuPage(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam("sortBy") String sortBy // 생성일, 수정일 기준
+            ) {
+        return menuService.getAllMenusTest(page-1, size, sortBy);
     }
 
 }
