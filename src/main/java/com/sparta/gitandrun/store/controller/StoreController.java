@@ -125,9 +125,9 @@ public class StoreController {
             @RequestParam(defaultValue = "createdAt") String sortField,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
-            @RequestParam String role) {
+            @RequestParam Long userId) {
 
-        Page<?> stores = storeService.searchStores(categoryId, sortField, page, size, role);
+        Page<?> stores = storeService.searchStores(categoryId, sortField, page, size, userId);
         return ResponseEntity.ok(stores);
     }
 
@@ -139,9 +139,9 @@ public class StoreController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(required = false, defaultValue = "asc") String sortDirection,
-            @RequestParam String role) {
+            @RequestParam Long userId) {
 
-        Page<?> stores = storeService.searchStoresByKeyword(keyword, sortField, page, size, role); // Page<Store>로 리턴
+        Page<?> stores = storeService.searchStoresByKeyword(keyword, sortField, page, size, userId); // Page<Store>로 리턴
         return ResponseEntity.ok(stores);
     }
 }
