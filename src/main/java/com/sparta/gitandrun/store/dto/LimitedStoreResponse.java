@@ -11,6 +11,7 @@ public class LimitedStoreResponse {
     private String address;
     private String addressDetail;
     private String zipCode;
+    private Long userId;  // user 대신 userId만 포함
 
     public LimitedStoreResponse(Store store) {
         this.storeName = store.getStoreName();
@@ -19,5 +20,6 @@ public class LimitedStoreResponse {
         this.address = store.getAddress();
         this.addressDetail = store.getAddressDetail();
         this.zipCode = store.getZipCode();
+        this.userId = store.getUser().getUserId();  // User 객체 대신 userId만 반환
     }
 }
