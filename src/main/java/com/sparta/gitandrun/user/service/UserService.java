@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -25,26 +26,29 @@ public class UserService {
 
     private final UserRepository userRepository;
 
-    public SignUpResDTO signUp(SignUpReqDTO SignUpReqDTO) {
+    public SignUpResDTO signUp(SignUpReqDTO signUpReqDTO) {
 
-        Optional<User> isDuplicated = userRepository.findByPhone(SignUpReqDTO.getPhone());
+        Optional<User> isDuplicated = userRepository.findByPhone(signUpReqDTO.getPhone());
         if (isDuplicated.isPresent()) {
             throw new UserException(ErrorCode.DUPLICATED_USER);
         }
         User user = User.builder()
-                .username(SignUpReqDTO.getUsername())
-                .nickName(SignUpReqDTO.getNickName())
-                .email(SignUpReqDTO.getEmail())
-                .password(SignUpReqDTO.getPassword())
+                .username(signUpReqDTO.getUsername())
+                .nickName(signUpReqDTO.getNickName())
+                .email(signUpReqDTO.getEmail())
+                .password(signUpReqDTO.getPassword())
                 .address(new Address(  // embedded
-                        SignUpReqDTO.getAddressReq().getAddress(),
-                        SignUpReqDTO.getAddressReq().getAddressDetail(),
-                        SignUpReqDTO.getAddressReq().getZipcode()
+                        signUpReqDTO.getAddressReq().getAddress(),
+                        signUpReqDTO.getAddressReq().getAddressDetail(),
+                        signUpReqDTO.getAddressReq().getZipcode()
                 ))
                 .role(Role.CUSTOMER) // 테스트 위해 기본값 고객으로 설정, 추후 수정
-                .phone(SignUpReqDTO.getPhone())
+                .phone(signUpReqDTO.getPhone())
+
                 .build();
         userRepository.save(user);
+
+
 
         return SignUpResDTO.from("추후에 토큰 발급 가능하게 만들예정.");
     }
@@ -62,7 +66,6 @@ public class UserService {
     public void updatePassword(String phone, String password) {
         User user = userRepository.findActiveUserByPhone(phone)
                 .orElseThrow(() -> new UserException(ErrorCode.USER_NOT_FOUND));
-
         user.updatePassword(password);
     }
     @Transactional
