@@ -2,6 +2,7 @@ package com.sparta.gitandrun.menu.entity;
 
 import com.sparta.gitandrun.common.entity.BaseEntity;
 import com.sparta.gitandrun.menu.dto.MenuRequestDto;
+import com.sparta.gitandrun.store.entity.Store;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -11,6 +12,7 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity
 @Getter
@@ -21,17 +23,18 @@ import java.time.LocalDateTime;
 public class Menu extends BaseEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @Column(name = "menuId", columnDefinition = "UUID")
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private UUID menuId;
 
     @Column(name = "menuName", nullable = false, length = 20)
-    private String name;
+    private String menuName;
 
     @Column(name = "menuPrice", nullable = false)
-    private int price;
+    private int menuPrice;
 
     @Column(name = "menuContent", nullable = false, length = 100)
-    private String content;
+    private String menuContent;
 
     @Column(nullable = false)
     @CreatedDate
@@ -58,16 +61,19 @@ public class Menu extends BaseEntity {
 
 /*  Store Entity 생성시 ManyToOne관계로 조인하여 연결
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "", nullable = false)
+    @JoinColumn(name = "store_id", nullable = false)
     private Store store;
 */
 
-
+//    @PrePersist
+//    public void PrePersist() {
+//        UUID uuid = UUID.randomUUID();
+//    }
 
     public Menu(MenuRequestDto requestDto) {
-            this.name = requestDto.getName();
-            this.price = requestDto.getPrice();
-            this.content = requestDto.getContent();
+            this.menuName = requestDto.getMenuName();
+            this.menuPrice = requestDto.getMenuPrice();
+            this.menuContent = requestDto.getMenuContent();
             this.createdAt = requestDto.getCreatedAt();
             this.createdBy = "test created user";
             this.updatedAt = requestDto.getUpdatedAt();
@@ -78,8 +84,8 @@ public class Menu extends BaseEntity {
         }
 
     public void update(MenuRequestDto requestDto) {
-        this.name = requestDto.getName();
-        this.price = requestDto.getPrice();
-        this.content = requestDto.getContent();
+        this.menuName = requestDto.getMenuName();
+        this.menuPrice = requestDto.getMenuPrice();
+        this.menuContent = requestDto.getMenuContent();
     }
 }

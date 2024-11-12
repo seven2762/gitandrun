@@ -23,14 +23,14 @@ public class MenuController {
     @PostMapping
     public ResponseEntity<ApiResDto> createMenu(@RequestBody MenuRequestDto requestDto) {
         menuService.createMenu(requestDto);
-        return ResponseEntity.ok().body(new ApiResDto("주문 완료", HttpStatus.OK.value()));
+        return ResponseEntity.ok().body(new ApiResDto("메뉴 생성 완료", HttpStatus.OK.value()));
     }
 
     //UPDATE
     @PatchMapping("/{id}")
     public ResponseEntity<ApiResDto> updateMenu(@RequestBody MenuRequestDto requestDto, @PathVariable("id") Long id) {
         menuService.updateMenu(id, requestDto);
-        return ResponseEntity.ok().body(new ApiResDto("수정 완료", HttpStatus.OK.value()));
+        return ResponseEntity.ok().body(new ApiResDto("메뉴 수정 완료", HttpStatus.OK.value()));
 
     }
     //DELETE

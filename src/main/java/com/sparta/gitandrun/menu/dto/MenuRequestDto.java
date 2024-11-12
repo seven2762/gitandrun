@@ -9,11 +9,11 @@ import java.time.LocalDateTime;
 @Setter
 public class MenuRequestDto {
 
-    private String name;
+    private String menuName;
 
-    private int price;
+    private int menuPrice;
 
-    private String content;
+    private String menuContent;
 
     private LocalDateTime createdAt;
 
