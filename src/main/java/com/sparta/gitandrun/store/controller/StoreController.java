@@ -42,8 +42,7 @@ public class StoreController {
 
     // 가게 등록
     @PostMapping
-    @Transactional
-    public Store createStore(UUID userId, @RequestBody StoreRequestDto storeRequestDto) {
+    public Store createStore(Long userId, @RequestBody StoreRequestDto storeRequestDto) {
         User user = userRepository.findByUserId(userId)
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
 
@@ -58,6 +57,7 @@ public class StoreController {
         newStore.setAddress(storeRequestDto.getAddress());
         newStore.setAddressDetail(storeRequestDto.getAddressDetail());
         newStore.setZipCode(storeRequestDto.getZipCode());
+        newStore.setUser(user);  // user 설정하여 user_id 필드가 null이 되지 않도록 설정
 
         // 카테고리가 설정되었을 경우 category_id 자동 할당
         if (newStore.getCategory() != null) {
@@ -72,18 +72,19 @@ public class StoreController {
         return storeRepository.save(newStore);
     }
 
+
     // ID로 조회
     @GetMapping("/{storeId}")
     public ResponseEntity<?> getStoreDetails(
             @PathVariable UUID storeId,
-            @RequestParam UUID userId
+            @RequestParam Long userId
     ) {
         return storeService.getStoreDetails(storeId, userId);
     }
 
     // 전체 가게 조회
     @GetMapping
-    public ResponseEntity<?> getAllStores(@RequestParam UUID userId) {
+    public ResponseEntity<?> getAllStores(@RequestParam Long userId) {
         List<?> stores = storeService.getAllStores(userId);
         return ResponseEntity.ok(stores);
     }
@@ -91,7 +92,7 @@ public class StoreController {
     // 가게 수정
     @PatchMapping("/{storeId}")
     public ResponseEntity<?> updateStore(@PathVariable UUID storeId,
-                                         @RequestParam UUID userId,
+                                         @RequestParam Long userId,
                                          @RequestBody StoreRequestDto updatedStoreDto) {
         try {
             storeService.updateStore(storeId, userId, updatedStoreDto);
@@ -106,7 +107,7 @@ public class StoreController {
     @DeleteMapping("/{storeId}")
     public ResponseEntity<ApiResDto> deleteStore(
             @PathVariable UUID storeId,
-            @RequestParam UUID userId
+            @RequestParam Long userId
     ) {
         try {
             storeService.deleteStore(storeId, userId);
