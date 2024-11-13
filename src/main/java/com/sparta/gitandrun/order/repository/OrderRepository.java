@@ -5,9 +5,13 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface OrderRepository extends JpaRepository<Order, Long> {
     @Query("select o from Order o where o.id = :orderId and o.isDeleted = false ")
     Optional<Order> findOrderById(@Param("orderId") Long orderId);
+
+    @Query("select o from Order o where o.user.userId = :userId and o.isDeleted = false ")
+    List<Order> findByUserId(@Param("userId") Long userId);
 }

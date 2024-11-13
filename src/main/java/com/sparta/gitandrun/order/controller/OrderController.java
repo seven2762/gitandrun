@@ -2,11 +2,14 @@ package com.sparta.gitandrun.order.controller;
 
 import com.sparta.gitandrun.common.entity.ApiResDto;
 import com.sparta.gitandrun.order.dto.req.CreateOrderReqDto;
+import com.sparta.gitandrun.order.dto.res.OrderResDto;
 import com.sparta.gitandrun.order.service.OrderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RequestMapping("/order")
 @RestController
@@ -26,6 +29,11 @@ public class OrderController {
         orderService.createOrder(dto);
 
         return ResponseEntity.ok().body(new ApiResDto("주문 완료", HttpStatus.OK.value()));
+    }
+
+    @GetMapping("/{userId}")
+    public List<OrderResDto> readOrder(@PathVariable("userId")Long userId) {
+        return orderService.getBy(userId);
     }
 
     /*

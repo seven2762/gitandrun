@@ -1,5 +1,6 @@
 package com.sparta.gitandrun.order.entity;
 
+import com.sparta.gitandrun.user.entity.User;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -11,6 +12,7 @@ import java.util.List;
 import java.util.Objects;
 
 import static jakarta.persistence.CascadeType.PERSIST;
+import static jakarta.persistence.FetchType.LAZY;
 
 @Entity
 @Getter
@@ -32,11 +34,16 @@ public class Order {
 
     private boolean isDeleted;
 
+    @ManyToOne(fetch = LAZY)
+    @JoinColumn(name = "p_user_id")
+    private User user;
+
     @OneToMany(mappedBy = "order", cascade = PERSIST, orphanRemoval = true)
     private List<OrderMenu> orderMenus = new ArrayList<>();
 
     @Builder
-    public Order(OrderStatus status, OrderType type) {
+    public Order(User user, OrderStatus status, OrderType type) {
+        this.user = user;
         this.orderStatus = status;
         this.orderType = type;
     }
@@ -47,8 +54,9 @@ public class Order {
     }
 
     // == 생성 메서드 == //
-    public static Order createOrder(boolean type, List<OrderMenu> orderMenus) {
+    public static Order createOrder(User user, boolean type, List<OrderMenu> orderMenus) {
         Order order = Order.builder()
+                .user(user)
                 .status(OrderStatus.PENDING)
                 .type(type ? OrderType.DELIVERY : OrderType.VISIT)
                 .build();
