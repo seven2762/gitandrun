@@ -1,12 +1,16 @@
 package com.sparta.gitandrun.Review.entity;
 
 import com.sparta.gitandrun.Review.dto.ReviewRequestDto;
+import com.sparta.gitandrun.user.entity.User;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -29,11 +33,10 @@ public class Review {
     @Column(name = "review_id")
     private UUID reviewId = UUID.randomUUID();
 
-//    @ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "user_id", nullable = false)
-    @Column(name = "username", nullable = false)
-    private String username; //회원별 조회
-//
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user; //회원별 조회
+
 //    @ManyToOne(fetch = FetchType.LAZY)
 //    @JoinColumn(name = "store_id", nullable = false)
 //    private Store store; //가게별 조회
@@ -71,14 +74,11 @@ public class Review {
     @Column(name = "deleted_by", length = 30)
     private String deletedBy;
 
-    public Review(ReviewRequestDto requestDto, String username) {
-//        this.user = user;
+    public Review(ReviewRequestDto requestDto, User user) {
+        this.user = user;
 //        this.store = store;
 //        this.order = order;
-        this.username = username;
         this.reviewContent = requestDto.getReviewContent();
         this.reviewRating = requestDto.getReviewRating();
-        this.createdBy = username;
-        this.updatedBy = username;
     }
 }
