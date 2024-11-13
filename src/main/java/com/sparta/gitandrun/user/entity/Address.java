@@ -6,13 +6,10 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
-
-
 @Embeddable
 @RequiredArgsConstructor
 @Getter
 public class Address {
-
 
     @Column(nullable = false, length = 50)
     private String address;
