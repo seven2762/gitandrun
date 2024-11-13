@@ -11,7 +11,6 @@ import com.sparta.gitandrun.user.dto.response.UserResDTO;
 import com.sparta.gitandrun.user.entity.User;
 import com.sparta.gitandrun.user.security.UserDetailsImpl;
 import com.sparta.gitandrun.user.service.UserService;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
