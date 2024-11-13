@@ -4,15 +4,21 @@ package com.sparta.gitandrun.order.service;
 import com.sparta.gitandrun.menu.entity.Menu;
 import com.sparta.gitandrun.menu.repository.MenuRepository;
 import com.sparta.gitandrun.order.dto.req.CreateOrderReqDto;
+import com.sparta.gitandrun.order.dto.res.OrderMenuResDto;
+import com.sparta.gitandrun.order.dto.res.OrderResDto;
 import com.sparta.gitandrun.order.entity.Order;
 import com.sparta.gitandrun.order.entity.OrderMenu;
+import com.sparta.gitandrun.order.repository.OrderMenuRepository;
 import com.sparta.gitandrun.order.repository.OrderRepository;
+import com.sparta.gitandrun.user.entity.User;
+import com.sparta.gitandrun.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -20,7 +26,9 @@ import java.util.stream.Collectors;
 public class OrderService {
 
     private final OrderRepository orderRepository;
+    private final OrderMenuRepository orderMenuRepository;
     private final MenuRepository menuRepository;
+    private final UserRepository userRepository;
 
     // 주문 생성
     @Transactional
@@ -34,6 +42,10 @@ public class OrderService {
         /*
             메뉴 조회 및 중복된 메뉴 개수 계산
         */
+
+        User findUser = userRepository.findById(dto.getUserId())
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 유저입니다."));
+
         List<Menu> findMenus = getMenus(dto);
 
         Map<Menu, Long> menuCountMap = getMenuCountMap(dto, findMenus);
@@ -46,12 +58,63 @@ public class OrderService {
         /*
             주문 생성
         */
-        Order order = Order.createOrder(dto.isType(), orderMenus);
+        Order order = Order.createOrder(findUser, dto.isType(), orderMenus);
 
         /*
             주문 저장
         */
         orderRepository.save(order);
+    }
+
+    @Transactional(readOnly = true)
+    public List<OrderResDto> getBy(Long userId) {
+
+        List<Order> findOrders = orderRepository.findByUserId(userId);
+
+        List<Long> orderIds = findOrders.stream()
+                .map(Order::getId)
+                .toList();
+
+        List<OrderMenu> findOrderMenus = orderMenuRepository.findByOrderIds(orderIds);
+
+        List<OrderResDto> orderResDtos = getOrderResDtos(findOrders);
+
+        List<OrderMenuResDto> orderMenuResDtos = getOrderMenuResDtos(findOrderMenus);
+
+        Map<Long, List<OrderMenuResDto>> orderMenusMap = orderMenuResDtos.stream()
+                .collect(Collectors.groupingBy(OrderMenuResDto::getOrderId));
+
+        orderResDtos.forEach(orderResDto -> orderResDto.setOrderMenuResDtos(orderMenusMap.get(orderResDto.getOrderId())));
+
+        return orderResDtos;
+    }
+
+    private static List<OrderMenuResDto> getOrderMenuResDtos(List<OrderMenu> findOrderMenus) {
+        return findOrderMenus.stream()
+                .map(orderMenu ->
+                        OrderMenuResDto.builder()
+                                .orderId(orderMenu.getOrder().getId())
+                                .orderMenuId(orderMenu.getId())
+                                .menuId(orderMenu.getMenu().getMenuId())
+                                .menuName(orderMenu.getMenu().getMenuName())
+                                .menuPrice(orderMenu.getMenu().getMenuPrice())
+                                .count(orderMenu.getOrderCount())
+                                .build()
+                )
+                .toList();
+    }
+
+    private static List<OrderResDto> getOrderResDtos(List<Order> findOrders) {
+        List<OrderResDto> orderResDtos = findOrders.stream()
+                .map(order ->
+                        OrderResDto.builder()
+                                .orderId(order.getId())
+                                .type(order.getOrderType().getType())
+                                .status(order.getOrderStatus().status)
+                                .build()
+                )
+                .toList();
+        return orderResDtos;
     }
 
     // 주문 취소
@@ -105,13 +168,13 @@ public class OrderService {
             2. 이때 Collectors.counting() 키 값의 개수를 세는 역할을 한다.
             3. 이후 { 메뉴 : 메뉴의 개수 } 형태로 구성된 Map 을 생성하여 반환한다.
         */
-        Map<Long, Long> idsCountingMap = dto.getMenuIds().stream()
+        Map<UUID, Long> uuidLongMap = dto.getMenuIds().stream()
                 .collect(Collectors.groupingBy(menuId -> menuId, Collectors.counting()));
 
         return findMenus.stream()
                 .collect(Collectors.toMap(
                         menu -> menu,
-                        menu -> idsCountingMap.get(menu.getMenuId())
+                        menu -> uuidLongMap.get(menu.getMenuId())
                 ));
     }
 
