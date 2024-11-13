@@ -1,6 +1,7 @@
 package com.sparta.gitandrun.Review.entity;
 
 import com.sparta.gitandrun.Review.dto.ReviewRequestDto;
+import com.sparta.gitandrun.order.entity.Order;
 import com.sparta.gitandrun.store.entity.Store;
 import com.sparta.gitandrun.user.entity.User;
 import jakarta.persistence.Column;
@@ -12,6 +13,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -42,9 +44,9 @@ public class Review {
     @JoinColumn(name = "store_id", nullable = false)
     private Store store; //가게별 조회
 
-//    @ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "order_id", nullable = false)
-//    private Order order; //주문과 리뷰 연결
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "order_id", nullable = false, unique = true)
+    private Order order; //주문과 리뷰 연결
 
     @Column(name = "review_content", nullable = false, length = 500)
     private String reviewContent;
@@ -75,10 +77,10 @@ public class Review {
     @Column(name = "deleted_by", length = 30)
     private String deletedBy;
 
-    public Review(ReviewRequestDto requestDto, User user, Store store) {
+    public Review(ReviewRequestDto requestDto, User user, Store store, Order order) {
         this.user = user;
-//        this.store = store;
-//        this.order = order;
+        this.store = store;
+        this.order = order;
         this.reviewContent = requestDto.getReviewContent();
         this.reviewRating = requestDto.getReviewRating();
     }
