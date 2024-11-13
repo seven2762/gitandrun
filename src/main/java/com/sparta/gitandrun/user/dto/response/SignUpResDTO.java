@@ -1,4 +1,4 @@
-package com.sparta.gitandrun.user.dto;
+package com.sparta.gitandrun.user.dto.response;
 
 import lombok.Getter;
 
