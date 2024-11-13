@@ -20,6 +20,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findActiveUserByPhone(@Param("phone") String phone);
 
     // Store에서 사용하기 위해 추가
-    Optional<User> findByUserId(UUID userId);
+    Optional<User> findByUserId(Long userId);
 
 }

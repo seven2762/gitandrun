@@ -3,6 +3,7 @@ package com.sparta.gitandrun.store.entity;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.sparta.gitandrun.user.entity.User;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -53,7 +54,7 @@ public class Store {
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
 
-    @Column(name = "is_deleted", nullable = false)
+    @Column(name = "is_deleted")
     private boolean isDeleted = false;
 
     @Column(name = "address", nullable = false, length = 255)
@@ -68,7 +69,9 @@ public class Store {
     // User와의 ManyToOne 관계 설정
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)  // Store 테이블에 user_id 컬럼 추가
+    @JsonBackReference  // 순환 참조 방지
     private User user;
+
 
     @PrePersist
     public void prePersist() {

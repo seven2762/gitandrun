@@ -23,7 +23,7 @@ public class FullStoreResponse {
     private String address;
     private String addressDetail;
     private String zipCode;
-    private boolean deleted;
+    private Long userId;  // user 대신 userId만 포함
 
     public FullStoreResponse(Store store) {
         this.storeId = store.getStoreId();
@@ -40,8 +40,6 @@ public class FullStoreResponse {
         this.address = store.getAddress();
         this.addressDetail = store.getAddressDetail();
         this.zipCode = store.getZipCode();
-        this.deleted = store.isDeleted();
+        this.userId = store.getUser().getUserId();  // User 객체 대신 userId만 반환
     }
 }
-
-
