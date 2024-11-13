@@ -1,5 +1,6 @@
 package com.sparta.gitandrun.order.entity;
 
+import com.sparta.gitandrun.common.entity.BaseEntity;
 import com.sparta.gitandrun.user.entity.User;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -18,7 +19,7 @@ import static jakarta.persistence.FetchType.LAZY;
 @Getter
 @Table(name = "p_order")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Order {
+public class Order extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -45,7 +46,6 @@ public class Order {
     public Order(User user, OrderStatus status, OrderType type) {
         this.user = user;
         this.orderStatus = status;
-        this.orderType = type;
     }
 
     public void addOrderMenus(List<OrderMenu> orderMenus) {
@@ -61,6 +61,7 @@ public class Order {
                 .type(type ? OrderType.DELIVERY : OrderType.VISIT)
                 .build();
 
+        order.initAuditInfo(user);
         order.addOrderMenus(orderMenus);
 
         return order;
