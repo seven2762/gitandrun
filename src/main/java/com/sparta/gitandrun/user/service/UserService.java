@@ -1,22 +1,25 @@
 package com.sparta.gitandrun.user.service;
 
-import com.sparta.gitandrun.user.dto.SignUpReqDTO;
-import com.sparta.gitandrun.user.dto.SignUpResDTO;
-import com.sparta.gitandrun.user.dto.UserResDTO;
+import com.sparta.gitandrun.user.dto.request.LoginReqDto;
+import com.sparta.gitandrun.user.dto.request.SignUpReqDTO;
+import com.sparta.gitandrun.user.dto.response.LoginResDto;
+import com.sparta.gitandrun.user.dto.response.SignUpResDTO;
+import com.sparta.gitandrun.user.dto.response.UserResDTO;
 import com.sparta.gitandrun.user.entity.Address;
 import com.sparta.gitandrun.user.entity.Role;
 import com.sparta.gitandrun.user.entity.User;
 import com.sparta.gitandrun.user.exception.ErrorCode;
 import com.sparta.gitandrun.user.exception.UserException;
+import com.sparta.gitandrun.user.jwt.JwtUtil;
 import com.sparta.gitandrun.user.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.Builder;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -25,6 +28,8 @@ import java.util.stream.Collectors;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final BCryptPasswordEncoder passwordEncoder;  // 추가
+    private final JwtUtil jwtUtil;
 
     public SignUpResDTO signUp(SignUpReqDTO signUpReqDTO) {
 
@@ -36,7 +41,7 @@ public class UserService {
                 .username(signUpReqDTO.getUsername())
                 .nickName(signUpReqDTO.getNickName())
                 .email(signUpReqDTO.getEmail())
-                .password(signUpReqDTO.getPassword())
+                .password(passwordEncoder.encode(signUpReqDTO.getPassword()))
                 .address(new Address(  // embedded
                         signUpReqDTO.getAddressReq().getAddress(),
                         signUpReqDTO.getAddressReq().getAddressDetail(),
@@ -50,9 +55,23 @@ public class UserService {
 
 
 
-        return SignUpResDTO.from("추후에 토큰 발급 가능하게 만들예정.");
+        return SignUpResDTO.from("good~!");
     }
+    public LoginResDto login(LoginReqDto loginReqDTO) {
+        User user = userRepository.findByEmail(loginReqDTO.getEmail())
+                .orElseThrow(() -> new UserException(ErrorCode.USER_NOT_FOUND));
 
+        if (!passwordEncoder.matches(loginReqDTO.getPassword(), user.getPassword())) {
+            throw new UserException(ErrorCode.INVALID_PASSWORD);
+        }
+
+        if (user.isDeleted()) {
+            throw new UserException(ErrorCode.USER_NOT_FOUND);
+        }
+
+
+        return LoginResDto.of(user, jwtUtil.createToken(user.getEmail(), user.getRole()));
+    }
     //전체 회원 목록 조회
     public List<UserResDTO> getAllActiveUsers() {
         List<User> activeUsers = userRepository.findAllActiveUsers();
@@ -63,10 +82,9 @@ public class UserService {
 
     //비밀번호 변경
     @Transactional
-    public void updatePassword(String phone, String password) {
-        User user = userRepository.findActiveUserByPhone(phone)
-                .orElseThrow(() -> new UserException(ErrorCode.USER_NOT_FOUND));
-        user.updatePassword(password);
+    public void updatePassword(User user, String password) {
+        String encodedPassword = passwordEncoder.encode(password);
+        user.updatePassword(encodedPassword, String.valueOf(user.getUserId()));
     }
     @Transactional
     public void softDeleteUser(String phone) {
