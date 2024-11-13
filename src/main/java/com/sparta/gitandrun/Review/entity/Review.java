@@ -12,12 +12,14 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
+import jakarta.persistence.PreRemove;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
 import java.util.UUID;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.SoftDelete;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -26,6 +28,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @Getter
 @Setter
 @EntityListeners(AuditingEntityListener.class)
+@SoftDelete(columnName = "is_deleted")
 @NoArgsConstructor
 @Table(name = "p_review")
 public class Review {
@@ -66,8 +69,8 @@ public class Review {
     @Column(name = "updated_by", nullable = false, length = 30)
     protected String updatedBy;
 
-    @Column(name = "is_deleted", nullable = false)
-    private Boolean isDeleted = Boolean.FALSE;
+    @Column(name = "is_deleted", insertable = false, updatable = false)
+    private boolean isDeleted;
 
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
@@ -75,11 +78,20 @@ public class Review {
     @Column(name = "deleted_by", length = 30)
     private String deletedBy;
 
+    @PreRemove
+    public void preRemove() {
+        this.isDeleted = true;
+        this.deletedAt = LocalDateTime.now();
+        this.deletedBy = String.valueOf(user.getUserId());
+    }
+
     public Review(ReviewRequestDto requestDto, User user, Store store, Order order) {
         this.user = user;
         this.store = store;
         this.order = order;
         this.reviewContent = requestDto.getReviewContent();
         this.reviewRating = requestDto.getReviewRating();
+        this.createdBy = String.valueOf(user.getUserId());
+        this.updatedBy = String.valueOf(user.getUserId());
     }
 }
