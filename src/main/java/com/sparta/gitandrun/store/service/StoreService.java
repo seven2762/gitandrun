@@ -3,7 +3,6 @@ package com.sparta.gitandrun.store.service;
 import com.sparta.gitandrun.store.dto.FullStoreResponse;
 import com.sparta.gitandrun.store.dto.LimitedStoreResponse;
 import com.sparta.gitandrun.store.dto.StoreRequestDto;
-import com.sparta.gitandrun.store.dto.StoreSearchRequestDto;
 import com.sparta.gitandrun.store.entity.Store;
 import com.sparta.gitandrun.store.repository.StoreRepository;
 import com.sparta.gitandrun.user.entity.Role;
@@ -38,109 +37,42 @@ public class StoreService {
     // 가게 생성
     @Transactional
     public Store createStore(Long userId, StoreRequestDto storeRequestDto) {
-        User user = userRepository.findByUserId(userId)
-                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+        User user = validateUserWithRoles(userId, Role.ADMIN, Role.OWNER);
 
-        if (user.getRole() != Role.ADMIN && user.getRole() != Role.OWNER) {
-            throw new IllegalArgumentException("생성 권한이 없습니다.");
-        }
-
-        // Store 객체 생성 및 필드 설정
         Store newStore = new Store();
-        newStore.setStoreName(storeRequestDto.getStoreName());
-        newStore.setPhone(storeRequestDto.getPhone());
-        newStore.setCategory(storeRequestDto.getCategory());
-        newStore.setAddress(storeRequestDto.getAddress());
-        newStore.setAddressDetail(storeRequestDto.getAddressDetail());
-        newStore.setZipCode(storeRequestDto.getZipCode());
-
-        // 카테고리가 설정되었을 경우 category_id 자동 할당
-        if (newStore.getCategory() != null) {
-            newStore.setCategoryId(newStore.getCategory().getUuid());
-        }
-
-        newStore.setCreatedBy(user.getUserId().toString());
-        newStore.setUpdatedBy(user.getUserId().toString());
-        newStore.setCreatedAt(LocalDateTime.now());
-        newStore.setUpdatedAt(LocalDateTime.now());
+        populateStoreFields(newStore, storeRequestDto, user.getUserId().toString());
 
         return storeRepository.save(newStore);
     }
 
-
     // 전체 가게 조회
     public List<?> getAllStores(Long userId) {
-        User user = userRepository.findByUserId(userId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
+        User user = getUser(userId);
+        List<Store> allStores = user.getRole() == Role.ADMIN ?
+                storeRepository.findAll() : storeRepository.findByisDeletedFalse();
 
-        List<Store> allStores;
-
-        if (user.getRole() == Role.ADMIN) {
-            allStores = storeRepository.findAll();
-            return allStores.stream()
-                    .map(FullStoreResponse::new)
-                    .collect(Collectors.toList());
-        }
-
-        allStores = storeRepository.findByisDeletedFalse();
         return allStores.stream()
-                .map(LimitedStoreResponse::new)
+                .map(store -> user.getRole() == Role.ADMIN ? new FullStoreResponse(store) : new LimitedStoreResponse(store))
                 .collect(Collectors.toList());
     }
 
     // 가게 상세 정보 조회
     public ResponseEntity<?> getStoreDetails(UUID storeId, Long userId) {
-        User user = userRepository.findByUserId(userId)
-                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
-        Store store = storeRepository.findById(storeId)
-                .orElseThrow(() -> new IllegalArgumentException("가게를 찾을 수 없습니다."));
+        User user = getUser(userId);
+        Store store = getStore(storeId);
 
-        if (user.getRole() == Role.ADMIN) {
-            return ResponseEntity.ok(new FullStoreResponse(store));
-        } else {
-            Map<String, Object> filteredStoreDetails = new LinkedHashMap<>();
-            filteredStoreDetails.put("storeName", store.getStoreName());
-            filteredStoreDetails.put("phone", store.getPhone());
-            filteredStoreDetails.put("address", store.getAddress());
-            filteredStoreDetails.put("addressDetail", store.getAddressDetail());
-            filteredStoreDetails.put("zipCode", store.getZipCode());
-
-            return ResponseEntity.ok(filteredStoreDetails);
-        }
+        return user.getRole() == Role.ADMIN ?
+                ResponseEntity.ok(new FullStoreResponse(store)) :
+                ResponseEntity.ok(generateLimitedStoreDetails(store));
     }
 
     // 가게 수정
     @Transactional
     public void updateStore(UUID storeId, Long userId, StoreRequestDto updatedStore) {
-        Store existingStore = storeRepository.findById(storeId)
-                .orElseThrow(() -> new IllegalArgumentException("가게를 찾을 수 없습니다."));
-        User user = userRepository.findByUserId(userId)
-                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+        User user = validateUserWithRoles(userId, Role.ADMIN, Role.OWNER);
+        Store existingStore = getStore(storeId);
 
-        if (user.getRole() != Role.ADMIN && user.getRole() != Role.OWNER) {
-            throw new IllegalArgumentException("수정 권한이 없습니다.");
-        }
-
-        if (updatedStore.getStoreName() != null) {
-            existingStore.setStoreName(updatedStore.getStoreName());
-        }
-        if (updatedStore.getPhone() != null) {
-            existingStore.setPhone(updatedStore.getPhone());
-        }
-        if (updatedStore.getCategory() != null) {
-            existingStore.setCategory(updatedStore.getCategory());
-        }
-        if (updatedStore.getAddress() != null) {
-            existingStore.setAddress(updatedStore.getAddress());
-        }
-        if (updatedStore.getAddressDetail() != null) {
-            existingStore.setAddressDetail(updatedStore.getAddressDetail());
-        }
-        if (updatedStore.getZipCode() != null) {
-            existingStore.setZipCode(updatedStore.getZipCode());
-        }
-        existingStore.setUpdatedBy(userId.toString());
-        existingStore.setUpdatedAt(LocalDateTime.now());
+        populateStoreFields(existingStore, updatedStore, user.getUserId().toString());
 
         storeRepository.save(existingStore);
     }
@@ -148,15 +80,9 @@ public class StoreService {
     // 가게 삭제 (soft delete 방식)
     @Transactional
     public boolean deleteStore(UUID storeId, Long userId) {
-        User user = userRepository.findByUserId(userId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
+        User user = validateUserWithRoles(userId, Role.ADMIN, Role.OWNER);
+        Store store = getStore(storeId);
 
-        if (user.getRole() != Role.ADMIN && user.getRole() != Role.OWNER) {
-            throw new IllegalArgumentException("삭제 권한이 없습니다.");
-        }
-
-        Store store = storeRepository.findById(storeId)
-                .orElseThrow(() -> new IllegalArgumentException("가게를 찾을 수 없습니다."));
         store.markAsDeleted(user.getUserId().toString());
         storeRepository.save(store);
         return true;
@@ -164,31 +90,70 @@ public class StoreService {
 
     // 페이징 및 조건부 정렬 구현
     public Page<?> searchStores(UUID categoryId, String sortField, int page, int size, Long userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+        User user = getUser(userId);
 
         Pageable pageable = PageRequest.of(page, size, Sort.by(sortField).descending());
         Page<Store> stores = storeRepository.findByCategoryId(categoryId, pageable);
 
-        if (user.getRole() == Role.ADMIN) {
-            return stores.map(FullStoreResponse::new); // 관리자: 모든 정보 표시
-        } else {
-            return stores.map(LimitedStoreResponse::new); // 소유자 및 고객: 제한된 정보만 표시
-        }
+        return mapStoreResponse(stores, user.getRole());
     }
 
     // 키워드 검색 및 권한에 따른 응답 제어
     public Page<?> searchStoresByKeyword(String keyword, String sortField, int page, int size, Long userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+        User user = getUser(userId);
 
         Pageable pageable = PageRequest.of(page, size, Sort.by(sortField).descending());
         Page<Store> stores = storeRepository.searchByKeyword(keyword, pageable);
 
-        if (user.getRole() == Role.ADMIN) {
-            return stores.map(FullStoreResponse::new); // 관리자: 모든 정보 표시
-        } else {
-            return stores.map(LimitedStoreResponse::new); // 소유자 및 고객: 제한된 정보만 표시
+        return mapStoreResponse(stores, user.getRole());
+    }
+
+    // 유저 조회 메서드
+    private User getUser(Long userId) {
+        return userRepository.findByUserId(userId)
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+    }
+
+    // 가게 조회 메서드
+    private Store getStore(UUID storeId) {
+        return storeRepository.findById(storeId)
+                .orElseThrow(() -> new IllegalArgumentException("가게를 찾을 수 없습니다."));
+    }
+
+    private User validateUserWithRoles(Long userId, Role... roles) {
+        User user = getUser(userId);
+        for (Role role : roles) {
+            if (user.getRole() == role) {
+                return user;
+            }
         }
+        throw new IllegalArgumentException("요청 권한이 없습니다.");
+    }
+
+    private Map<String, Object> generateLimitedStoreDetails(Store store) {
+        Map<String, Object> filteredStoreDetails = new LinkedHashMap<>();
+        filteredStoreDetails.put("storeName", store.getStoreName());
+        filteredStoreDetails.put("phone", store.getPhone());
+        filteredStoreDetails.put("address", store.getAddress());
+        filteredStoreDetails.put("addressDetail", store.getAddressDetail());
+        filteredStoreDetails.put("zipCode", store.getZipCode());
+        return filteredStoreDetails;
+    }
+
+    private Page<?> mapStoreResponse(Page<Store> stores, Role role) {
+        return role == Role.ADMIN ?
+                stores.map(FullStoreResponse::new) :
+                stores.map(LimitedStoreResponse::new);
+    }
+
+    private void populateStoreFields(Store store, StoreRequestDto storeRequestDto, String userId) {
+        if (storeRequestDto.getStoreName() != null) store.setStoreName(storeRequestDto.getStoreName());
+        if (storeRequestDto.getPhone() != null) store.setPhone(storeRequestDto.getPhone());
+        if (storeRequestDto.getCategory() != null) store.setCategory(storeRequestDto.getCategory());
+        if (storeRequestDto.getAddress() != null) store.setAddress(storeRequestDto.getAddress());
+        if (storeRequestDto.getAddressDetail() != null) store.setAddressDetail(storeRequestDto.getAddressDetail());
+        if (storeRequestDto.getZipCode() != null) store.setZipCode(storeRequestDto.getZipCode());
+        store.setUpdatedBy(userId);
+        store.setUpdatedAt(LocalDateTime.now());
     }
 }
