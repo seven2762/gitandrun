@@ -41,4 +41,7 @@ public class BaseEntity {
     protected void setCreatedBy(String createdBy) {
         this.createdBy = createdBy;
     }
+    protected void setUpdatedBy(String updatedBy) {
+        this.updatedBy = updatedBy;
+    }
 }
