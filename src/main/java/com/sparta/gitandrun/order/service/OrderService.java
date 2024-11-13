@@ -4,8 +4,7 @@ package com.sparta.gitandrun.order.service;
 import com.sparta.gitandrun.menu.entity.Menu;
 import com.sparta.gitandrun.menu.repository.MenuRepository;
 import com.sparta.gitandrun.order.dto.req.CreateOrderReqDto;
-import com.sparta.gitandrun.order.dto.res.OrderMenuResDto;
-import com.sparta.gitandrun.order.dto.res.OrderResDto;
+import com.sparta.gitandrun.order.dto.res.ResOrderGetDTO;
 import com.sparta.gitandrun.order.entity.Order;
 import com.sparta.gitandrun.order.entity.OrderMenu;
 import com.sparta.gitandrun.order.repository.OrderMenuRepository;
@@ -67,54 +66,32 @@ public class OrderService {
     }
 
     @Transactional(readOnly = true)
-    public List<OrderResDto> getBy(Long userId) {
+    public List<ResOrderGetDTO.OrderDTO> getBy(Long userId) {
+        /*
+            주문 조회 : userId 를 기준으로
+        */
+        List<Order> orders = getOrdersBy(userId);
 
-        List<Order> findOrders = orderRepository.findByUserId(userId);
+        /*
+            주문 목록 조회 : 앞서 구한 order 의 id 를 기준으로
+        */
+        List<OrderMenu> orderMenus = getOrderMenusBy(getIdsBy(orders));
 
-        List<Long> orderIds = findOrders.stream()
+        return ResOrderGetDTO.OrderDTO.from(orders, orderMenus);
+    }
+
+    private List<OrderMenu> getOrderMenusBy(List<Long> orderIds) {
+        return orderMenuRepository.findByOrderIds(orderIds);
+    }
+
+    private static List<Long> getIdsBy(List<Order> orders) {
+        return orders.stream()
                 .map(Order::getId)
                 .toList();
-
-        List<OrderMenu> findOrderMenus = orderMenuRepository.findByOrderIds(orderIds);
-
-        List<OrderResDto> orderResDtos = getOrderResDtos(findOrders);
-
-        List<OrderMenuResDto> orderMenuResDtos = getOrderMenuResDtos(findOrderMenus);
-
-        Map<Long, List<OrderMenuResDto>> orderMenusMap = orderMenuResDtos.stream()
-                .collect(Collectors.groupingBy(OrderMenuResDto::getOrderId));
-
-        orderResDtos.forEach(orderResDto -> orderResDto.setOrderMenuResDtos(orderMenusMap.get(orderResDto.getOrderId())));
-
-        return orderResDtos;
     }
 
-    private static List<OrderMenuResDto> getOrderMenuResDtos(List<OrderMenu> findOrderMenus) {
-        return findOrderMenus.stream()
-                .map(orderMenu ->
-                        OrderMenuResDto.builder()
-                                .orderId(orderMenu.getOrder().getId())
-                                .orderMenuId(orderMenu.getId())
-                                .menuId(orderMenu.getMenu().getMenuId())
-                                .menuName(orderMenu.getMenu().getMenuName())
-                                .menuPrice(orderMenu.getMenu().getMenuPrice())
-                                .count(orderMenu.getOrderCount())
-                                .build()
-                )
-                .toList();
-    }
-
-    private static List<OrderResDto> getOrderResDtos(List<Order> findOrders) {
-        List<OrderResDto> orderResDtos = findOrders.stream()
-                .map(order ->
-                        OrderResDto.builder()
-                                .orderId(order.getId())
-                                .type(order.getOrderType().getType())
-                                .status(order.getOrderStatus().status)
-                                .build()
-                )
-                .toList();
-        return orderResDtos;
+    private List<Order> getOrdersBy(Long userId) {
+        return orderRepository.findByUserId(userId);
     }
 
     // 주문 취소
