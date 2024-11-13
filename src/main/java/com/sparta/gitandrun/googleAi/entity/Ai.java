@@ -17,7 +17,7 @@ public class Ai {
     @Id
     @Column(name = "aiId", columnDefinition = "UUID")
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private UUID menuId;
+    private UUID Id;
 
     private String question;
 
