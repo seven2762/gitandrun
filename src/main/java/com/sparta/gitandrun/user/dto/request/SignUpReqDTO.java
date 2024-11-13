@@ -1,12 +1,11 @@
-package com.sparta.gitandrun.user.dto;
+package com.sparta.gitandrun.user.dto.request;
 
+import com.sparta.gitandrun.user.dto.AddressDTO;
 import com.sparta.gitandrun.user.entity.Role;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
-import java.util.UUID;
 
 @Getter
 @Builder
