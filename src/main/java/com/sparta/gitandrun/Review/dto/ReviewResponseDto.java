@@ -14,13 +14,12 @@ public class ReviewResponseDto {
 
     private UUID reviewId;
     private Long userId;
-    private UUID orderId;
+    private Long orderId;
     private UUID storeId;
     private String reviewContent;
     private Short reviewRating;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    private Boolean isDeleted;
 
     public ReviewResponseDto(Review review) {
         this.reviewId = review.getReviewId();
