@@ -25,9 +25,9 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @Table(name = "p_review")
 public class Review {
 
-    @Id @GeneratedValue(strategy = GenerationType.AUTO)
+    @Id
     @Column(name = "review_id")
-    private UUID reviewId;
+    private UUID reviewId = UUID.randomUUID();
 
 //    @ManyToOne(fetch = FetchType.LAZY)
 //    @JoinColumn(name = "user_id", nullable = false)
