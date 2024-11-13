@@ -1,15 +1,17 @@
 package com.sparta.gitandrun.store.entity;
 
-import java.time.LocalDateTime;
-import java.util.UUID;
-
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.sparta.gitandrun.category.entity.Category;
+import com.sparta.gitandrun.region.entity.Region;
 import com.sparta.gitandrun.user.entity.User;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity
 @Table(name = "p_store")
@@ -21,10 +23,15 @@ public class Store {
 
     @Id
     @Column(name = "store_id", columnDefinition = "UUID")
-    private UUID storeId;
+    private UUID storeId = UUID.randomUUID();
 
-    @Column(name = "category_id", nullable = false, columnDefinition = "UUID")
-    private UUID categoryId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "category_id", nullable = false)  // FK로 `category_id`를 연결
+    private Category category;  // `UUID` 대신 `Category` 타입으로 참조
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "region_id", nullable = false) // FK 관계로 `region_id` 추가
+    private Region region;
 
     @Column(name = "store_name", nullable = false, length = 100, unique = true)
     private String storeName;
@@ -32,21 +39,17 @@ public class Store {
     @Column(name = "phone", nullable = false, length = 20)
     private String phone;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "category", nullable = false)
-    private Category category;
-
     @Column(name = "created_by", nullable = false, length = 100)
     private String createdBy;
 
     @Column(name = "created_at", nullable = false)
-    private LocalDateTime createdAt;
+    private LocalDateTime createdAt = LocalDateTime.now();
 
     @Column(name = "updated_by", nullable = false, length = 100)
     private String updatedBy;
 
     @Column(name = "updated_at", nullable = false)
-    private LocalDateTime updatedAt;
+    private LocalDateTime updatedAt = LocalDateTime.now();
 
     @Column(name = "deleted_by", length = 100)
     private String deletedBy;
@@ -68,25 +71,15 @@ public class Store {
 
     // User와의 ManyToOne 관계 설정
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)  // Store 테이블에 user_id 컬럼 추가
+    @JoinColumn(name = "user_id", nullable = false)
     @JsonBackReference  // 순환 참조 방지
     private User user;
 
-
     @PrePersist
     public void prePersist() {
-        if (this.storeId == null) {
-            this.storeId = UUID.randomUUID();
-        }
-        if (this.createdAt == null) {
-            this.createdAt = LocalDateTime.now();
-        }
-        if (this.updatedAt == null) {
-            this.updatedAt = LocalDateTime.now();
-        }
-        if (this.category != null) {
-            this.categoryId = this.category.getUuid();
-        }
+        this.storeId = this.storeId == null ? UUID.randomUUID() : this.storeId;
+        this.createdAt = this.createdAt == null ? LocalDateTime.now() : this.createdAt;
+        this.updatedAt = this.updatedAt == null ? LocalDateTime.now() : this.updatedAt;
     }
 
     @PreUpdate
@@ -98,12 +91,5 @@ public class Store {
         this.isDeleted = true;
         this.deletedAt = LocalDateTime.now();
         this.deletedBy = deletedBy;
-    }
-
-    public void setCategory(Category category) {
-        this.category = category;
-        if (category != null) {
-            this.categoryId = category.getUuid();  // 카테고리의 UUID를 자동 설정
-        }
     }
 }
