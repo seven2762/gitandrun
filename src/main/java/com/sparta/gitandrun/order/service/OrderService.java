@@ -104,10 +104,6 @@ public class OrderService {
                 .toList();
     }
 
-//    private List<Order> getOrdersBy(Long userId) {
-//        return orderRepository.findByUserId(userId);
-//    }
-
     // 주문 취소
     @Transactional
     public void cancelOrder(Long orderId) {
