@@ -38,7 +38,7 @@ public class OrderController {
     @GetMapping("/{userId}")
     public ResponseEntity<ResDto<ResOrderGetDTO>> readOrder(
             @PathVariable("userId")Long userId,
-            @PageableDefault(sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
+            @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
 
         return orderService.getBy(userId, pageable);
     }
