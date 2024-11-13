@@ -4,6 +4,7 @@ package com.sparta.gitandrun.order.service;
 import com.sparta.gitandrun.menu.entity.Menu;
 import com.sparta.gitandrun.menu.repository.MenuRepository;
 import com.sparta.gitandrun.order.dto.req.CreateOrderReqDto;
+import com.sparta.gitandrun.order.dto.res.ResDto;
 import com.sparta.gitandrun.order.dto.res.ResOrderGetDTO;
 import com.sparta.gitandrun.order.entity.Order;
 import com.sparta.gitandrun.order.entity.OrderMenu;
@@ -12,6 +13,10 @@ import com.sparta.gitandrun.order.repository.OrderRepository;
 import com.sparta.gitandrun.user.entity.User;
 import com.sparta.gitandrun.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -66,33 +71,42 @@ public class OrderService {
     }
 
     @Transactional(readOnly = true)
-    public List<ResOrderGetDTO.OrderDTO> getBy(Long userId) {
+    public ResponseEntity<ResDto<ResOrderGetDTO>> getBy(Long userId, Pageable pageable) {
         /*
             주문 조회 : userId 를 기준으로
         */
-        List<Order> orders = getOrdersBy(userId);
+        Page<Order> findOrderPage = orderRepository.findByUser_UserIdAndIsDeletedFalse(userId, pageable);
 
         /*
             주문 목록 조회 : 앞서 구한 order 의 id 를 기준으로
         */
-        List<OrderMenu> orderMenus = getOrderMenusBy(getIdsBy(orders));
+        List<OrderMenu> orderMenus = getOrderMenusBy(getIdsBy(findOrderPage));
 
-        return ResOrderGetDTO.OrderDTO.from(orders, orderMenus);
+
+        return new ResponseEntity<>(
+                ResDto.<ResOrderGetDTO>builder()
+                        .code(HttpStatus.OK.value())
+                        .message("주문 조회에 성공했습니다.")
+                        .data(ResOrderGetDTO.of(findOrderPage, orderMenus))
+                        .build(),
+                HttpStatus.OK
+        );
     }
+
 
     private List<OrderMenu> getOrderMenusBy(List<Long> orderIds) {
         return orderMenuRepository.findByOrderIds(orderIds);
     }
 
-    private static List<Long> getIdsBy(List<Order> orders) {
-        return orders.stream()
+    private static List<Long> getIdsBy(Page<Order> orders) {
+        return orders.getContent().stream()
                 .map(Order::getId)
                 .toList();
     }
 
-    private List<Order> getOrdersBy(Long userId) {
-        return orderRepository.findByUserId(userId);
-    }
+//    private List<Order> getOrdersBy(Long userId) {
+//        return orderRepository.findByUserId(userId);
+//    }
 
     // 주문 취소
     @Transactional

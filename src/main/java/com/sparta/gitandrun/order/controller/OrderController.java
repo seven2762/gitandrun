@@ -2,9 +2,13 @@ package com.sparta.gitandrun.order.controller;
 
 import com.sparta.gitandrun.common.entity.ApiResDto;
 import com.sparta.gitandrun.order.dto.req.CreateOrderReqDto;
+import com.sparta.gitandrun.order.dto.res.ResDto;
 import com.sparta.gitandrun.order.dto.res.ResOrderGetDTO;
 import com.sparta.gitandrun.order.service.OrderService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -32,8 +36,11 @@ public class OrderController {
     }
 
     @GetMapping("/{userId}")
-    public List<ResOrderGetDTO.OrderDTO> readOrder(@PathVariable("userId")Long userId) {
-        return orderService.getBy(userId);
+    public ResponseEntity<ResDto<ResOrderGetDTO>> readOrder(
+            @PathVariable("userId")Long userId,
+            @PageableDefault(sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
+
+        return orderService.getBy(userId, pageable);
     }
 
     /*
