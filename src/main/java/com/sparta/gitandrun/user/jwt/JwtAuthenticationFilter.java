@@ -53,11 +53,11 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authResult) throws IOException {
         log.info("로그인 성공 및 JWT 생성");
         String username = ((UserDetailsImpl) authResult.getPrincipal()).getUsername();
-        Role role = ((UserDetailsImpl) authResult.getPrincipal()).user().getRole();
+        Role role = ((UserDetailsImpl) authResult.getPrincipal()).getUser().getRole();
 
         String token = jwtUtil.createToken(username, role);
         response.addHeader(JwtUtil.AUTHORIZATION_HEADER, token);
-        User user = ((UserDetailsImpl) authResult.getPrincipal()).user();
+        User user = ((UserDetailsImpl) authResult.getPrincipal()).getUser();
         LoginResDto loginResDto = LoginResDto.of(user, token);
         UserApiResDto apiResDto = new UserApiResDto("로그인이 완료되었습니다.", 200, loginResDto);
 
