@@ -18,13 +18,8 @@ public class AiController {
 
     //Question CREATE
     @PostMapping
-    public String createQuestion(@RequestBody String text) {
-//        System.out.println(text);
-        try {
-            return aiService.createQuestion(text);
-        } catch (IOException e) {
-            return e.getMessage();
-        }
+    public String createQuestion(@RequestBody String text) { // json 받아오게
+        return aiService.createQuestion(text);
     }
 
 }

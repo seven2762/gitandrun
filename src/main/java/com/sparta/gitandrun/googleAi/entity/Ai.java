@@ -1,5 +1,6 @@
 package com.sparta.gitandrun.googleAi.entity;
 
+import com.sparta.gitandrun.googleAi.dto.AiDto;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -23,4 +24,8 @@ public class Ai {
 
     private String answer;
 
+    public Ai(AiDto aiDto){
+        this.question = aiDto.getQuestion();
+        this.answer = aiDto.getAnswer();
+    }
 }
