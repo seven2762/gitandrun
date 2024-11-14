@@ -47,12 +47,13 @@ public class OrderController {
        2. 추후, 주문 상태별 / 최신순 및 오래된 순 등 다양한 기준에 따라 정렬 및 조회 가능한 동적 쿼리 작성 예정
        3. @PathVariable 삭제하고 인증 객체를 받아 user 정보를 받은 예정
    */
-    @GetMapping("/{userId}")
-    public ResponseEntity<ResDto<ResOrderGetByCustomerDTO>> readOrder(
-            @PathVariable("userId") Long userId,
+    @Secured("ROLE_CUSTOMER")
+    @GetMapping("/customer")
+    public ResponseEntity<ResDto<ResOrderGetByCustomerDTO>> getByCustomer(
+            @AuthenticationPrincipal UserDetailsImpl userDetails,
             @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
 
-        return orderService.getBy(userId, pageable);
+        return orderService.getByCustomer(userDetails.getUser(), pageable);
     }
 
     /*
@@ -62,7 +63,7 @@ public class OrderController {
 
     @Secured("ROLE_OWNER")
     @GetMapping("/owner")
-    public ResponseEntity<ResDto<ResOrderGetByOwnerDTO>> readOrder(
+    public ResponseEntity<ResDto<ResOrderGetByOwnerDTO>> getByOwner(
             @AuthenticationPrincipal UserDetailsImpl userDetails,
             @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
 
