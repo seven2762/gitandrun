@@ -99,8 +99,8 @@ public class ResOrderGetByOwnerDTO {
                             .nickName(user.getNickName())
                             .phone(user.getPhone())
                             .zipcode(user.getAddress().getZipCode())
-                            .zipcode(user.getAddress().getAddress())
-                            .zipcode(user.getAddress().getAddressDetail())
+                            .address(user.getAddress().getAddress())
+                            .addressDetail(user.getAddress().getAddressDetail())
                             .build();
                 }
             }

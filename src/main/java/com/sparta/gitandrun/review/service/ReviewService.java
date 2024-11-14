@@ -30,7 +30,7 @@ public class ReviewService {
     //리뷰 작성
     public Review createReview(ReviewRequestDto requestDto, Long userId, Long orderId) {
         // userId로 User 객체 조회
-        User user = userRepository.findByUserId(userId)
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
 
         // orderId로 Order 객체 조회 및 완료된 주문인지 확인
