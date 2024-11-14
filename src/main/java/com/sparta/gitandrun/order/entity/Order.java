@@ -46,6 +46,7 @@ public class Order extends BaseEntity {
     public Order(User user, OrderStatus status, OrderType type) {
         this.user = user;
         this.orderStatus = status;
+        this.orderType = type;
     }
 
     public void addOrderMenus(List<OrderMenu> orderMenus) {
