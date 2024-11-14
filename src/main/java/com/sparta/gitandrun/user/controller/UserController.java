@@ -48,7 +48,7 @@ public class UserController {
     @PutMapping("/password")
     public ResponseEntity<ApiResDto> updatePassword(@AuthenticationPrincipal UserDetailsImpl userDetails, @RequestParam String password
     ) {
-        User user = userDetails.user();
+        User user = userDetails.getUser();
         userService.updatePassword(user, password);
         return ResponseEntity.ok(new ApiResDto("비밀번호가 성공적으로 변경되었습니다.", 200));
     }
