@@ -5,13 +5,15 @@ import com.sparta.gitandrun.menu.entity.Menu;
 import com.sparta.gitandrun.menu.repository.MenuRepository;
 import com.sparta.gitandrun.order.dto.req.CreateOrderReqDto;
 import com.sparta.gitandrun.order.dto.res.ResDto;
+import com.sparta.gitandrun.order.dto.res.ResOrderGetByCustomerDTO;
 import com.sparta.gitandrun.order.dto.res.ResOrderGetByIdDTO;
-import com.sparta.gitandrun.order.dto.res.ResOrderGetDTO;
+import com.sparta.gitandrun.order.dto.res.ResOrderGetByOwnerDTO;
 import com.sparta.gitandrun.order.entity.Order;
 import com.sparta.gitandrun.order.entity.OrderMenu;
 import com.sparta.gitandrun.order.repository.OrderMenuRepository;
 import com.sparta.gitandrun.order.repository.OrderRepository;
 import com.sparta.gitandrun.store.entity.Store;
+import com.sparta.gitandrun.store.repository.StoreRepository;
 import com.sparta.gitandrun.user.entity.User;
 import com.sparta.gitandrun.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -35,6 +37,7 @@ public class OrderService {
     private final OrderMenuRepository orderMenuRepository;
     private final MenuRepository menuRepository;
     private final UserRepository userRepository;
+    private final StoreRepository storeRepository;
 
     // 주문 생성
     @Transactional
@@ -49,8 +52,7 @@ public class OrderService {
             메뉴 조회 및 중복된 메뉴 개수 계산
         */
 
-        User findUser = userRepository.findById(dto.getUserId())
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 유저입니다."));
+        User findUser = getUserBy(dto.getUserId());
 
         List<Menu> findMenus = getMenus(dto);
 
@@ -72,12 +74,15 @@ public class OrderService {
         orderRepository.save(order);
     }
 
+    /*
+        Customer 본인 주문 내역 조회
+    */
     @Transactional(readOnly = true)
-    public ResponseEntity<ResDto<ResOrderGetDTO>> getBy(Long userId, Pageable pageable) {
+    public ResponseEntity<ResDto<ResOrderGetByCustomerDTO>> getByCustomer(User user, Pageable pageable) {
         /*
             주문 조회 : userId 를 기준으로
         */
-        Page<Order> findOrderPage = orderRepository.findByUser_UserIdAndIsDeletedFalse(userId, pageable);
+        Page<Order> findOrderPage = orderRepository.findByUser_UserIdAndIsDeletedFalse(user.getUserId(), pageable);
 
         /*
             주문 목록 조회 : 앞서 구한 order 의 id 를 기준으로
@@ -85,10 +90,30 @@ public class OrderService {
         List<OrderMenu> orderMenus = getOrderMenusBy(getIdsBy(findOrderPage));
 
         return new ResponseEntity<>(
-                ResDto.<ResOrderGetDTO>builder()
+                ResDto.<ResOrderGetByCustomerDTO>builder()
                         .code(HttpStatus.OK.value())
                         .message("주문 조회에 성공했습니다.")
-                        .data(ResOrderGetDTO.of(findOrderPage, orderMenus))
+                        .data(ResOrderGetByCustomerDTO.of(findOrderPage, orderMenus))
+                        .build(),
+                HttpStatus.OK
+        );
+    }
+
+    /*
+        Owner 본인 가게 주문 조회
+    */
+    @Transactional(readOnly = true)
+    public ResponseEntity<ResDto<ResOrderGetByOwnerDTO>> getByOwner(User user, Pageable pageable) {
+
+        List<OrderMenu> findOrderMenus = getOrderMenus(user);
+
+        Page<Order> findOrderPage = orderRepository.findByIdInAndIsDeletedFalse(getIdsBy(findOrderMenus), pageable);
+
+        return new ResponseEntity<>(
+                ResDto.<ResOrderGetByOwnerDTO>builder()
+                        .code(HttpStatus.OK.value())
+                        .message("주문 조회에 성공했습니다.")
+                        .data(ResOrderGetByOwnerDTO.of(findOrderPage, findOrderMenus))
                         .build(),
                 HttpStatus.OK
         );
@@ -193,4 +218,28 @@ public class OrderService {
                 ));
     }
 
+
+    /*
+        본인 가게 주문 조회 메서드
+    */
+    private static List<Long> getIdsBy(List<OrderMenu> findOrderMenus) {
+        return findOrderMenus.stream()
+                .map(orderMenu -> orderMenu.getOrder().getId())
+                .toList();
+    }
+
+    private List<OrderMenu> getOrderMenus(User user) {
+        List<Store> findStores = storeRepository.findByUser_UserId(user.getUserId());
+
+        List<UUID> storeIds = findStores.stream()
+                .map(Store::getStoreId)
+                .toList();
+
+        return orderMenuRepository.findOrderMenusByStoreIdIn(storeIds);
+    }
+
+    private User getUserBy(Long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 유저입니다."));
+    }
 }

@@ -4,17 +4,20 @@ import com.sparta.gitandrun.common.entity.ApiResDto;
 import com.sparta.gitandrun.order.dto.req.CreateOrderReqDto;
 import com.sparta.gitandrun.order.dto.res.ResDto;
 import com.sparta.gitandrun.order.dto.res.ResOrderGetByIdDTO;
-import com.sparta.gitandrun.order.dto.res.ResOrderGetDTO;
+import com.sparta.gitandrun.order.dto.res.ResOrderGetByCustomerDTO;
+import com.sparta.gitandrun.order.dto.res.ResOrderGetByOwnerDTO;
 import com.sparta.gitandrun.order.service.OrderService;
+import com.sparta.gitandrun.user.entity.Role;
+import com.sparta.gitandrun.user.security.UserDetailsImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RequestMapping("/order")
 @RestController
@@ -29,7 +32,9 @@ public class OrderController {
         2. 매개변수로 User 추가할 것
     */
     @PostMapping
-    public ResponseEntity<ApiResDto> createOrder(@RequestBody CreateOrderReqDto dto) {
+    public ResponseEntity<ApiResDto> createOrder(
+            @AuthenticationPrincipal UserDetailsImpl userDetails,
+            @RequestBody CreateOrderReqDto dto) {
 
         orderService.createOrder(dto);
 
@@ -42,19 +47,35 @@ public class OrderController {
        2. 추후, 주문 상태별 / 최신순 및 오래된 순 등 다양한 기준에 따라 정렬 및 조회 가능한 동적 쿼리 작성 예정
        3. @PathVariable 삭제하고 인증 객체를 받아 user 정보를 받은 예정
    */
-    @GetMapping("/{userId}")
-    public ResponseEntity<ResDto<ResOrderGetDTO>> readOrder(
-            @PathVariable("userId")Long userId,
+    @Secured("ROLE_CUSTOMER")
+    @GetMapping("/customer")
+    public ResponseEntity<ResDto<ResOrderGetByCustomerDTO>> getByCustomer(
+            @AuthenticationPrincipal UserDetailsImpl userDetails,
             @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
 
-        return orderService.getBy(userId, pageable);
+        return orderService.getByCustomer(userDetails.getUser(), pageable);
+    }
+
+    /*
+      본인 가게 주문 조회
+      1. 사장 권한의 유저가 본인 가게의 전체 주문 내역을 조회할 수 있음.
+  */
+
+    @Secured("ROLE_OWNER")
+    @GetMapping("/owner")
+    public ResponseEntity<ResDto<ResOrderGetByOwnerDTO>> getByOwner(
+            @AuthenticationPrincipal UserDetailsImpl userDetails,
+            @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+
+        System.out.println("사장 주문 조회");
+        return orderService.getByOwner(userDetails.getUser(), pageable);
     }
 
     /*
         주문 단일 및 상세 조회
     */
     @GetMapping("/{orderId}")
-    public ResponseEntity<ResDto<ResOrderGetByIdDTO>> getById(@PathVariable("orderId")Long orderId) {
+    public ResponseEntity<ResDto<ResOrderGetByIdDTO>> getById(@PathVariable("orderId") Long orderId) {
         return orderService.getBy(orderId);
     }
 

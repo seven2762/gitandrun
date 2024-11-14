@@ -2,6 +2,7 @@ package com.sparta.gitandrun.order.dto.res;
 
 import com.sparta.gitandrun.order.entity.Order;
 import com.sparta.gitandrun.order.entity.OrderMenu;
+import com.sparta.gitandrun.user.entity.User;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -19,18 +20,18 @@ import java.util.stream.Collectors;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ResOrderGetDTO {
+public class ResOrderGetByOwnerDTO {
 
     private OrderPage orderPage;
 
-    public static ResOrderGetDTO of(Page<Order> orderPage, List<OrderMenu> orderMenus) {
-        return ResOrderGetDTO.builder()
-                .orderPage(new OrderPage(orderPage, orderMenus))
+    public static ResOrderGetByOwnerDTO of(Page<Order> orderPage, List<OrderMenu> orderMenus) {
+        return ResOrderGetByOwnerDTO.builder()
+                .orderPage(new ResOrderGetByOwnerDTO.OrderPage(orderPage, orderMenus))
                 .build();
     }
 
     @Getter
-    public static class OrderPage extends PagedModel<OrderPage.OrderDTO> {
+    private static class OrderPage extends PagedModel<OrderPage.OrderDTO> {
 
         public OrderPage(Page<Order> orderPage, List<OrderMenu> orderMenus) {
             super(
@@ -42,16 +43,15 @@ public class ResOrderGetDTO {
             );
         }
 
-
         @Getter
         @Builder
         @NoArgsConstructor
         @AllArgsConstructor
-        public static class OrderDTO {
-
+        private static class OrderDTO {
             private Long orderId;
             private String status;
             private String type;
+            private Customer customer;
             private List<OrderMenuDTO> orderMenuDTOS;
             private int totalPrice;
 
@@ -63,13 +63,14 @@ public class ResOrderGetDTO {
 
             public static OrderDTO from(Order order, List<OrderMenu> orderMenus) {
 
-                List<OrderMenuDTO> orderMenuDTOS = OrderMenuDTO.from(orderMenus).get(order.getId());
+                List<OrderDTO.OrderMenuDTO> orderMenuDTOS = OrderMenuDTO.from(orderMenus).get(order.getId());
 
                 return OrderDTO.builder()
                         .orderId(order.getId())
                         .status(order.getOrderStatus().status)
                         .type(order.getOrderType().getType())
                         .orderMenuDTOS(orderMenuDTOS)
+                        .customer(Customer.from(order.getUser()))
                         .totalPrice(sumFrom(orderMenuDTOS))
                         .build();
             }
@@ -84,8 +85,31 @@ public class ResOrderGetDTO {
             @Builder
             @NoArgsConstructor
             @AllArgsConstructor
-            public static class OrderMenuDTO {
+            private static class Customer {
+                private long userId;
+                private String nickName;
+                private String phone;
+                private String zipcode;
+                private String address;
+                private String addressDetail;
 
+                private static Customer from(User user) {
+                    return Customer.builder()
+                            .userId(user.getUserId())
+                            .nickName(user.getNickName())
+                            .phone(user.getPhone())
+                            .zipcode(user.getAddress().getZipCode())
+                            .address(user.getAddress().getAddress())
+                            .addressDetail(user.getAddress().getAddressDetail())
+                            .build();
+                }
+            }
+
+            @Getter
+            @Builder
+            @NoArgsConstructor
+            @AllArgsConstructor
+            private static class OrderMenuDTO {
                 private Long orderMenuId;
                 private UUID menuId;
                 private String menuName;

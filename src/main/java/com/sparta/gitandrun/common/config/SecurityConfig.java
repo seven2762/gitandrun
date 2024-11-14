@@ -13,6 +13,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -29,6 +30,7 @@ import static org.springframework.security.access.hierarchicalroles.RoleHierarch
 @EnableWebSecurity
 @RequiredArgsConstructor
 @Slf4j
+@EnableMethodSecurity(securedEnabled = true)
 public class SecurityConfig {
 
    private final JwtUtil jwtUtil;
@@ -74,11 +76,6 @@ public class SecurityConfig {
                                "/user/signup",
                                "/user/login"
                        ).permitAll()
-                       .requestMatchers("/user/password").hasAnyRole("CUSTOMER","OWNER")
-                       .requestMatchers("/user/all").hasAnyRole("MANGER","ADMIN")
-                       .requestMatchers("/user/delete").hasRole("MANAGER")
-                       .requestMatchers("/admin/**").hasRole("MANAGER")
-                       .requestMatchers("/stores/**").hasAnyRole("OWNER", "MANAGER", "ADMIN")
                        .anyRequest().authenticated()
                )
                .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
