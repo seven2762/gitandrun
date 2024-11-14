@@ -4,7 +4,7 @@ import com.sparta.gitandrun.common.entity.ApiResDto;
 import com.sparta.gitandrun.order.dto.req.CreateOrderReqDto;
 import com.sparta.gitandrun.order.dto.res.ResDto;
 import com.sparta.gitandrun.order.dto.res.ResOrderGetByIdDTO;
-import com.sparta.gitandrun.order.dto.res.ResOrderGetDTO;
+import com.sparta.gitandrun.order.dto.res.ResOrderGetByCustomerDTO;
 import com.sparta.gitandrun.order.service.OrderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -13,8 +13,6 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RequestMapping("/order")
 @RestController
@@ -43,7 +41,7 @@ public class OrderController {
        3. @PathVariable 삭제하고 인증 객체를 받아 user 정보를 받은 예정
    */
     @GetMapping("/{userId}")
-    public ResponseEntity<ResDto<ResOrderGetDTO>> readOrder(
+    public ResponseEntity<ResDto<ResOrderGetByCustomerDTO>> readOrder(
             @PathVariable("userId")Long userId,
             @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
 

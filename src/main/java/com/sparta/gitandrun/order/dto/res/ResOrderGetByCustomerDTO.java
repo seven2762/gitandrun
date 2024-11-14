@@ -19,12 +19,12 @@ import java.util.stream.Collectors;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ResOrderGetDTO {
+public class ResOrderGetByCustomerDTO {
 
     private OrderPage orderPage;
 
-    public static ResOrderGetDTO of(Page<Order> orderPage, List<OrderMenu> orderMenus) {
-        return ResOrderGetDTO.builder()
+    public static ResOrderGetByCustomerDTO of(Page<Order> orderPage, List<OrderMenu> orderMenus) {
+        return ResOrderGetByCustomerDTO.builder()
                 .orderPage(new OrderPage(orderPage, orderMenus))
                 .build();
     }

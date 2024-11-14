@@ -6,7 +6,7 @@ import com.sparta.gitandrun.menu.repository.MenuRepository;
 import com.sparta.gitandrun.order.dto.req.CreateOrderReqDto;
 import com.sparta.gitandrun.order.dto.res.ResDto;
 import com.sparta.gitandrun.order.dto.res.ResOrderGetByIdDTO;
-import com.sparta.gitandrun.order.dto.res.ResOrderGetDTO;
+import com.sparta.gitandrun.order.dto.res.ResOrderGetByCustomerDTO;
 import com.sparta.gitandrun.order.entity.Order;
 import com.sparta.gitandrun.order.entity.OrderMenu;
 import com.sparta.gitandrun.order.repository.OrderMenuRepository;
@@ -73,7 +73,7 @@ public class OrderService {
     }
 
     @Transactional(readOnly = true)
-    public ResponseEntity<ResDto<ResOrderGetDTO>> getBy(Long userId, Pageable pageable) {
+    public ResponseEntity<ResDto<ResOrderGetByCustomerDTO>> getBy(Long userId, Pageable pageable) {
         /*
             주문 조회 : userId 를 기준으로
         */
@@ -85,10 +85,10 @@ public class OrderService {
         List<OrderMenu> orderMenus = getOrderMenusBy(getIdsBy(findOrderPage));
 
         return new ResponseEntity<>(
-                ResDto.<ResOrderGetDTO>builder()
+                ResDto.<ResOrderGetByCustomerDTO>builder()
                         .code(HttpStatus.OK.value())
                         .message("주문 조회에 성공했습니다.")
-                        .data(ResOrderGetDTO.of(findOrderPage, orderMenus))
+                        .data(ResOrderGetByCustomerDTO.of(findOrderPage, orderMenus))
                         .build(),
                 HttpStatus.OK
         );
