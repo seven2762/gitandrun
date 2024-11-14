@@ -139,7 +139,7 @@ public class StoreService {
 
     // 유저 조회 메서드
     private User getUser(Long userId) {
-        return userRepository.findByUserId(userId)
+        return userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
     }
 
@@ -199,6 +199,18 @@ public class StoreService {
 
         store.setUpdatedBy(userId);
         store.setUpdatedAt(LocalDateTime.now());
+    }
+
+    // 지역 이름으로 가게 조회
+    public List<?> getStoresByRegionName(Long userId, String regionName) {
+        User user = getUser(userId);
+
+        // 지역 이름으로 가게 검색
+        List<Store> stores = storeRepository.findByRegionName(regionName);
+
+        return stores.stream()
+                .map(store -> user.getRole() == Role.ADMIN ? new FullStoreResponse(store) : new LimitedStoreResponse(store))
+                .collect(Collectors.toList());
     }
 
 }
