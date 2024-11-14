@@ -2,11 +2,9 @@ package com.sparta.gitandrun.user.entity;
 
 
 import lombok.Getter;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
-import java.util.Collections;
-import java.util.EnumMap;
-import java.util.List;
-import java.util.Map;
+
 
 //enum은 @RequiredArgsConstructor 사용 불가
 //@RequiredArgsConstructor는 객체 생성 시점에 동작
@@ -14,27 +12,21 @@ import java.util.Map;
 
 @Getter
 public enum Role {
-    MANAGER("ROLE_MANAGER"),
-    ADMIN("ROLE_ADMIN"),
+
     OWNER("ROLE_OWNER"),
-    CUSTOMER("ROLE_CUSTOMER");
+    CUSTOMER("ROLE_CUSTOMER"),
+    ADMIN("ROLE_ADMIN"),
+    MANAGER("ROLE_MANAGER");
 
     private final String role;
-    private static final Map<Role, List<Role>> ROLE_LEVELS = new EnumMap<>(Role.class);
 
-    static {
-        ROLE_LEVELS.put(MANAGER, List.of(ADMIN, OWNER, CUSTOMER));
-        ROLE_LEVELS.put(ADMIN, List.of(OWNER, CUSTOMER));
-        ROLE_LEVELS.put(OWNER, Collections.emptyList());
-        ROLE_LEVELS.put(CUSTOMER, Collections.emptyList());
-    }
 
     Role(String role) {
         this.role = role;
     }
 
-    public List<Role> getIncludeRoles() {
-        return ROLE_LEVELS.getOrDefault(this, Collections.emptyList());
+    public SimpleGrantedAuthority toAuthority() {
+        return new SimpleGrantedAuthority(role);
     }
 }
 
