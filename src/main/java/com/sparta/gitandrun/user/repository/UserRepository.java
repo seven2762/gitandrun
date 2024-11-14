@@ -18,5 +18,5 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     @Query("select u from User u where u.isDeleted = false and u.phone = :phone")
     Optional<User> findActiveUserByPhone(@Param("phone") String phone);
-
+    Optional<User> findByEmail(String email);
 }

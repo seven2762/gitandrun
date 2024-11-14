@@ -6,7 +6,6 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.util.List;
-import java.util.UUID;
 
 @Entity
 @Getter
@@ -56,8 +55,9 @@ public class User extends BaseEntity {
     }
 
 
-    public void updatePassword(String password) {
+    public void updatePassword(String password, String updatedBy) {
         this.password = password;
+        setUpdatedBy(updatedBy);
     }
 
     public void softDelete() {
