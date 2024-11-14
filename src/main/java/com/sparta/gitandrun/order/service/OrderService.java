@@ -5,11 +5,13 @@ import com.sparta.gitandrun.menu.entity.Menu;
 import com.sparta.gitandrun.menu.repository.MenuRepository;
 import com.sparta.gitandrun.order.dto.req.CreateOrderReqDto;
 import com.sparta.gitandrun.order.dto.res.ResDto;
+import com.sparta.gitandrun.order.dto.res.ResOrderGetByIdDTO;
 import com.sparta.gitandrun.order.dto.res.ResOrderGetDTO;
 import com.sparta.gitandrun.order.entity.Order;
 import com.sparta.gitandrun.order.entity.OrderMenu;
 import com.sparta.gitandrun.order.repository.OrderMenuRepository;
 import com.sparta.gitandrun.order.repository.OrderRepository;
+import com.sparta.gitandrun.store.entity.Store;
 import com.sparta.gitandrun.user.entity.User;
 import com.sparta.gitandrun.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -82,7 +84,6 @@ public class OrderService {
         */
         List<OrderMenu> orderMenus = getOrderMenusBy(getIdsBy(findOrderPage));
 
-
         return new ResponseEntity<>(
                 ResDto.<ResOrderGetDTO>builder()
                         .code(HttpStatus.OK.value())
@@ -93,6 +94,32 @@ public class OrderService {
         );
     }
 
+    /*
+        주문 단일 및 상세 조회
+    */
+    @Transactional(readOnly = true)
+    public ResponseEntity<ResDto<ResOrderGetByIdDTO>> getBy(Long orderId) {
+
+        Order findOrder = getFindOrder(orderId);
+
+        List<OrderMenu> findOrderMenus = orderMenuRepository.findByOrderId(orderId);
+
+        Store store = findOrderMenus.get(0).getMenu().getStore();
+
+        return new ResponseEntity<>(
+                ResDto.<ResOrderGetByIdDTO>builder()
+                        .code(HttpStatus.OK.value())
+                        .message("주문 조회에 성공했습니다.")
+                        .data(ResOrderGetByIdDTO.of(findOrder, findOrderMenus, store))
+                        .build(),
+                HttpStatus.OK
+        );
+    }
+
+    private Order getFindOrder(Long orderId) {
+        return orderRepository.findById(orderId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 항목입니다."));
+    }
 
     private List<OrderMenu> getOrderMenusBy(List<Long> orderIds) {
         return orderMenuRepository.findByOrderIds(orderIds);
@@ -103,6 +130,7 @@ public class OrderService {
                 .map(Order::getId)
                 .toList();
     }
+
 
     // 주문 취소
     @Transactional
