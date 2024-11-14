@@ -30,8 +30,7 @@ public class ReviewService {
     //리뷰 작성
     public Review createReview(ReviewRequestDto requestDto, Long userId, Long orderId) {
         // userId로 User 객체 조회
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+        User user = getUser(userId);
 
         // orderId로 Order 객체 조회 및 완료된 주문인지 확인
         Order order = orderRepository.findByIdAndOrderStatus(orderId, OrderStatus.COMPLETED)
@@ -61,16 +60,14 @@ public class ReviewService {
 
     //리뷰 단일 조회
     public ReviewResponseDto getOneReview(UUID reviewId) {
-        Review review = reviewRepository.findById(reviewId)
-                .orElseThrow(() -> new IllegalArgumentException("리뷰를 찾을 수 없습니다."));
+        Review review = getReview(reviewId);
         return new ReviewResponseDto(review);
     }
 
     //리뷰 수정
     @Transactional
     public void updateReview(UUID reviewId, ReviewRequestDto requestDto) {
-        Review review = reviewRepository.findById(reviewId)
-                .orElseThrow(() -> new IllegalArgumentException("리뷰가 존재하지 않습니다."));
+        Review review = getReview(reviewId);
 
         if (requestDto.getReviewContent() != null && !requestDto.getReviewContent().isEmpty()) {
             review.setReviewContent(requestDto.getReviewContent());
@@ -89,5 +86,17 @@ public class ReviewService {
                 .orElseThrow(() -> new IllegalArgumentException("리뷰가 존재하지 않습니다."));
         review.setDeleted(true);
         reviewRepository.save(review);
+    }
+
+    //사용자 확인
+    private User getUser(Long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+    }
+
+    //리뷰 확인
+    private Review getReview(UUID reviewId) {
+        return reviewRepository.findById(reviewId)
+                .orElseThrow(() -> new IllegalArgumentException("리뷰를 찾을 수 없습니다."));
     }
 }
