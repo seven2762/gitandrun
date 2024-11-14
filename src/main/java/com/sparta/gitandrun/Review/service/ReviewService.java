@@ -5,7 +5,9 @@ import com.sparta.gitandrun.Review.dto.ReviewResponseDto;
 import com.sparta.gitandrun.Review.entity.Review;
 import com.sparta.gitandrun.Review.repository.ReviewRepository;
 import com.sparta.gitandrun.order.entity.Order;
+import com.sparta.gitandrun.order.entity.OrderMenu;
 import com.sparta.gitandrun.order.entity.OrderStatus;
+import com.sparta.gitandrun.order.repository.OrderMenuRepository;
 import com.sparta.gitandrun.order.repository.OrderRepository;
 import com.sparta.gitandrun.store.entity.Store;
 import com.sparta.gitandrun.store.repository.StoreRepository;
@@ -26,6 +28,7 @@ public class ReviewService {
     private final UserRepository userRepository;
     private final OrderRepository orderRepository;
     private final StoreRepository storeRepository;
+    private final OrderMenuRepository orderMenuRepository;
 
     //리뷰 작성
     public Review createReview(ReviewRequestDto requestDto, Long userId, Long orderId) {
@@ -42,8 +45,11 @@ public class ReviewService {
             throw new IllegalArgumentException("이미 리뷰가 작성된 주문입니다.");
         }
 
-        // 주문에 포함된 메뉴들을 통해 storeId 가져오기
-        UUID storeId = order.getOrderMenus().get(0).getMenu().getStore().getStoreId();
+        //orderId에 맞는 주문 메뉴 가져오기
+        List<OrderMenu> orderMenus = orderMenuRepository.findByOrderId(orderId);
+
+        //가게 정보 가져오기
+        UUID storeId = orderMenus.get(0).getMenu().getStore().getStoreId();
 
         // storeId를 통해 존재하는 가게인지 확인
         Store store = storeRepository.findById(storeId)
