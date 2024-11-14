@@ -1,18 +1,23 @@
 package com.sparta.gitandrun.user.security;
 
-import com.sparta.gitandrun.user.entity.Role;
 import com.sparta.gitandrun.user.entity.User;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 
 import java.util.Collection;
-import java.util.stream.Stream;
+import java.util.Collections;
 
 
-public record UserDetailsImpl(User user) implements UserDetails {
+@RequiredArgsConstructor
+@Getter
+public class UserDetailsImpl implements UserDetails {
+
+    private final User user;
+
+
 
     @Override
     public String getPassword() {
@@ -26,14 +31,9 @@ public record UserDetailsImpl(User user) implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        Role userRole = user.getRole();
-        return Stream.concat(
-                        Stream.of(userRole),
-                        userRole.getIncludeRoles().stream()
-                )
-                .map(role -> new SimpleGrantedAuthority(role.getRole()))
-                .toList();
+        return Collections.singleton(user.getRole().toAuthority());
     }
+
     @Override
     public boolean isAccountNonExpired() {
         return true;
