@@ -16,7 +16,7 @@ public class AiDto {
     private String question;
     private String answer;
 
-    private List<AiDto> aiList = new ArrayList<>();
+
 
     public AiDto(Ai ai) {
         this.question = ai.getQuestion();
