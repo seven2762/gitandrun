@@ -67,7 +67,7 @@ public class ReviewService {
     //userId로 조회
     public List<ReviewResponseDto> getReviewsByUser(Long userId) {
         User user = getUser(userId);
-        List<Review> reviews = reviewRepository.findById(userId);
+        List<Review> reviews = reviewRepository.findByUser(user);
         return reviews.stream()
                 .map(ReviewResponseDto::new)
                 .collect(Collectors.toList());
