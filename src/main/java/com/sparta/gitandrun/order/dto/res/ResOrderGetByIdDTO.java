@@ -37,13 +37,16 @@ public class ResOrderGetByIdDTO {
     @AllArgsConstructor
     private static class StoreDTO {
         private UUID storeId;
+        private String zipcode;
         private String address;
         private String addressDetail;
-        private String zipcode;
 
         private static StoreDTO from(Store store) {
             return StoreDTO.builder()
                     .storeId(store.getStoreId())
+                    .zipcode(store.getAddress().getZipCode())
+                    .address(store.getAddress().getAddress())
+                    .addressDetail(store.getAddress().getAddressDetail())
                     .build();
         }
     }
