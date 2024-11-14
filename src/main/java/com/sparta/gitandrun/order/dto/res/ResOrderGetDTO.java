@@ -1,9 +1,11 @@
 package com.sparta.gitandrun.order.dto.res;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.sparta.gitandrun.order.entity.Order;
 import com.sparta.gitandrun.order.entity.OrderMenu;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.web.PagedModel;
@@ -39,6 +41,7 @@ public class ResOrderGetDTO {
                     )
             );
         }
+
 
         @Getter
         @Builder
@@ -83,30 +86,25 @@ public class ResOrderGetDTO {
             @AllArgsConstructor
             public static class OrderMenuDTO {
 
-                @JsonIgnore
-                private Long orderId;
                 private Long orderMenuId;
                 private UUID menuId;
                 private String menuName;
                 private int menuPrice;
                 private int count;
 
-                public static Map<Long, List<OrderMenuDTO>> from(List<OrderMenu> orderMenus) {
-                    List<OrderMenuDTO> list = getOrderMenuDTOS(orderMenus);
-
-                    return list.stream()
-                            .collect(Collectors.groupingBy(orderMenuDTO -> orderMenuDTO.orderId));
-                }
-
-                private static List<OrderMenuDTO> getOrderMenuDTOS(List<OrderMenu> orderMenus) {
+                private static Map<Long, List<OrderMenuDTO>> from(List<OrderMenu> orderMenus) {
                     return orderMenus.stream()
-                            .map(OrderMenuDTO::from)
-                            .toList();
+                            .collect(Collectors.groupingBy(
+                                    orderMenu -> orderMenu.getOrder().getId(),
+                                    Collectors.mapping(
+                                            OrderMenuDTO::from,
+                                            Collectors.toList()
+                                    )
+                            ));
                 }
 
                 public static OrderMenuDTO from(OrderMenu orderMenu) {
                     return OrderMenuDTO.builder()
-                            .orderId(orderMenu.getOrder().getId())
                             .orderMenuId(orderMenu.getId())
                             .menuId(orderMenu.getMenu().getMenuId())
                             .menuName(orderMenu.getMenu().getMenuName())
