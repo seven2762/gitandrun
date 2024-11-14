@@ -1,11 +1,9 @@
-package com.sparta.gitandrun.user.dto;
+package com.sparta.gitandrun.user.dto.response;
 
 import com.sparta.gitandrun.user.entity.Address;
 import com.sparta.gitandrun.user.entity.User;
 import lombok.Builder;
 import lombok.Getter;
-
-import java.util.UUID;
 
 @Getter
 @Builder
