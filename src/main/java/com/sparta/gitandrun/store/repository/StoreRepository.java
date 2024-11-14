@@ -24,4 +24,12 @@ public interface StoreRepository extends JpaRepository<Store, UUID> {
 
     @Query("SELECT s FROM Store s WHERE s.storeName LIKE %:keyword% OR s.address.address LIKE %:keyword%")
     Page<Store> searchByKeyword(@Param("keyword") String keyword, Pageable pageable);
+
+    // 지역 이름으로 가게 검색
+    @Query("SELECT s FROM Store s WHERE s.region.regionName LIKE %:regionName%")
+    List<Store> findByRegionName(@Param("regionName") String regionName);
+
+    // 페이징 처리와 함께 지역 이름으로 가게 검색
+    @Query("SELECT s FROM Store s WHERE s.region.regionName LIKE %:regionName%")
+    Page<Store> findByRegionNameWithPagination(@Param("regionName") String regionName, Pageable pageable);
 }
