@@ -5,7 +5,6 @@ import com.sparta.gitandrun.googleAi.service.AiService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.IOException;
 import java.util.List;
 
 @RestController
