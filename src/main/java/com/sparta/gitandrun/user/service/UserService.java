@@ -47,7 +47,7 @@ public class UserService {
                         signUpReqDTO.getAddressReq().getAddressDetail(),
                         signUpReqDTO.getAddressReq().getZipcode()
                 ))
-                .role(Role.CUSTOMER) // 테스트 위해 기본값 고객으로 설정, 추후 수정
+                .role(Role.CUSTOMER)
                 .phone(signUpReqDTO.getPhone())
 
                 .build();
@@ -60,19 +60,16 @@ public class UserService {
     public LoginResDto login(LoginReqDto loginReqDTO) {
         User user = userRepository.findByEmail(loginReqDTO.getEmail())
                 .orElseThrow(() -> new UserException(ErrorCode.USER_NOT_FOUND));
-
         if (!passwordEncoder.matches(loginReqDTO.getPassword(), user.getPassword())) {
             throw new UserException(ErrorCode.INVALID_PASSWORD);
         }
-
         if (user.isDeleted()) {
             throw new UserException(ErrorCode.USER_NOT_FOUND);
         }
-
-
         return LoginResDto.of(user, jwtUtil.createToken(user.getEmail(), user.getRole()));
     }
-    //전체 회원 목록 조회
+
+
     public List<UserResDTO> getAllActiveUsers() {
         List<User> activeUsers = userRepository.findAllActiveUsers();
         return activeUsers.stream()
@@ -80,7 +77,6 @@ public class UserService {
                 .collect(Collectors.toList());
     }
 
-    //비밀번호 변경
     @Transactional
     public void updatePassword(User user, String password) {
         String encodedPassword = passwordEncoder.encode(password);
