@@ -49,6 +49,13 @@ public class ReviewController {
         return ResponseEntity.ok(review);
     }
 
+    //userId로 조회
+    @GetMapping("/{userId}")
+    public ResponseEntity<List<ReviewResponseDto>> getReviewsByUser(@PathVariable Long userId) {
+        List<ReviewResponseDto> reviews = reviewService.getReviewsByUser(userId);
+        return ResponseEntity.ok(reviews);
+    }
+
     //리뷰 수정
     @PatchMapping("/{reviewId}")
     public ResponseEntity<String> updateReview(@PathVariable UUID reviewId,

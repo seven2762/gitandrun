@@ -58,10 +58,19 @@ public class ReviewService {
                 .collect(Collectors.toList());
     }
 
-    //리뷰 단일 조회
+    //리뷰 아이디로 조회
     public ReviewResponseDto getOneReview(UUID reviewId) {
         Review review = getReview(reviewId);
         return new ReviewResponseDto(review);
+    }
+
+    //userId로 조회
+    public List<ReviewResponseDto> getReviewsByUser(Long userId) {
+        User user = getUser(userId);
+        List<Review> reviews = reviewRepository.findById(userId);
+        return reviews.stream()
+                .map(ReviewResponseDto::new)
+                .collect(Collectors.toList());
     }
 
     //리뷰 수정
