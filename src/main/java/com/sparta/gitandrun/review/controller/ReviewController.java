@@ -1,9 +1,9 @@
-package com.sparta.gitandrun.Review.controller;
+package com.sparta.gitandrun.review.controller;
 
-import com.sparta.gitandrun.Review.dto.ReviewRequestDto;
-import com.sparta.gitandrun.Review.dto.ReviewResponseDto;
-import com.sparta.gitandrun.Review.entity.Review;
-import com.sparta.gitandrun.Review.service.ReviewService;
+import com.sparta.gitandrun.review.dto.ReviewRequestDto;
+import com.sparta.gitandrun.review.dto.ReviewResponseDto;
+import com.sparta.gitandrun.review.entity.Review;
+import com.sparta.gitandrun.review.service.ReviewService;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;

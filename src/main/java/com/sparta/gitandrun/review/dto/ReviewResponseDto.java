@@ -1,6 +1,6 @@
-package com.sparta.gitandrun.Review.dto;
+package com.sparta.gitandrun.review.dto;
 
-import com.sparta.gitandrun.Review.entity.Review;
+import com.sparta.gitandrun.review.entity.Review;
 import java.time.LocalDateTime;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
@@ -25,7 +25,7 @@ public class ReviewResponseDto {
         this.reviewId = review.getReviewId();
         this.userId = review.getUser().getUserId();
         this.orderId = review.getOrder().getId();
-        this.storeId = review.getStore().getStoreId();
+        this.storeId = review.getStoreId();
         this.reviewContent = review.getReviewContent();
         this.reviewRating = review.getReviewRating();
         this.createdAt = review.getCreatedAt();

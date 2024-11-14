@@ -1,6 +1,6 @@
-package com.sparta.gitandrun.Review.repository;
+package com.sparta.gitandrun.review.repository;
 
-import com.sparta.gitandrun.Review.entity.Review;
+import com.sparta.gitandrun.review.entity.Review;
 import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.UUID;
 
