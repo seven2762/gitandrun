@@ -1,5 +1,6 @@
 package com.sparta.gitandrun.common.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sparta.gitandrun.user.jwt.JwtAuthenticationFilter;
 import com.sparta.gitandrun.user.jwt.JwtAuthorizationFilter;
 import com.sparta.gitandrun.user.jwt.JwtUtil;
@@ -9,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -16,9 +18,12 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+import java.util.Map;
+
+import static org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl.fromHierarchy;
 
 @Configuration
 @EnableWebSecurity
@@ -46,8 +51,12 @@ public class SecurityConfig {
        filter.setAuthenticationManager(authenticationManager(authenticationConfiguration));
        return filter;
    }
+    @Bean
+    RoleHierarchy roleHierarchy() {
+        return fromHierarchy("ROLE_MANAGER > ROLE_ADMIN > ROLE_OWNER > ROLE_CUSTOMER");
+    }
 
-   @Bean
+    @Bean
    public JwtAuthorizationFilter jwtAuthorizationFilter() {
        return new JwtAuthorizationFilter(jwtUtil, userDetailsService);
    }
@@ -80,10 +89,10 @@ public class SecurityConfig {
                            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                            response.setContentType("application/json;charset=UTF-8");
 
-                           String jsonResponse = String.format(
-                                   "{\"code\":\"%s\",\"message\":\"%s\"}",
-                                   "UNAUTHORIZED",
-                                   "인증되지 않은 요청입니다."
+                           ObjectMapper objectMapper = new ObjectMapper();
+                           String jsonResponse = objectMapper.writeValueAsString(Map.of
+                                   ("code", "FORBIDDEN",
+                                   "message", "접근 권한이 없습니다.")
                            );
 
                            response.getWriter().write(jsonResponse);
@@ -93,11 +102,10 @@ public class SecurityConfig {
                            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
                            response.setContentType("application/json;charset=UTF-8");
 
-                           String jsonResponse = String.format(
-                                   "{\"code\":\"%s\",\"message\":\"%s\"}",
-                                   "FORBIDDEN",
-                                   "접근 권한이 없습니다."
-                           );
+
+                           ObjectMapper objectMapper = new ObjectMapper();
+                           String jsonResponse = objectMapper.writeValueAsString(Map.of("code", "FORBIDDEN",
+                                           "message", "접근 권한이 없습니다."));
 
                            response.getWriter().write(jsonResponse);
                        })
