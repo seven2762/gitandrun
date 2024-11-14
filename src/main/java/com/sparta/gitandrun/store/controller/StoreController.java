@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -117,6 +118,20 @@ public class StoreController {
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body(new ApiResDto("검색 권한이 없습니다.", HttpStatus.FORBIDDEN.value()));
+        }
+    }
+
+    // 지역 이름으로 가게 조회
+    @GetMapping("/search/region")
+    public ResponseEntity<ApiResDto> getStoresByRegionName(
+            @RequestParam Long userId,
+            @RequestParam String regionName) {
+        try {
+            List<?> stores = storeService.getStoresByRegionName(userId, regionName);
+            return ResponseEntity.ok(new ApiResDto("가게 목록 조회 성공", 200, stores));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(404)
+                    .body(new ApiResDto("가게 목록 조회 실패: " + e.getMessage(), 404));
         }
     }
 }
