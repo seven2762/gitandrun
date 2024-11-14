@@ -1,5 +1,6 @@
 package com.sparta.gitandrun.common.entity;
 
+import com.sparta.gitandrun.user.entity.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -40,5 +41,13 @@ public class BaseEntity {
 
     protected void setCreatedBy(String createdBy) {
         this.createdBy = createdBy;
+    }
+    protected void setUpdatedBy(String updatedBy) {
+        this.updatedBy = updatedBy;
+    }
+
+    protected void initAuditInfo(User user) {
+        this.createdBy = user.getUsername();
+        this.updatedBy = user.getUsername();
     }
 }
