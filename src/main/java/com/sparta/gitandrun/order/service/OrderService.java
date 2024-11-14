@@ -4,8 +4,8 @@ package com.sparta.gitandrun.order.service;
 import com.sparta.gitandrun.menu.entity.Menu;
 import com.sparta.gitandrun.menu.repository.MenuRepository;
 import com.sparta.gitandrun.order.dto.req.CreateOrderReqDto;
-import com.sparta.gitandrun.order.dto.res.OrderMenuResDto;
-import com.sparta.gitandrun.order.dto.res.OrderResDto;
+import com.sparta.gitandrun.order.dto.res.ResDto;
+import com.sparta.gitandrun.order.dto.res.ResOrderGetDTO;
 import com.sparta.gitandrun.order.entity.Order;
 import com.sparta.gitandrun.order.entity.OrderMenu;
 import com.sparta.gitandrun.order.repository.OrderMenuRepository;
@@ -13,6 +13,10 @@ import com.sparta.gitandrun.order.repository.OrderRepository;
 import com.sparta.gitandrun.user.entity.User;
 import com.sparta.gitandrun.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -67,55 +71,42 @@ public class OrderService {
     }
 
     @Transactional(readOnly = true)
-    public List<OrderResDto> getBy(Long userId) {
+    public ResponseEntity<ResDto<ResOrderGetDTO>> getBy(Long userId, Pageable pageable) {
+        /*
+            주문 조회 : userId 를 기준으로
+        */
+        Page<Order> findOrderPage = orderRepository.findByUser_UserIdAndIsDeletedFalse(userId, pageable);
 
-        List<Order> findOrders = orderRepository.findByUserId(userId);
+        /*
+            주문 목록 조회 : 앞서 구한 order 의 id 를 기준으로
+        */
+        List<OrderMenu> orderMenus = getOrderMenusBy(getIdsBy(findOrderPage));
 
-        List<Long> orderIds = findOrders.stream()
+
+        return new ResponseEntity<>(
+                ResDto.<ResOrderGetDTO>builder()
+                        .code(HttpStatus.OK.value())
+                        .message("주문 조회에 성공했습니다.")
+                        .data(ResOrderGetDTO.of(findOrderPage, orderMenus))
+                        .build(),
+                HttpStatus.OK
+        );
+    }
+
+
+    private List<OrderMenu> getOrderMenusBy(List<Long> orderIds) {
+        return orderMenuRepository.findByOrderIds(orderIds);
+    }
+
+    private static List<Long> getIdsBy(Page<Order> orders) {
+        return orders.getContent().stream()
                 .map(Order::getId)
                 .toList();
-
-        List<OrderMenu> findOrderMenus = orderMenuRepository.findByOrderIds(orderIds);
-
-        List<OrderResDto> orderResDtos = getOrderResDtos(findOrders);
-
-        List<OrderMenuResDto> orderMenuResDtos = getOrderMenuResDtos(findOrderMenus);
-
-        Map<Long, List<OrderMenuResDto>> orderMenusMap = orderMenuResDtos.stream()
-                .collect(Collectors.groupingBy(OrderMenuResDto::getOrderId));
-
-        orderResDtos.forEach(orderResDto -> orderResDto.setOrderMenuResDtos(orderMenusMap.get(orderResDto.getOrderId())));
-
-        return orderResDtos;
     }
 
-    private static List<OrderMenuResDto> getOrderMenuResDtos(List<OrderMenu> findOrderMenus) {
-        return findOrderMenus.stream()
-                .map(orderMenu ->
-                        OrderMenuResDto.builder()
-                                .orderId(orderMenu.getOrder().getId())
-                                .orderMenuId(orderMenu.getId())
-                                .menuId(orderMenu.getMenu().getMenuId())
-                                .menuName(orderMenu.getMenu().getMenuName())
-                                .menuPrice(orderMenu.getMenu().getMenuPrice())
-                                .count(orderMenu.getOrderCount())
-                                .build()
-                )
-                .toList();
-    }
-
-    private static List<OrderResDto> getOrderResDtos(List<Order> findOrders) {
-        List<OrderResDto> orderResDtos = findOrders.stream()
-                .map(order ->
-                        OrderResDto.builder()
-                                .orderId(order.getId())
-                                .type(order.getOrderType().getType())
-                                .status(order.getOrderStatus().status)
-                                .build()
-                )
-                .toList();
-        return orderResDtos;
-    }
+//    private List<Order> getOrdersBy(Long userId) {
+//        return orderRepository.findByUserId(userId);
+//    }
 
     // 주문 취소
     @Transactional

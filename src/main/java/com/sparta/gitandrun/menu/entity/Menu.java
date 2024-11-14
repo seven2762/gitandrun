@@ -2,7 +2,7 @@ package com.sparta.gitandrun.menu.entity;
 
 import com.sparta.gitandrun.common.entity.BaseEntity;
 import com.sparta.gitandrun.menu.dto.MenuRequestDto;
-import com.sparta.gitandrun.store.entity.Store;
+import com.sparta.gitandrun.store.entity.*;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

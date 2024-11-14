@@ -1,6 +1,6 @@
 package com.sparta.gitandrun.store.dto;
 
-import com.sparta.gitandrun.store.entity.Category;
+import com.sparta.gitandrun.category.entity.Category;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 

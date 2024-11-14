@@ -27,7 +27,7 @@ public class FullStoreResponse {
 
     public FullStoreResponse(Store store) {
         this.storeId = store.getStoreId();
-        this.categoryId = store.getCategory().getUuid();
+        this.categoryId = store.getCategory().getId();
         this.storeName = store.getStoreName();
         this.phone = store.getPhone();
         this.category = store.getCategory().toString();
