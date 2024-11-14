@@ -11,7 +11,6 @@ import com.sparta.gitandrun.store.entity.Store;
 import com.sparta.gitandrun.store.repository.StoreRepository;
 import com.sparta.gitandrun.user.entity.User;
 import com.sparta.gitandrun.user.repository.UserRepository;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -81,8 +80,6 @@ public class ReviewService {
         if (requestDto.getReviewRating() != null) {
             review.setReviewRating(requestDto.getReviewRating());
         }
-
-        review.setUpdatedAt(LocalDateTime.now());
         reviewRepository.save(review);
     }
 
