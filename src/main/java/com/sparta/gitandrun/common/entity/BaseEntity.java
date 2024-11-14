@@ -1,8 +1,10 @@
 package com.sparta.gitandrun.common.entity;
 
-import com.sparta.gitandrun.user.entity.User;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -28,21 +30,15 @@ public class BaseEntity {
     @Temporal(TemporalType.TIMESTAMP)
     private LocalDateTime deletedAt;
 
-    @Column(nullable = false)
+    @Column
     private String createdBy;
 
-    @Column(nullable = false)
+    @Column
     private String updatedBy;
-
     @Column
     private String deletedBy;
 
     protected void setCreatedBy(String createdBy) {
         this.createdBy = createdBy;
-    }
-
-    protected void initAuditInfo(User user) {
-        this.createdBy = user.getUsername();
-        this.updatedBy = user.getUsername();
     }
 }
