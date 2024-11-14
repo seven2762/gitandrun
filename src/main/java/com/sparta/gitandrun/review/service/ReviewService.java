@@ -1,16 +1,14 @@
-package com.sparta.gitandrun.Review.service;
+package com.sparta.gitandrun.review.service;
 
-import com.sparta.gitandrun.Review.dto.ReviewRequestDto;
-import com.sparta.gitandrun.Review.dto.ReviewResponseDto;
-import com.sparta.gitandrun.Review.entity.Review;
-import com.sparta.gitandrun.Review.repository.ReviewRepository;
+import com.sparta.gitandrun.review.dto.ReviewRequestDto;
+import com.sparta.gitandrun.review.dto.ReviewResponseDto;
+import com.sparta.gitandrun.review.entity.Review;
+import com.sparta.gitandrun.review.repository.ReviewRepository;
 import com.sparta.gitandrun.order.entity.Order;
 import com.sparta.gitandrun.order.entity.OrderMenu;
 import com.sparta.gitandrun.order.entity.OrderStatus;
 import com.sparta.gitandrun.order.repository.OrderMenuRepository;
 import com.sparta.gitandrun.order.repository.OrderRepository;
-import com.sparta.gitandrun.store.entity.Store;
-import com.sparta.gitandrun.store.repository.StoreRepository;
 import com.sparta.gitandrun.user.entity.User;
 import com.sparta.gitandrun.user.repository.UserRepository;
 import java.util.List;
@@ -27,7 +25,6 @@ public class ReviewService {
     private final ReviewRepository reviewRepository;
     private final UserRepository userRepository;
     private final OrderRepository orderRepository;
-    private final StoreRepository storeRepository;
     private final OrderMenuRepository orderMenuRepository;
 
     //리뷰 작성
@@ -51,11 +48,7 @@ public class ReviewService {
         //가게 정보 가져오기
         UUID storeId = orderMenus.get(0).getMenu().getStore().getStoreId();
 
-        // storeId를 통해 존재하는 가게인지 확인
-        Store store = storeRepository.findById(storeId)
-                .orElseThrow(() -> new IllegalArgumentException("가게를 찾을 수 없습니다."));
-
-        Review review = new Review(requestDto, user, store, order);
+        Review review = new Review(requestDto, user, storeId, order);
         return reviewRepository.save(review);
     }
 
