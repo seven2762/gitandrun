@@ -5,6 +5,7 @@ import com.sparta.gitandrun.menu.dto.MenuResponseDto;
 import com.sparta.gitandrun.menu.entity.Menu;
 import com.sparta.gitandrun.menu.repository.MenuRepository;
 import com.sparta.gitandrun.store.entity.Store;
+import com.sparta.gitandrun.store.repository.StoreRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -21,25 +22,21 @@ import java.util.List;
 public class MenuService {
 
     private final MenuRepository menuRepository;
+    private final StoreRepository storeRepository;
 
     //CREATE
     public MenuResponseDto createMenu(MenuRequestDto requestDto) {
-        Menu menu = menuRepository.save(new Menu(requestDto));
+
+        //가게 정보 조회 후 가게가 존재하지 않을 경우 예외 발생
+        Store store = storeRepository.findById(requestDto.getStoreId())
+            .orElseThrow(() -> new IllegalArgumentException("가게를 찾을 수 없습니다."));
+
+        //메뉴에 저장
+        Menu menu = menuRepository.save(new Menu(requestDto, store));
+        System.out.println("StoreID는 !!! : " +requestDto.getStoreId());
+        System.out.println("store의 이름은!!!"+store.getStoreName());
         return new MenuResponseDto(menu);
     }
-
-//    public Menu createMenu(MenuRequestDto requestDto) {
-//        Store store = storeRepository.findById(requestDto.getStoreId())
-//                .orElseThrow(() -> new IllegalArgumentException("가게를 찾을 수 없습니다."));
-//
-//        Menu menu = new Menu();
-//        menu.setMenuName(requestDto.getMenuName());
-//        menu.setMenuPrice(requestDto.getMenuPrice());
-//        menu.setMenuContent(requestDto.getMenuContent());
-//        menu.setStore(store); // Store 엔티티 설정
-//
-//        return menuRepository.save(menu);
-//    }
 
     //UPDATE
     @Transactional

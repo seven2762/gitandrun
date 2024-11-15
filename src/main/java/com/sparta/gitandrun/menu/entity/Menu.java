@@ -63,12 +63,8 @@ public class Menu extends BaseEntity {
     @JoinColumn(name = "store_id", nullable = false)
     private Store store;
 
-//    @PrePersist
-//    public void PrePersist() {
-//        UUID uuid = UUID.randomUUID();
-//    }
-
-    public Menu(MenuRequestDto requestDto) {
+    public Menu(MenuRequestDto requestDto, Store store) {
+            this.store = store;
             this.menuName = requestDto.getMenuName();
             this.menuPrice = requestDto.getMenuPrice();
             this.menuContent = requestDto.getMenuContent();

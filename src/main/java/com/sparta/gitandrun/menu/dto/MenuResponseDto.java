@@ -13,6 +13,7 @@ import java.util.UUID;
 @NoArgsConstructor
 public class MenuResponseDto {
 
+    private UUID storeId;
     private UUID menuId;
     private String menuName;
     private int menuPrice;
@@ -30,6 +31,7 @@ public class MenuResponseDto {
     private List<MenuResponseDto> menuList = new ArrayList<>();
 
     public MenuResponseDto(Menu menu) {
+        this.storeId = menu.getStore().getStoreId();
         this.menuId = menu.getMenuId();
         this.menuName = menu.getMenuName();
         this.menuPrice = menu.getMenuPrice();
