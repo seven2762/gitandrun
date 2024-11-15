@@ -110,7 +110,6 @@ public class ReviewService {
         if (requestDto.getReviewRating() != null) {
             review.setReviewRating(requestDto.getReviewRating());
         }
-        reviewRepository.save(review);
     }
 
     //리뷰 삭제
@@ -119,7 +118,6 @@ public class ReviewService {
         Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(() -> new IllegalArgumentException("리뷰가 존재하지 않습니다."));
         review.setDeleted(true);
-        reviewRepository.save(review);
     }
 
     //사용자 확인
