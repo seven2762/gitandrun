@@ -2,8 +2,10 @@ package com.sparta.gitandrun.user.entity;
 
 import com.sparta.gitandrun.common.entity.BaseEntity;
 import com.sparta.gitandrun.store.entity.Store;
+import com.sparta.gitandrun.user.dto.request.SignUpReqDTO;
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.util.List;
 
@@ -45,19 +47,32 @@ public class User extends BaseEntity {
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)  // Store와의 관계 설정
     private List<Store> stores;
 
-    @Column(name = "is_deleted", nullable = false)
-    private boolean isDeleted = Boolean.FALSE;
-    //Auditing 추후 구현 예정
+    @Column(name = "is_deleted")
+    private boolean isDeleted ;
 
-    @PostPersist
-    public void prePersistCreatedBy() {
-        setCreatedBy(String.valueOf(this.userId));
+
+    public static User createUser(SignUpReqDTO signUpReqDTO, Role role, BCryptPasswordEncoder passwordEncoder) {
+        User user =  User.builder()
+                .username(signUpReqDTO.getUsername())
+                .nickName(signUpReqDTO.getNickName())
+                .email(signUpReqDTO.getEmail())
+                .password(passwordEncoder.encode(signUpReqDTO.getPassword()))
+                .address(new Address(
+                        signUpReqDTO.getAddressReq().getAddress(),
+                        signUpReqDTO.getAddressReq().getAddressDetail(),
+                        signUpReqDTO.getAddressReq().getZipcode()
+                ))
+                .role(role)
+                .phone(signUpReqDTO.getPhone())
+                .build();
+
+        user.initAuditInfo(user);
+        return user;
     }
 
-
-    public void updatePassword(String password, String updatedBy) {
+    public void updatePassword(String password) {
         this.password = password;
-        setUpdatedBy(updatedBy);
+        this.initAuditInfo(this);
     }
 
     public void softDelete() {
