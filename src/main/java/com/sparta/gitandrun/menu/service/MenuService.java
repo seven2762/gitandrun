@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -33,24 +34,23 @@ public class MenuService {
 
         //메뉴에 저장
         Menu menu = menuRepository.save(new Menu(requestDto, store));
-        System.out.println("StoreID는 !!! : " +requestDto.getStoreId());
-        System.out.println("store의 이름은!!!"+store.getStoreName());
         return new MenuResponseDto(menu);
     }
 
     //UPDATE
     @Transactional
-    public MenuResponseDto updateMenu(Long id, MenuRequestDto requestDto) {
-        findId(id);
-        Menu menu = menuRepository.findById(id).get();
+    public MenuResponseDto updateMenu(MenuRequestDto requestDto, UUID menuId) {
+        findId(menuId);
+        Menu menu = menuRepository.findById(menuId).get();
+
         menu.update(requestDto);
         return new MenuResponseDto(menu);
     }
 
     //DELETE
-    public void deleteMenu(Long id) {
-        findId(id);
-        menuRepository.deleteById(id);
+    public void deleteMenu(UUID menuId) {
+        findId(menuId);
+        menuRepository.deleteById(menuId);
     }
 
     //READ ( 전체 조회 )
@@ -64,14 +64,14 @@ public class MenuService {
     }
 
     //READ ( 단 건 조회 )
-    public MenuResponseDto getOneMenu(Long id) {
-        findId(id);
-        Menu menu = menuRepository.findById(id).get();
+    public MenuResponseDto getOneMenu(UUID menuId) {
+        findId(menuId);
+        Menu menu = menuRepository.findById(menuId).get();
         MenuResponseDto responseDto = new MenuResponseDto(menu);
         return responseDto;
     }
 
-    private void findId(Long id){
+    private void findId(UUID id){
         menuRepository.findById(id).orElseThrow(
             () -> new NullPointerException("해당 Id가 존재하지 않습니다.")
         );

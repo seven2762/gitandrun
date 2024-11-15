@@ -10,6 +10,8 @@ import java.util.UUID;
 @Setter
 public class MenuRequestDto {
 
+    private UUID menuId;
+
     private String menuName;
 
     private int menuPrice;

@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/menu")
@@ -27,16 +28,16 @@ public class MenuController {
     }
 
     //UPDATE
-    @PatchMapping("/{id}")
-    public ResponseEntity<ApiResDto> updateMenu(@RequestBody MenuRequestDto requestDto, @PathVariable("id") Long id) {
-        menuService.updateMenu(id, requestDto);
+    @PatchMapping("/{menuId}")
+    public ResponseEntity<ApiResDto> updateMenu(@RequestBody MenuRequestDto requestDto, @PathVariable("menuId") UUID menuId) {
+        menuService.updateMenu(requestDto, menuId);
         return ResponseEntity.ok().body(new ApiResDto("메뉴 수정 완료", HttpStatus.OK.value()));
 
     }
     //DELETE
-    @DeleteMapping("/{id}")
-    public ResponseEntity<ApiResDto> deleteMenu(@PathVariable("id") Long id){
-        menuService.deleteMenu(id);
+    @DeleteMapping("/{menuId}")
+    public ResponseEntity<ApiResDto> deleteMenu(@PathVariable("menuId") UUID menuId){
+        menuService.deleteMenu(menuId);
         return ResponseEntity.ok().body(new ApiResDto("삭제 완료", HttpStatus.OK.value()));
     }
 
@@ -48,8 +49,8 @@ public class MenuController {
 
     //READ ony One
     @GetMapping("/{id}")
-    public MenuResponseDto getOneMenu(@PathVariable("id") Long id){
-        return menuService.getOneMenu(id);
+    public MenuResponseDto getOneMenu(@PathVariable("id") UUID menuId){
+        return menuService.getOneMenu(menuId);
     }
 
     //메뉴 페이징
