@@ -31,6 +31,7 @@ public class ReviewService {
     private final OrderMenuRepository orderMenuRepository;
 
     //리뷰 작성
+    @Transactional
     public Review createReview(ReviewRequestDto requestDto, Long userId, Long orderId) {
         // userId로 User 객체 조회
         User user = getUser(userId);
@@ -55,6 +56,7 @@ public class ReviewService {
     }
 
     //리뷰 전체 조회
+    @Transactional(readOnly = true)
     public Page<ReviewResponseDto> getAllReviews(int page, int size, String sortBy) {
         Pageable pageable = optionPageable(page, size, sortBy);
         Page<Review> reviews = reviewRepository.findAll(pageable);
@@ -62,12 +64,14 @@ public class ReviewService {
     }
 
     //리뷰 아이디로 조회
+    @Transactional(readOnly = true)
     public ReviewResponseDto getOneReview(UUID reviewId) {
         Review review = getReview(reviewId);
         return new ReviewResponseDto(review);
     }
 
-    //userId로 조회
+    //사용자별 리뷰 조회
+    @Transactional(readOnly = true)
     public Page<ReviewResponseDto> getReviewsByUser(Long userId, int page, int size, String sortBy) {
         User user = getUser(userId);
         Pageable pageable = optionPageable(page, size, sortBy);
@@ -75,14 +79,16 @@ public class ReviewService {
         return reviews.map(ReviewResponseDto::new);
     }
 
-    //storeId로 조회
+    //가게별 리뷰 조회
+    @Transactional(readOnly = true)
     public Page<ReviewResponseDto> getReviewsByStore(UUID storeId, int page, int size, String sortBy) {
         Pageable pageable = optionPageable(page, size, sortBy);
         Page<Review> reviews = reviewRepository.findByStoreId(storeId, pageable);
         return reviews.map(ReviewResponseDto::new);
     }
 
-    //리뷰내용 키워드로 검색
+    //리뷰 내용 키워드로 검색
+    @Transactional(readOnly = true)
     public Page<ReviewResponseDto> getReviewsByKeyword(String keyword, int page, int size, String sortBy) {
         Pageable pageable = optionPageable(page, size, sortBy);
         Page<Review> reviews = reviewRepository.findByReviewContentContaining(keyword, pageable);
