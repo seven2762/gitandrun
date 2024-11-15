@@ -45,7 +45,7 @@ public class Review extends BaseEntity {
     @Column(name = "review_rating", nullable = false)
     private Short reviewRating;
 
-    @Column(name = "is_deleted")
+    @Column(name = "is_deleted", nullable = false)
     private boolean isDeleted = false;
 
     public Review(ReviewRequestDto requestDto, User user, UUID storeId, Order order) {
