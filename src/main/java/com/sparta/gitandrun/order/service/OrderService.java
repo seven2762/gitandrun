@@ -144,15 +144,17 @@ public class OrderService {
 
     // 주문 거절
     @Transactional
-    public void rejectOrder(Long orderId) {
+    public void rejectOrder(User user, Long orderId) {
 
-        Order findOrder = getOrder(orderId);
+        List<Store> findStore = getStoreBy(user);
 
-        /*
-            본인 가게 주문 검증 메서드 구현 필요
-        */
+        List<OrderMenu> findOrderMenus = getOrderMenusBy(orderId);
 
-        findOrder.rejectOrder();
+        Order order = user.getRole() == Role.OWNER
+                ? validateOwnerAccess(findOrderMenus, findStore)
+                : getOrder(orderId);
+
+        order.rejectOrder();
     }
 
     /*
@@ -202,6 +204,10 @@ public class OrderService {
                 .orElseThrow(() -> new IllegalArgumentException("접근 권한이 없습니다."));
     }
 
+    private List<OrderMenu> getOrderMenusBy(Long orderId) {
+        return orderMenuRepository.findByOrderId(orderId);
+    }
+
     private List<OrderMenu> getOrderMenusBy(List<Long> orderIds) {
         return orderMenuRepository.findByOrderIds(orderIds);
     }
@@ -221,14 +227,31 @@ public class OrderService {
                 .toList();
     }
 
+    private List<Store> getStoreBy(User user) {
+        return storeRepository.findByUser_UserId(user.getUserId());
+    }
+
     private List<OrderMenu> getOrderMenus(User user, UUID storeId) {
-        List<Store> findStores = storeRepository.findByUser_UserId(user.getUserId());
+        List<Store> findStores = getStoreBy(user);
 
         List<UUID> storeIds = findStores.stream()
                 .map(Store::getStoreId)
                 .toList();
 
         return orderMenuRepository.findOrderMenusByStoreId(storeId, storeIds);
+    }
+
+    /*
+        주문 거절 검증 메서드
+    */
+
+    private Order validateOwnerAccess(List<OrderMenu> findOrderMenus, List<Store> findStore) {
+
+        if (!findStore.contains(findOrderMenus.get(0).getMenu().getStore())) {
+            throw new IllegalArgumentException("해당 주문에 접근할 권한이 없습니다.");
+        }
+
+        return findOrderMenus.get(0).getOrder();
     }
 
     /*
