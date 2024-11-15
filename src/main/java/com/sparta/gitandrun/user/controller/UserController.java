@@ -2,9 +2,7 @@ package com.sparta.gitandrun.user.controller;
 
 
 import com.sparta.gitandrun.common.entity.ApiResDto;
-import com.sparta.gitandrun.user.dto.request.LoginReqDto;
 import com.sparta.gitandrun.user.dto.request.SignUpReqDTO;
-import com.sparta.gitandrun.user.dto.response.LoginResDto;
 import com.sparta.gitandrun.user.dto.response.SignUpResDTO;
 import com.sparta.gitandrun.user.dto.response.UserApiResDto;
 import com.sparta.gitandrun.user.dto.response.UserResDTO;
@@ -17,6 +15,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/user")
@@ -27,17 +26,10 @@ public class UserController {
 
     @PostMapping("/signup")
     public ResponseEntity<UserApiResDto> signup(@RequestBody SignUpReqDTO signUpReqDTO) {
-
         SignUpResDTO signUpResDTO = userService.signUp(signUpReqDTO);
-
         return ResponseEntity.ok(new UserApiResDto("회원 가입이 완료되었습니다.", 200, signUpResDTO));
     }
 
-    @PostMapping("/login")
-    public ResponseEntity<UserApiResDto> login(@RequestBody LoginReqDto loginReqDto) {
-        LoginResDto loginResDto = userService.login(loginReqDto);
-        return ResponseEntity.ok(new UserApiResDto("로그인이 완료되었습니다.", 200, loginResDto));
-    }
 
     @GetMapping("/all")
     public ResponseEntity<UserApiResDto> getAllUsers() {
@@ -46,10 +38,9 @@ public class UserController {
     }
 
     @PutMapping("/password")
-    public ResponseEntity<ApiResDto> updatePassword(@AuthenticationPrincipal UserDetailsImpl userDetails, @RequestParam String password
-    ) {
+    public ResponseEntity<ApiResDto> updatePassword(@AuthenticationPrincipal UserDetailsImpl userDetails,   @RequestBody Map<String, String> request) {
         User user = userDetails.getUser();
-        userService.updatePassword(user, password);
+        userService.updatePassword(user, request);
         return ResponseEntity.ok(new ApiResDto("비밀번호가 성공적으로 변경되었습니다.", 200));
     }
 
