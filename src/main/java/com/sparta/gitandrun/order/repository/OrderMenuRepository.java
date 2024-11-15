@@ -6,9 +6,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
-import java.util.UUID;
 
-public interface OrderMenuRepository extends JpaRepository<OrderMenu, Long> {
+public interface OrderMenuRepository extends JpaRepository<OrderMenu, Long>, OrderMenuCustomRepository {
     @Query("select om " +
             "from OrderMenu om " +
             "join fetch om.menu " +
@@ -20,11 +19,4 @@ public interface OrderMenuRepository extends JpaRepository<OrderMenu, Long> {
             "join fetch om.menu " +
             "where om.order.id = :orderId")
     List<OrderMenu> findByOrderId(@Param("orderId") Long orderId);
-
-    @Query("select om from OrderMenu om " +
-            "join fetch om.order " +
-            "join fetch om.menu m " +
-            "join fetch m.store s " +
-            "where s.storeId in :storeIds")
-    List<OrderMenu> findOrderMenusByStoreIdIn(@Param("storeIds") List<UUID> storeIds);
 }

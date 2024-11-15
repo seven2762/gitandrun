@@ -103,9 +103,9 @@ public class OrderService {
         Owner 본인 가게 주문 조회
     */
     @Transactional(readOnly = true)
-    public ResponseEntity<ResDto<ResOrderGetByOwnerDTO>> getByOwner(User user, Pageable pageable) {
+    public ResponseEntity<ResDto<ResOrderGetByOwnerDTO>> getByOwner(User user, Pageable pageable, UUID storeId) {
 
-        List<OrderMenu> findOrderMenus = getOrderMenus(user);
+        List<OrderMenu> findOrderMenus = getOrderMenus(user, storeId);
 
         Page<Order> findOrderPage = orderRepository.findByIdInAndIsDeletedFalse(getIdsBy(findOrderMenus), pageable);
 
@@ -228,14 +228,14 @@ public class OrderService {
                 .toList();
     }
 
-    private List<OrderMenu> getOrderMenus(User user) {
+    private List<OrderMenu> getOrderMenus(User user, UUID storeId) {
         List<Store> findStores = storeRepository.findByUser_UserId(user.getUserId());
 
         List<UUID> storeIds = findStores.stream()
                 .map(Store::getStoreId)
                 .toList();
 
-        return orderMenuRepository.findOrderMenusByStoreIdIn(storeIds);
+        return orderMenuRepository.findOrderMenusByStoreId(storeId, storeIds);
     }
 
     private User getUserBy(Long userId) {
