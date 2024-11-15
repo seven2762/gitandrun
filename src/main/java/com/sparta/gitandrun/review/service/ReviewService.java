@@ -55,7 +55,7 @@ public class ReviewService {
     public List<ReviewResponseDto> getAllReviews() {
         return reviewRepository.findAll().stream()
                 .map(ReviewResponseDto::new)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     //리뷰 아이디로 조회
@@ -70,7 +70,15 @@ public class ReviewService {
         List<Review> reviews = reviewRepository.findByUser(user);
         return reviews.stream()
                 .map(ReviewResponseDto::new)
-                .collect(Collectors.toList());
+                .toList();
+    }
+
+    //storeId로 조회
+    public List<ReviewResponseDto> getReviewsByStore(UUID storeId) {
+        List<Review> reviews = reviewRepository.findByStoreId(storeId);
+        return reviews.stream()
+                .map(ReviewResponseDto::new)
+                .toList();
     }
 
     //리뷰 수정
