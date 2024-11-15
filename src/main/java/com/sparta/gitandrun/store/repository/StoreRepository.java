@@ -29,11 +29,14 @@ public interface StoreRepository extends JpaRepository<Store, UUID> {
     @Query("SELECT s FROM Store s WHERE s.region.regionName LIKE %:regionName%")
     List<Store> findByRegionName(@Param("regionName") String regionName);
 
-    @Query("SELECT s FROM Store s WHERE " +
-            "(LOWER(s.storeName) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
+    @Query("SELECT s FROM Store s " +
+            "WHERE (LOWER(s.storeName) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
             "OR LOWER(s.address.address) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
             "OR LOWER(s.address.addressDetail) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
             "OR LOWER(s.category.name) LIKE LOWER(CONCAT('%', :keyword, '%'))) " +
-            "AND s.isDeleted = false")
-    Page<Store> searchStoresAndIsDeletedFalse(@Param("keyword") String keyword, Pageable pageable);
+            "AND (:isAdmin = true OR s.isDeleted = false)")
+    Page<Store> searchStoresWithKeywordAndRole(@Param("keyword") String keyword,
+                                               @Param("isAdmin") boolean isAdmin,
+                                               Pageable pageable);
+
 }

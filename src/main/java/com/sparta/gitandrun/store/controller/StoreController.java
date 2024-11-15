@@ -8,6 +8,7 @@ import com.sparta.gitandrun.user.entity.Role;
 import com.sparta.gitandrun.user.jwt.JwtUtil;
 import com.sparta.gitandrun.user.security.UserDetailsImpl;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
@@ -196,15 +197,15 @@ public class StoreController {
             @RequestParam(defaultValue = "10") int size) {
 
         try {
-            ApiResDto response = new ApiResDto("검색 성공", 200,
-                    storeService.searchStoresByKeyword(keyword, sortField, page, size, true));
+            Page<?> searchResults = storeService.searchStoresByKeyword(keyword, sortField, page, size, true);
+            ApiResDto response = new ApiResDto("검색 성공", 200, searchResults);
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             return ResponseEntity.status(500).body(new ApiResDto("검색 중 오류 발생", 500));
         }
     }
 
-    // 키워드로 검색
+    // 키워드로 검색 (일반 사용자용)
     @GetMapping("/search/keyword")
     public ResponseEntity<ApiResDto> searchStoresByKeyword(
             @AuthenticationPrincipal UserDetailsImpl userDetails,
@@ -215,13 +216,14 @@ public class StoreController {
 
         try {
             boolean isAdmin = userDetails.getUser().getRole().equals(Role.ADMIN);
-            ApiResDto response = new ApiResDto("검색 성공", 200,
-                    storeService.searchStoresByKeyword(keyword, sortField, page, size, isAdmin));
+            Page<?> searchResults = storeService.searchStoresByKeyword(keyword, sortField, page, size, isAdmin);
+            ApiResDto response = new ApiResDto("검색 성공", 200, searchResults);
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             return ResponseEntity.status(500).body(new ApiResDto("검색 중 오류 발생", 500));
         }
     }
+
 
     // 지역 이름으로 가게 조회
     @GetMapping("/search/region")

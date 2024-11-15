@@ -232,15 +232,13 @@ public class StoreService {
 
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, sortField));
 
-        Page<Store> stores;
-        if (isAdmin) {
-            stores = storeRepository.searchStores(keyword, pageable);
-        } else {
-            stores = storeRepository.searchStoresAndIsDeletedFalse(keyword, pageable);
-        }
+        Page<Store> stores = storeRepository.searchStoresWithKeywordAndRole(keyword, isAdmin, pageable);
 
+        // 관리자와 사용자에 따른 결과 매핑
         return isAdmin ? stores.map(FullStoreResponse::new) : stores.map(LimitedStoreResponse::new);
     }
+
+
 
     // 유저 조회 메서드
 //    private User getUser(Long userId) {
