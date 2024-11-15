@@ -6,6 +6,7 @@ import com.sparta.gitandrun.region.entity.Region;
 import com.sparta.gitandrun.region.service.RegionService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,7 +21,8 @@ public class RegionController {
         this.regionService = regionService;
     }
 
-    // JSON 형식으로 데이터를 받아 지역 생성
+    // 지역 생성
+    @Secured("ROLE_ADMIN")
     @PostMapping
     public ResponseEntity<?> createRegion(@RequestBody RegionRequestDto regionRequest) {
         try {
@@ -53,7 +55,8 @@ public class RegionController {
                         .body(new ApiResDto("해당 ID를 가진 지역을 찾을 수 없습니다: " + regionId, 404)));
     }
 
-    // JSON 형식으로 데이터를 받아 지역 수정
+    // 지역 수정
+    @Secured("ROLE_ADMIN")
     @PutMapping("/{regionId}")
     public ResponseEntity<ApiResDto> updateRegion(@PathVariable Long regionId,
                                                   @RequestBody RegionRequestDto regionRequest) {
@@ -69,7 +72,8 @@ public class RegionController {
         }
     }
 
-    // ID로 지역 삭제
+    // 지역 삭제
+    @Secured("ROLE_ADMIN")
     @DeleteMapping("/{regionId}")
     public ResponseEntity<ApiResDto> deleteRegion(@PathVariable Long regionId) {
         try {

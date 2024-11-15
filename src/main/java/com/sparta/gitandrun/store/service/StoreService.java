@@ -20,6 +20,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import lombok.extern.slf4j.Slf4j;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
@@ -27,6 +28,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.LinkedHashMap;
 
+@Slf4j
 @Service
 public class StoreService {
 
@@ -42,16 +44,10 @@ public class StoreService {
         this.categoryRepository = categoryRepository;
     }
 
-    // 가게 생성
     @Transactional
     public Store createStore(Long userId, StoreRequestDto storeRequestDto) {
         // 사용자 정보 조회
         User user = getUser(userId);
-
-        // 권한 체크 - ADMIN 또는 OWNER만 가능
-        if (user.getRole() != Role.ADMIN && user.getRole() != Role.OWNER) {
-            throw new IllegalArgumentException("가게 생성 권한이 없습니다.");  // 권한이 없으면 예외 발생
-        }
 
         // 카테고리 이름으로 카테고리 조회
         Category category = categoryRepository.findByName(storeRequestDto.getCategoryName())
@@ -61,90 +57,200 @@ public class StoreService {
         Region region = regionRepository.findById(storeRequestDto.getRegionId())
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 지역입니다."));
 
+        // 새 가게 생성
         Store newStore = new Store();
+
+        // storeId를 UUID로 자동 생성
+        newStore.setStoreId(UUID.randomUUID());
+
+        // 필드 채우기
         populateStoreFields(newStore, storeRequestDto, user.getUserId().toString());
 
         // 카테고리와 지역 설정
-        newStore.setCategory(category);  // Category 설정
-        newStore.setRegion(region);      // Region 설정
+        newStore.setCategory(category);
+        newStore.setRegion(region);
 
+        // created_by와 updated_by에 userId 설정
+        newStore.setCreatedBy(user.getUserId().toString());
+        newStore.setUpdatedBy(user.getUserId().toString());
+
+        // user 설정
+        newStore.setUser(user);
+
+        // 새 가게 저장
         return storeRepository.save(newStore);
     }
 
-
-
-
-    // 전체 가게 조회
-    public List<?> getAllStores(Long userId) {
-        User user = getUser(userId);
-        List<Store> allStores = user.getRole() == Role.ADMIN ?
-                storeRepository.findAll() : storeRepository.findByisDeletedFalse();
-
-        return allStores.stream()
-                .map(store -> user.getRole() == Role.ADMIN ? new FullStoreResponse(store) : new LimitedStoreResponse(store))
-                .collect(Collectors.toList());
+    private void populateStoreFields(Store store, StoreRequestDto storeRequestDto, String userId) {
+        store.setStoreName(storeRequestDto.getStoreName());
+        store.setPhone(storeRequestDto.getPhone());
+        store.setAddress(storeRequestDto.getAddress());
+        store.setCreatedBy(userId);
+        store.setUpdatedBy(userId);
+        store.setCreatedAt(LocalDateTime.now());
+        store.setUpdatedAt(LocalDateTime.now());
     }
 
-    // 가게 상세 정보 조회
-    public ResponseEntity<?> getStoreDetails(UUID storeId, Long userId) {
-        User user = getUser(userId);
-        Store store = getStore(storeId);
-
-        return user.getRole() == Role.ADMIN ?
-                ResponseEntity.ok(new FullStoreResponse(store)) :
-                ResponseEntity.ok(generateLimitedStoreDetails(store));
-    }
-
-    // 가게 수정
-    @Transactional
-    public void updateStore(UUID storeId, Long userId, StoreRequestDto updatedStore) {
-        User user = validateUserWithRoles(userId, Role.ADMIN, Role.OWNER);
-        Store existingStore = getStore(storeId);
-
-        populateStoreFields(existingStore, updatedStore, user.getUserId().toString());
-
-        storeRepository.save(existingStore);
-    }
-
-    // 가게 삭제 (soft delete 방식)
-    @Transactional
-    public boolean deleteStore(UUID storeId, Long userId) {
-        User user = validateUserWithRoles(userId, Role.ADMIN, Role.OWNER);
-        Store store = getStore(storeId);
-
-        store.markAsDeleted(user.getUserId().toString());
-        storeRepository.save(store);
-        return true;
-    }
-
-    // 페이징 및 조건부 정렬 구현
-    public Page<?> searchStores(UUID categoryId, String sortField, int page, int size, Long userId) {
-        User user = getUser(userId);
-
-        Pageable pageable = PageRequest.of(page, size, Sort.by(sortField).descending());
-        Page<Store> stores = storeRepository.findByCategoryId(categoryId, pageable);
-
-        return mapStoreResponse(stores, user.getRole());
-    }
-
-    public Page<Store> searchStoresByKeyword(String keyword, String sortField, int page, int size, Long userId) {
-        User user = getUser(userId);
-
-        // 정렬 설정
-        Sort sort = Sort.by(Sort.Direction.DESC, sortField);
-        Pageable pageable = PageRequest.of(page, size, sort);
-
-        return storeRepository.searchStores(keyword, pageable);
-    }
-
-    // 유저 조회 메서드
     private User getUser(Long userId) {
         return userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
     }
 
-    // 가게 조회 메서드
+    // ADMIN 전체 가게 조회
+    @Transactional(readOnly = true)
+    public List<FullStoreResponse> getAllStoresForAdmin() {
+        // 모든 가게 정보 조회
+        List<Store> stores = storeRepository.findAll();
+        // FullStoreResponse DTO로 변환하여 반환
+        return stores.stream()
+                .map(FullStoreResponse::new)
+                .collect(Collectors.toList());
+    }
+
+    // ~ADMIN 전체 가게 조회
+    @Transactional(readOnly = true)
+    public List<LimitedStoreResponse> getAllStoresForUser() {
+        // Soft-delete되지 않은 가게만 조회
+        List<Store> stores = storeRepository.findByIsDeletedFalse();
+        // LimitedStoreResponse DTO로 변환하여 반환
+        return stores.stream()
+                .map(LimitedStoreResponse::new)
+                .collect(Collectors.toList());
+    }
+
+    // 가게 상세 정보 조회 (로그인한 유저의 권한에 따라 다르게 응답)
+    @Transactional(readOnly = true)
+    public ResponseEntity<?> getStoreDetails(UUID storeId, Long userId) {
+        User user = getUser(userId); // 로그인한 유저 조회
+        Store store = getStore(storeId); // 가게 정보 조회
+
+        // 유저의 역할에 따라 FullStoreResponse 또는 LimitedStoreResponse 반환
+        if (user.getRole() == Role.ADMIN) {
+            return ResponseEntity.ok(new FullStoreResponse(store)); // 관리자일 경우 모든 정보 제공
+        } else {
+            return ResponseEntity.ok(generateLimitedStoreDetails(store)); // 그 외 유저는 제한된 정보만 제공
+        }
+    }
+
+    // 관리자 가게 수정
+    @Transactional
+    public void updateStoreByAdmin(UUID storeId, StoreRequestDto storeRequestDto) {
+        Store store = storeRepository.findById(storeId)
+                .orElseThrow(() -> new IllegalArgumentException("가게를 찾을 수 없습니다."));
+
+        // 모든 필드 수정 가능
+        store.setStoreName(storeRequestDto.getStoreName());
+        store.setPhone(storeRequestDto.getPhone());
+        store.setAddress(storeRequestDto.getAddress());
+
+        if (storeRequestDto.getCategoryName() != null) {
+            Category category = categoryRepository.findByName(storeRequestDto.getCategoryName())
+                    .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 카테고리입니다."));
+            store.setCategory(category);
+        }
+
+        if (storeRequestDto.getRegionId() != null) {
+            Region region = regionRepository.findById(storeRequestDto.getRegionId())
+                    .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 지역입니다."));
+            store.setRegion(region);
+        }
+    }
+
+    // 가게 수정
+    @Transactional
+    public void updateStoreByUser(UUID storeId, StoreRequestDto storeRequestDto) {
+        Store store = storeRepository.findById(storeId)
+                .orElseThrow(() -> new IllegalArgumentException("가게를 찾을 수 없습니다."));
+
+        // 제한된 필드만 수정 가능
+        if (storeRequestDto.getStoreName() != null) {
+            store.setStoreName(storeRequestDto.getStoreName());
+        }
+        if (storeRequestDto.getPhone() != null) {
+            store.setPhone(storeRequestDto.getPhone());
+        }
+        if (storeRequestDto.getAddress() != null) {
+            store.setAddress(storeRequestDto.getAddress());
+        }
+    }
+
+    // ADMIN 권한으로 삭제
+    @Transactional
+    public void softDeleteStoreByAdmin(UUID storeId) {
+        Store store = storeRepository.findById(storeId)
+                .orElseThrow(() -> new IllegalArgumentException("가게를 찾을 수 없습니다."));
+
+        markAsDeleted(store, "ADMIN");
+    }
+
+    // Owner 권한으로 삭제
+    @Transactional
+    public void softDeleteStoreByOwner(UUID storeId, Long userId) {
+        Store store = storeRepository.findById(storeId)
+                .orElseThrow(() -> new IllegalArgumentException("가게를 찾을 수 없습니다."));
+
+        if (!store.getUser().getUserId().equals(userId)) {
+            throw new IllegalArgumentException("본인이 소유한 가게만 삭제할 수 있습니다.");
+        }
+
+        markAsDeleted(store, userId.toString());
+    }
+
+    // Delete
+    private void markAsDeleted(Store store, String deletedBy) {
+        store.setDeletedBy(deletedBy);
+        store.setDeletedAt(LocalDateTime.now());
+        store.setDeleted(true); // Soft delete 플래그 설정
+        storeRepository.save(store); // 변경된 상태 저장
+    }
+
+    // 카테고리로 검색
+    public Page<?> searchStoresByCategory(UUID categoryId, String sortField, int page, int size, boolean isAdmin) {
+        validatePageSize(size);
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, sortField));
+
+        Page<Store> stores;
+        if (isAdmin) {
+            stores = storeRepository.findByCategoryId(categoryId, pageable);
+        } else {
+            stores = storeRepository.findByCategoryIdAndIsDeletedFalse(categoryId, pageable);
+        }
+
+        return isAdmin ? stores.map(FullStoreResponse::new) : stores.map(LimitedStoreResponse::new);
+    }
+
+
+    private void validatePageSize(int size) {
+        if (size != 10 && size != 30 && size != 50) {
+            throw new IllegalArgumentException("허용되지 않는 페이지 크기입니다. (10, 30, 50 중 하나만 가능합니다)");
+        }
+    }
+
+    public Page<?> searchStoresByKeyword(String keyword, String sortField, int page, int size, boolean isAdmin) {
+        validatePageSize(size);
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, sortField));
+
+        Page<Store> stores = storeRepository.searchStoresWithKeywordAndRole(keyword, isAdmin, pageable);
+
+        // 관리자와 사용자에 따른 결과 매핑
+        return isAdmin ? stores.map(FullStoreResponse::new) : stores.map(LimitedStoreResponse::new);
+    }
+
+
+
+    // 유저 조회 메서드
+//    private User getUser(Long userId) {
+//        return userRepository.findById(userId)
+//                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+//    }
+
+    // Store 조회 메서드 (storeId로 조회)
     private Store getStore(UUID storeId) {
+        if (storeId == null) {
+            throw new IllegalArgumentException("storeId는 null일 수 없습니다.");
+        }
         return storeRepository.findById(storeId)
                 .orElseThrow(() -> new IllegalArgumentException("가게를 찾을 수 없습니다."));
     }
@@ -181,25 +287,25 @@ public class StoreService {
                 stores.map(LimitedStoreResponse::new);
     }
 
-    private void populateStoreFields(Store store, StoreRequestDto storeRequestDto, String userId) {
-        if (storeRequestDto.getStoreName() != null) store.setStoreName(storeRequestDto.getStoreName());
-        if (storeRequestDto.getPhone() != null) store.setPhone(storeRequestDto.getPhone());
-
-        // 카테고리 이름이 비어있지 않으면 카테고리 조회 후 설정
-        if (storeRequestDto.getCategoryName() != null && !storeRequestDto.getCategoryName().isEmpty()) {
-            Category category = categoryRepository.findByName(storeRequestDto.getCategoryName())
-                    .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 카테고리입니다: " + storeRequestDto.getCategoryName()));
-            store.setCategory(category);
-        } else {
-            throw new IllegalArgumentException("카테고리 이름은 필수입니다.");
-        }
-
-        // 주소 처리
-        if (storeRequestDto.getAddress() != null) store.setAddress(storeRequestDto.getAddress());
-
-        store.setUpdatedBy(userId);
-        store.setUpdatedAt(LocalDateTime.now());
-    }
+//    private void populateStoreFields(Store store, StoreRequestDto storeRequestDto, String userId) {
+//        if (storeRequestDto.getStoreName() != null) store.setStoreName(storeRequestDto.getStoreName());
+//        if (storeRequestDto.getPhone() != null) store.setPhone(storeRequestDto.getPhone());
+//
+//        // 카테고리 이름이 비어있지 않으면 카테고리 조회 후 설정
+//        if (storeRequestDto.getCategoryName() != null && !storeRequestDto.getCategoryName().isEmpty()) {
+//            Category category = categoryRepository.findByName(storeRequestDto.getCategoryName())
+//                    .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 카테고리입니다: " + storeRequestDto.getCategoryName()));
+//            store.setCategory(category);
+//        } else {
+//            throw new IllegalArgumentException("카테고리 이름은 필수입니다.");
+//        }
+//
+//        // 주소 처리
+//        if (storeRequestDto.getAddress() != null) store.setAddress(storeRequestDto.getAddress());
+//
+//        store.setUpdatedBy(userId);
+//        store.setUpdatedAt(LocalDateTime.now());
+//    }
 
     // 지역 이름으로 가게 조회
     public List<?> getStoresByRegionName(Long userId, String regionName) {
