@@ -71,6 +71,19 @@ public class MenuService {
         return responseDto;
     }
 
+    public List<MenuResponseDto> getDetailMenu(UUID storeId) {
+        Store store = storeRepository.findById(storeId)
+                .orElseThrow(() -> new IllegalArgumentException("StoreId를 찾을 수 없습니다."));
+
+        List<MenuResponseDto> responseDtoList = new ArrayList<>();
+        List<Menu> menuList = menuRepository.findAllByStoreId(storeId);
+
+        for (Menu menu : menuList) {
+            responseDtoList.add(new MenuResponseDto(menu));
+        }
+        return responseDtoList;
+    }
+
     private void findId(UUID id){
         menuRepository.findById(id).orElseThrow(
             () -> new NullPointerException("해당 Id가 존재하지 않습니다.")
@@ -85,16 +98,10 @@ public class MenuService {
 
         Page<Menu> menuList;
 
-/* 임시 코드, 추후 메뉴 장르별 카테고리 추가시 작성.
-        MenuRoleEnum menuRoleEnum 추후 메뉴 category 에서 Role을 받아와야 함.(메뉴별 검색)
-        if (menuRoleEnum == MenuRoleEnum.한식) {
-            menuList = menuRepository.findAllByCategory(한식, pageable);
-        } else if {
-            menuList....
-        }
-*/
         menuList = menuRepository.findAll(pageable);
 
         return menuList.map(MenuResponseDto::new);
     }
+
+
 }

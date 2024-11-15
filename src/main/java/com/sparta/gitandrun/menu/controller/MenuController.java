@@ -41,11 +41,23 @@ public class MenuController {
         return ResponseEntity.ok().body(new ApiResDto("삭제 완료", HttpStatus.OK.value()));
     }
 
-    //READ
+    //READ 모든 필드 조회(SECURED ADMIN, MANAGER)
     @GetMapping
     public List<MenuResponseDto> getAllMenus(){
         return menuService.getAllMenus();
     }
+
+      //READ 가게의 모든 메뉴에 대한 이름, 내용, 가격들 조회
+    @GetMapping("/search/{storeId}")
+    public List<MenuResponseDto> getDetailMenu(@PathVariable UUID storeId){
+        return menuService.getDetailMenu(storeId);
+    }
+
+    //READ 가게 이름에 메뉴명이 들어가는 가게 조회 및 가게의 메뉴들 조회
+//    @GetMapping("/search")
+//    public List<MenuResponseDto> getOneStoreMenus(){
+//        return menuService.getStoreMenus();
+//    }
 
     //READ ony One
     @GetMapping("/{id}")
