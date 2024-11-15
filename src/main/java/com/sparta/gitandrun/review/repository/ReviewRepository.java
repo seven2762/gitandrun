@@ -15,4 +15,6 @@ public interface ReviewRepository extends JpaRepository<Review, UUID> {
     List<Review> findByUser(User userId);
 
     List<Review> findByStoreId(UUID storeId);
+
+    List<Review> findByReviewContentContaining(String keyword);
 }

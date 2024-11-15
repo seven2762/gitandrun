@@ -81,6 +81,14 @@ public class ReviewService {
                 .toList();
     }
 
+    //리뷰내용 키워드로 검색
+    public List<ReviewResponseDto> getReviewsByKeyword(String keyword) {
+        List<Review> reviews = reviewRepository.findByReviewContentContaining(keyword);
+        return reviews.stream()
+                .map(ReviewResponseDto::new)
+                .toList();
+    }
+
     //리뷰 수정
     @Transactional
     public void updateReview(UUID reviewId, ReviewRequestDto requestDto) {
