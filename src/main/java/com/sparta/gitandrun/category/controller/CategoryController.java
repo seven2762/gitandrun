@@ -5,6 +5,7 @@ import com.sparta.gitandrun.category.dto.CategoryRequestDto;
 import com.sparta.gitandrun.category.entity.Category;
 import com.sparta.gitandrun.category.service.CategoryService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -29,6 +30,7 @@ public class CategoryController {
     }
 
     // 새로운 카테고리 추가
+    @Secured("ROLE_ADMIN")
     @PostMapping
     public ResponseEntity<ApiResDto> createCategory(@RequestBody CategoryRequestDto categoryRequest) {
         try {
@@ -42,6 +44,7 @@ public class CategoryController {
     }
 
     // 카테고리 수정
+    @Secured("ROLE_ADMIN")
     @PatchMapping("/{categoryId}")
     public ResponseEntity<ApiResDto> updateCategory(@PathVariable UUID categoryId, @RequestBody CategoryRequestDto categoryRequest) {
         try {
@@ -54,7 +57,8 @@ public class CategoryController {
         }
     }
 
-    // 카테고리 삭제 (옵션)
+    // 카테고리 삭제
+    @Secured("ROLE_ADMIN")
     @DeleteMapping("/{categoryId}")
     public ResponseEntity<ApiResDto> deleteCategory(@PathVariable UUID categoryId) {
         try {
