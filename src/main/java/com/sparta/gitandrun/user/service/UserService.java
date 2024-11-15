@@ -82,6 +82,7 @@ public class UserService {
         String encodedPassword = passwordEncoder.encode(password);
         user.updatePassword(encodedPassword, String.valueOf(user.getUserId()));
     }
+
     @Transactional
     public void softDeleteUser(String phone) {
         User user = userRepository.findActiveUserByPhone(phone)
