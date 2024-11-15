@@ -64,7 +64,7 @@ public class OrderController {
     public ResponseEntity<ResDto<ResOrderGetByOwnerDTO>> getByOwner(
             @AuthenticationPrincipal UserDetailsImpl userDetails,
             @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
-            @RequestParam(name = "storeId", required = false)UUID storeId) {
+            @RequestParam(name = "storeId", required = false) UUID storeId) {
 
         return orderService.getByOwner(userDetails.getUser(), pageable, storeId);
     }
@@ -83,9 +83,10 @@ public class OrderController {
    */
     @Secured({"ROLE_CUSTOMER", "ROLE_MANAGER"})
     @PatchMapping("/{orderId}/cancel")
-    public ResponseEntity<ApiResDto> cancelOrder(@PathVariable("orderId") Long orderId) {
+    public ResponseEntity<ApiResDto> cancelOrder(@AuthenticationPrincipal UserDetailsImpl userDetails,
+                                                 @PathVariable("orderId") Long orderId) {
 
-        orderService.cancelOrder(orderId);
+        orderService.cancelOrder(userDetails.getUser(), orderId);
 
         return ResponseEntity.ok().body(new ApiResDto("주문 취소 완료", HttpStatus.OK.value()));
     }
@@ -96,9 +97,10 @@ public class OrderController {
    */
     @Secured({"ROLE_OWNER", "ROLE_MANAGER"})
     @PatchMapping("/{orderId}/reject")
-    private ResponseEntity<ApiResDto> rejectOrder(@PathVariable("orderId") Long orderId) {
+    private ResponseEntity<ApiResDto> rejectOrder(@AuthenticationPrincipal UserDetailsImpl userDetails,
+                                                  @PathVariable("orderId") Long orderId) {
 
-        orderService.rejectOrder(orderId);
+        orderService.rejectOrder(userDetails.getUser(), orderId);
 
         return ResponseEntity.ok().body(new ApiResDto("주문 거절 완료", HttpStatus.OK.value()));
     }

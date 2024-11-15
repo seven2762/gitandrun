@@ -18,6 +18,8 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     //리뷰에서 orderId와 orderStatus 확인하기 위해 추가
     Optional<Order> findByIdAndOrderStatus(Long orderId, OrderStatus orderStatus);
 
+    Optional<Order> findByIdAndUser_UserId(Long orderId, Long userId);
+
     Page<Order> findByUser_UserIdAndIsDeletedFalse(Long userId, Pageable pageable);
 
     @Query("select o from Order o " +

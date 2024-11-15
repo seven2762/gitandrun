@@ -14,6 +14,7 @@ import com.sparta.gitandrun.order.repository.OrderMenuRepository;
 import com.sparta.gitandrun.order.repository.OrderRepository;
 import com.sparta.gitandrun.store.entity.Store;
 import com.sparta.gitandrun.store.repository.StoreRepository;
+import com.sparta.gitandrun.user.entity.Role;
 import com.sparta.gitandrun.user.entity.User;
 import com.sparta.gitandrun.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -61,7 +62,6 @@ public class OrderService {
         */
         orderRepository.save(order);
     }
-
 
 
     /*
@@ -133,20 +133,13 @@ public class OrderService {
 
     // 주문 취소
     @Transactional
-    public void cancelOrder(Long orderId) {
-        /*
-            본인 검증 메서드 추후 구현 예정
-        */
-//        private void checkOrderAccessPermission (User user, Order findOrder){
-//            if (!user.getId().equals(findOrder.getUser().getId())) {
-//                Objects.equals();
-//                throw new IllegalArgumentException("해당 주문에 대한 접근 권한이 없습니다.");
-//            }
-//        }
-//
-        Order findOrder = getOrder(orderId);
+    public void cancelOrder(User user, Long orderId) {
 
-        findOrder.cancelOrder();
+        Order order = user.getRole() == Role.CUSTOMER
+                ? getOrder(user, orderId)
+                : getOrder(orderId);
+
+        order.cancelOrder();
     }
 
     // 주문 거절
@@ -202,6 +195,11 @@ public class OrderService {
     private Order getOrder(Long orderId) {
         return orderRepository.findByIdAndIsDeletedFalse(orderId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 항목입니다."));
+    }
+
+    private Order getOrder(User user, Long orderId) {
+        return orderRepository.findByIdAndUser_UserId(orderId, user.getUserId())
+                .orElseThrow(() -> new IllegalArgumentException("접근 권한이 없습니다."));
     }
 
     private List<OrderMenu> getOrderMenusBy(List<Long> orderIds) {
