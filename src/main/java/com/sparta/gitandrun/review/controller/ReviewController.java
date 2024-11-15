@@ -56,6 +56,13 @@ public class ReviewController {
         return ResponseEntity.ok(reviews);
     }
 
+    //storeId로 조회
+    @GetMapping("/{storeId}")
+    public ResponseEntity<List<ReviewResponseDto>> getReviewsByStore(@PathVariable UUID storeId) {
+        List<ReviewResponseDto> reviews = reviewService.getReviewsByStore(storeId);
+        return ResponseEntity.ok(reviews);
+    }
+
     //reviewContent에서 키워드로 검색
     @GetMapping("/search")
     public ResponseEntity<List<ReviewResponseDto>> getReviewsByKeyword(@RequestParam String keyword) {
