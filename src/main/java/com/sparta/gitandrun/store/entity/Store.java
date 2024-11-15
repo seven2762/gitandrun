@@ -22,6 +22,7 @@ import java.util.UUID;
 public class Store {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "store_id", columnDefinition = "UUID")
     private UUID storeId = UUID.randomUUID();
 
@@ -60,14 +61,13 @@ public class Store {
     @Column(name = "is_deleted")
     private boolean isDeleted = false;
 
-    // Address 임베디드 클래스 적용
     @Embedded
     private Address address;
 
     // User와의 ManyToOne 관계 설정
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
-    @JsonBackReference  // 순환 참조 방지
+    @JsonBackReference // 순환 참조 방지
     private User user;
 
     @PrePersist
