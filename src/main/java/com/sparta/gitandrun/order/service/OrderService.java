@@ -3,7 +3,7 @@ package com.sparta.gitandrun.order.service;
 
 import com.sparta.gitandrun.menu.entity.Menu;
 import com.sparta.gitandrun.menu.repository.MenuRepository;
-import com.sparta.gitandrun.order.dto.req.CreateOrderReqDto;
+import com.sparta.gitandrun.order.dto.req.ReqOrderPostDTO;
 import com.sparta.gitandrun.order.dto.res.ResDto;
 import com.sparta.gitandrun.order.dto.res.ResOrderGetByCustomerDTO;
 import com.sparta.gitandrun.order.dto.res.ResOrderGetByIdDTO;
@@ -14,6 +14,7 @@ import com.sparta.gitandrun.order.repository.OrderMenuRepository;
 import com.sparta.gitandrun.order.repository.OrderRepository;
 import com.sparta.gitandrun.store.entity.Store;
 import com.sparta.gitandrun.store.repository.StoreRepository;
+import com.sparta.gitandrun.user.entity.Role;
 import com.sparta.gitandrun.user.entity.User;
 import com.sparta.gitandrun.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -41,38 +42,27 @@ public class OrderService {
 
     // 주문 생성
     @Transactional
-    public void createOrder(CreateOrderReqDto dto) {
-
+    public void createOrder(User user, ReqOrderPostDTO dto) {
         /*
             유저 조회
-            User findUser = userRepository.findUser(user.getId);
         */
+        User findUser = getUser(user.getUserId());
 
         /*
-            메뉴 조회 및 중복된 메뉴 개수 계산
+            주문 목록 생성
         */
-
-        User findUser = getUserBy(dto.getUserId());
-
-        List<Menu> findMenus = getMenus(dto);
-
-        Map<Menu, Long> menuCountMap = getMenuCountMap(dto, findMenus);
-
-        /*
-            주문 상품 생성
-        */
-        List<OrderMenu> orderMenus = OrderMenu.createOrderMenus(findMenus, menuCountMap);
-
+        List<OrderMenu> orderMenus = getOrderMenus(dto);
         /*
             주문 생성
         */
-        Order order = Order.createOrder(findUser, dto.isType(), orderMenus);
+        Order order = Order.createOrder(findUser, dto.getType().isType(), orderMenus);
 
         /*
             주문 저장
         */
         orderRepository.save(order);
     }
+
 
     /*
         Customer 본인 주문 내역 조회
@@ -125,7 +115,7 @@ public class OrderService {
     @Transactional(readOnly = true)
     public ResponseEntity<ResDto<ResOrderGetByIdDTO>> getBy(Long orderId) {
 
-        Order findOrder = getFindOrder(orderId);
+        Order findOrder = getOrder(orderId);
 
         List<OrderMenu> findOrderMenus = orderMenuRepository.findByOrderId(orderId);
 
@@ -141,9 +131,81 @@ public class OrderService {
         );
     }
 
-    private Order getFindOrder(Long orderId) {
-        return orderRepository.findById(orderId)
+    // 주문 취소
+    @Transactional
+    public void cancelOrder(User user, Long orderId) {
+
+        Order order = user.getRole() == Role.CUSTOMER
+                ? getOrder(user, orderId)
+                : getOrder(orderId);
+
+        order.cancelOrder();
+    }
+
+    // 주문 거절
+    @Transactional
+    public void rejectOrder(User user, Long orderId) {
+
+        List<Store> findStore = getStoreBy(user);
+
+        List<OrderMenu> findOrderMenus = getOrderMenusBy(orderId);
+
+        Order order = user.getRole() == Role.OWNER
+                ? validateOwnerAccess(findOrderMenus, findStore)
+                : getOrder(orderId);
+
+        order.rejectOrder();
+    }
+
+    /*
+        =========== private 메서드 ===========
+    */
+
+    /*
+        주문 생성 private 메서드
+    */
+
+    private List<OrderMenu> getOrderMenus(ReqOrderPostDTO dto) {
+        List<UUID> menuIds = dto.getOrderItems().stream()
+                .map(ReqOrderPostDTO.OrderItem::getMenuId)
+                .toList();
+
+        Map<UUID, Menu> menuMap = menuRepository.findByIdsAndIsDeletedFalse(menuIds).stream()
+                .collect(Collectors.toMap(Menu::getMenuId, menu -> menu));
+
+        return dto.getOrderItems().stream()
+                .map(orderItem -> createOrderMenu(orderItem, menuMap))
+                .collect(Collectors.toList());
+    }
+
+    private OrderMenu createOrderMenu(ReqOrderPostDTO.OrderItem orderItem, Map<UUID, Menu> menuMap) {
+        // 메뉴 ID로 메뉴 정보 조회
+        Menu menu = menuMap.get(orderItem.getMenuId());
+
+        // OrderMenu 객체 생성
+        return OrderMenu.builder()
+                .menu(menu)
+                .orderCount(orderItem.getCount())
+                .orderPrice(menu.getMenuPrice() * orderItem.getCount()) // 메뉴 가격 * 수량
+                .build();
+    }
+
+    /*
+        주문 조회 private 메서드
+    */
+
+    private Order getOrder(Long orderId) {
+        return orderRepository.findByIdAndIsDeletedFalse(orderId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 항목입니다."));
+    }
+
+    private Order getOrder(User user, Long orderId) {
+        return orderRepository.findByIdAndUser_UserId(orderId, user.getUserId())
+                .orElseThrow(() -> new IllegalArgumentException("접근 권한이 없습니다."));
+    }
+
+    private List<OrderMenu> getOrderMenusBy(Long orderId) {
+        return orderMenuRepository.findByOrderId(orderId);
     }
 
     private List<OrderMenu> getOrderMenusBy(List<Long> orderIds) {
@@ -156,69 +218,6 @@ public class OrderService {
                 .toList();
     }
 
-
-    // 주문 취소
-    @Transactional
-    public void cancelOrder(Long orderId) {
-        /*
-            본인 검증 메서드 추후 구현 예정
-        */
-//        private void checkOrderAccessPermission (User user, Order findOrder){
-//            if (!user.getId().equals(findOrder.getUser().getId())) {
-//                Objects.equals();
-//                throw new IllegalArgumentException("해당 주문에 대한 접근 권한이 없습니다.");
-//            }
-//        }
-//
-        Order findOrder = getOrder(orderId);
-
-        findOrder.cancelOrder();
-    }
-
-    // 주문 거절
-    @Transactional
-    public void rejectOrder(Long orderId) {
-
-        Order findOrder = getOrder(orderId);
-
-        /*
-            본인 가게 주문 검증 메서드 구현 필요
-        */
-
-        findOrder.rejectOrder();
-    }
-
-    private Order getOrder(Long orderId) {
-        return orderRepository.findOrderById(orderId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 항목입니다."));
-    }
-
-    private List<Menu> getMenus(CreateOrderReqDto dto) {
-        List<Menu> findMenus = menuRepository.findByIdsAndIsDeletedFalse(dto.getMenuIds());
-
-        if (findMenus.isEmpty()) {
-            throw new NullPointerException("메뉴 목록이 비어있습니다.");
-        }
-        return findMenus;
-    }
-
-    private static Map<Menu, Long> getMenuCountMap(CreateOrderReqDto dto, List<Menu> findMenus) {
-        /*
-            1. 클라이언트로부터 전달 받은 menuId 의 리스트를 { 메뉴 Id : 개수 } 형태로 구성된 Map 으로 생성한다.
-            2. 이때 Collectors.counting() 키 값의 개수를 세는 역할을 한다.
-            3. 이후 { 메뉴 : 메뉴의 개수 } 형태로 구성된 Map 을 생성하여 반환한다.
-        */
-        Map<UUID, Long> uuidLongMap = dto.getMenuIds().stream()
-                .collect(Collectors.groupingBy(menuId -> menuId, Collectors.counting()));
-
-        return findMenus.stream()
-                .collect(Collectors.toMap(
-                        menu -> menu,
-                        menu -> uuidLongMap.get(menu.getMenuId())
-                ));
-    }
-
-
     /*
         본인 가게 주문 조회 메서드
     */
@@ -228,8 +227,12 @@ public class OrderService {
                 .toList();
     }
 
+    private List<Store> getStoreBy(User user) {
+        return storeRepository.findByUser_UserId(user.getUserId());
+    }
+
     private List<OrderMenu> getOrderMenus(User user, UUID storeId) {
-        List<Store> findStores = storeRepository.findByUser_UserId(user.getUserId());
+        List<Store> findStores = getStoreBy(user);
 
         List<UUID> storeIds = findStores.stream()
                 .map(Store::getStoreId)
@@ -238,7 +241,23 @@ public class OrderService {
         return orderMenuRepository.findOrderMenusByStoreId(storeId, storeIds);
     }
 
-    private User getUserBy(Long userId) {
+    /*
+        주문 거절 검증 메서드
+    */
+
+    private Order validateOwnerAccess(List<OrderMenu> findOrderMenus, List<Store> findStore) {
+
+        if (!findStore.contains(findOrderMenus.get(0).getMenu().getStore())) {
+            throw new IllegalArgumentException("해당 주문에 접근할 권한이 없습니다.");
+        }
+
+        return findOrderMenus.get(0).getOrder();
+    }
+
+    /*
+        유저 조회 private 메서드
+    */
+    private User getUser(Long userId) {
         return userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 유저입니다."));
     }

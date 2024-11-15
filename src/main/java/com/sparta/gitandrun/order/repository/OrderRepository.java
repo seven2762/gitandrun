@@ -12,11 +12,13 @@ import java.util.List;
 import java.util.Optional;
 
 public interface OrderRepository extends JpaRepository<Order, Long> {
-    @Query("select o from Order o where o.id = :orderId and o.isDeleted = false ")
-    Optional<Order> findOrderById(@Param("orderId") Long orderId);
+
+    Optional<Order> findByIdAndIsDeletedFalse(Long orderId);
 
     //리뷰에서 orderId와 orderStatus 확인하기 위해 추가
     Optional<Order> findByIdAndOrderStatus(Long orderId, OrderStatus orderStatus);
+
+    Optional<Order> findByIdAndUser_UserId(Long orderId, Long userId);
 
     Page<Order> findByUser_UserIdAndIsDeletedFalse(Long userId, Pageable pageable);
 
