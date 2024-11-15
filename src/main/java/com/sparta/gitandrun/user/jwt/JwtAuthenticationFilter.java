@@ -1,11 +1,9 @@
 package com.sparta.gitandrun.user.jwt;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sparta.gitandrun.common.entity.ApiResDto;
 import com.sparta.gitandrun.user.dto.request.LoginReqDto;
-import com.sparta.gitandrun.user.dto.response.LoginResDto;
-import com.sparta.gitandrun.user.dto.response.UserApiResDto;
 import com.sparta.gitandrun.user.entity.Role;
-import com.sparta.gitandrun.user.entity.User;
 import com.sparta.gitandrun.user.security.UserDetailsImpl;
 
 import jakarta.servlet.FilterChain;
@@ -57,9 +55,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
         String token = jwtUtil.createToken(username, role);
         response.addHeader(JwtUtil.AUTHORIZATION_HEADER, token);
-        User user = ((UserDetailsImpl) authResult.getPrincipal()).getUser();
-        LoginResDto loginResDto = LoginResDto.of(user, token);
-        UserApiResDto apiResDto = new UserApiResDto("로그인이 완료되었습니다.", 200, loginResDto);
+        ApiResDto apiResDto = new ApiResDto("로그인이 완료되었습니다.", 200);
 
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");

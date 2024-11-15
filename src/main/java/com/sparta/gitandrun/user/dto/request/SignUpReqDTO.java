@@ -12,7 +12,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class SignUpReqDTO {
-    private Long userId;
     private String username;
     private String nickName;
     private String email;
