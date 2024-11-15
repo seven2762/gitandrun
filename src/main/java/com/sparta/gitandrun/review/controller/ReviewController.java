@@ -4,9 +4,9 @@ import com.sparta.gitandrun.review.dto.ReviewRequestDto;
 import com.sparta.gitandrun.review.dto.ReviewResponseDto;
 import com.sparta.gitandrun.review.entity.Review;
 import com.sparta.gitandrun.review.service.ReviewService;
-import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,7 +26,7 @@ public class ReviewController {
     private final ReviewService reviewService;
 
     //리뷰 작성
-    @PostMapping
+    @PostMapping("/write")
     public ResponseEntity<ReviewResponseDto> createReview(
             @RequestBody ReviewRequestDto requestDto,
             @RequestParam Long userId,
@@ -35,18 +35,54 @@ public class ReviewController {
         return ResponseEntity.ok(new ReviewResponseDto(review));
     }
 
-    //리뷰 전체 조회
-    @GetMapping
-    public ResponseEntity<List<ReviewResponseDto>> getAllReviews() {
-        List<ReviewResponseDto> reviews = reviewService.getAllReviews();
+    //공통 - 가게별 리뷰 조회
+    @GetMapping("/storeId/{storeId}")
+    public ResponseEntity<Page<ReviewResponseDto>> getReviewsByStore(
+            @PathVariable UUID storeId,
+            @RequestParam(defaultValue="0") int page,
+            @RequestParam(defaultValue="10") int size,
+            @RequestParam(defaultValue = "createdAt") String sortBy) {
+        Page<ReviewResponseDto> reviews = reviewService.getReviewsByStore(storeId, page, size, sortBy);
         return ResponseEntity.ok(reviews);
     }
 
-    //리뷰 단일 조회
-    @GetMapping("/{reviewId}")
+    // 사용자 - 본인 리뷰 조회
+    @GetMapping("/userId/{userId}")
+    public ResponseEntity<Page<ReviewResponseDto>> getReviewsByUser(
+            @PathVariable Long userId,
+            @RequestParam(defaultValue="0") int page,
+            @RequestParam(defaultValue="10") int size,
+            @RequestParam(defaultValue = "createdAt") String sortBy) {
+        Page<ReviewResponseDto> reviews = reviewService.getReviewsByUser(userId, page, size, sortBy);
+        return ResponseEntity.ok(reviews);
+    }
+
+    // 관리자 - 모든 리뷰 조회
+    @GetMapping("/all")
+    public ResponseEntity<Page<ReviewResponseDto>> getAllReviews(
+            @RequestParam(defaultValue="0") int page,
+            @RequestParam(defaultValue="10") int size,
+            @RequestParam(defaultValue = "createdAt") String sortBy) {
+        Page<ReviewResponseDto> reviews = reviewService.getAllReviews(page, size, sortBy);
+        return ResponseEntity.ok(reviews);
+    }
+
+    // 관리자 - 리뷰 아이디로 조회
+    @GetMapping("/reviewId/{reviewId}")
     public ResponseEntity<ReviewResponseDto> getOneReview(@PathVariable UUID reviewId) {
         ReviewResponseDto review = reviewService.getOneReview(reviewId);
         return ResponseEntity.ok(review);
+    }
+
+    // 관리자 - 키워드로 리뷰 검색
+    @GetMapping("/search")
+    public ResponseEntity<Page<ReviewResponseDto>> getReviewsByKeyword(
+            @RequestParam String keyword,
+            @RequestParam(defaultValue="0") int page,
+            @RequestParam(defaultValue="10") int size,
+            @RequestParam(defaultValue = "createdAt") String sortBy) {
+        Page<ReviewResponseDto> reviews = reviewService.getReviewsByKeyword(keyword, page, size, sortBy);
+        return ResponseEntity.ok(reviews);
     }
 
     //리뷰 수정
