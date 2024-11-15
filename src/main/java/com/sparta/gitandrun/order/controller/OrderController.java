@@ -3,11 +3,10 @@ package com.sparta.gitandrun.order.controller;
 import com.sparta.gitandrun.common.entity.ApiResDto;
 import com.sparta.gitandrun.order.dto.req.CreateOrderReqDto;
 import com.sparta.gitandrun.order.dto.res.ResDto;
-import com.sparta.gitandrun.order.dto.res.ResOrderGetByIdDTO;
 import com.sparta.gitandrun.order.dto.res.ResOrderGetByCustomerDTO;
+import com.sparta.gitandrun.order.dto.res.ResOrderGetByIdDTO;
 import com.sparta.gitandrun.order.dto.res.ResOrderGetByOwnerDTO;
 import com.sparta.gitandrun.order.service.OrderService;
-import com.sparta.gitandrun.user.entity.Role;
 import com.sparta.gitandrun.user.security.UserDetailsImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -18,6 +17,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.UUID;
 
 @RequestMapping("/order")
 @RestController
@@ -65,10 +66,10 @@ public class OrderController {
     @GetMapping("/owner")
     public ResponseEntity<ResDto<ResOrderGetByOwnerDTO>> getByOwner(
             @AuthenticationPrincipal UserDetailsImpl userDetails,
-            @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+            @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
+            @RequestParam(name = "storeId", required = false)UUID storeId) {
 
-        System.out.println("사장 주문 조회");
-        return orderService.getByOwner(userDetails.getUser(), pageable);
+        return orderService.getByOwner(userDetails.getUser(), pageable, storeId);
     }
 
     /*
