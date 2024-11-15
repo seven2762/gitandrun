@@ -1,7 +1,7 @@
 package com.sparta.gitandrun.order.controller;
 
 import com.sparta.gitandrun.common.entity.ApiResDto;
-import com.sparta.gitandrun.order.dto.req.CreateOrderReqDto;
+import com.sparta.gitandrun.order.dto.req.ReqOrderPostDTO;
 import com.sparta.gitandrun.order.dto.res.ResDto;
 import com.sparta.gitandrun.order.dto.res.ResOrderGetByCustomerDTO;
 import com.sparta.gitandrun.order.dto.res.ResOrderGetByIdDTO;
@@ -32,12 +32,13 @@ public class OrderController {
         1. @Secured("CUSTOMER") 추후 접근 권한 처리
         2. 매개변수로 User 추가할 것
     */
+    @Secured("ROLE_CUSTOMER")
     @PostMapping
     public ResponseEntity<ApiResDto> createOrder(
             @AuthenticationPrincipal UserDetailsImpl userDetails,
-            @RequestBody CreateOrderReqDto dto) {
+            @RequestBody ReqOrderPostDTO dto) {
 
-        orderService.createOrder(dto);
+        orderService.createOrder(userDetails.getUser(), dto);
 
         return ResponseEntity.ok().body(new ApiResDto("주문 완료", HttpStatus.OK.value()));
     }
