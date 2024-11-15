@@ -1,5 +1,6 @@
 package com.sparta.gitandrun.user.entity;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.sparta.gitandrun.common.entity.BaseEntity;
 import com.sparta.gitandrun.store.entity.Store;
 import jakarta.persistence.*;
@@ -43,6 +44,7 @@ public class User extends BaseEntity {
 
     // User가 Store 정보를 가져올 수 있게 추가
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)  // Store와의 관계 설정
+    @JsonManagedReference // 순환 참조 방지
     private List<Store> stores;
 
     @Column(name = "is_deleted", nullable = false)
