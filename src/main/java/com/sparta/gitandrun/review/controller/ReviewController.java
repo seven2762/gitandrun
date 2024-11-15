@@ -26,7 +26,7 @@ public class ReviewController {
     private final ReviewService reviewService;
 
     //리뷰 작성
-    @PostMapping
+    @PostMapping("/write")
     public ResponseEntity<ReviewResponseDto> createReview(
             @RequestBody ReviewRequestDto requestDto,
             @RequestParam Long userId,
