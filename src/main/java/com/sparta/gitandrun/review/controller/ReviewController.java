@@ -4,12 +4,10 @@ import com.sparta.gitandrun.review.dto.ReviewRequestDto;
 import com.sparta.gitandrun.review.dto.ReviewResponseDto;
 import com.sparta.gitandrun.review.entity.Review;
 import com.sparta.gitandrun.review.service.ReviewService;
-import com.sparta.gitandrun.user.entity.User;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -48,26 +46,25 @@ public class ReviewController {
     }
 
     //리뷰 단일 조회
-    @GetMapping("/{reviewId}")
+    @GetMapping("/reviewId/{reviewId}")
     public ResponseEntity<ReviewResponseDto> getOneReview(@PathVariable UUID reviewId) {
         ReviewResponseDto review = reviewService.getOneReview(reviewId);
         return ResponseEntity.ok(review);
     }
 
-    //현재 로그인한 사용자가 쓴 리뷰 조회
-    @GetMapping("/my-reviews")
-    public ResponseEntity<Page<ReviewResponseDto>> getReviewsByCurrentUser(
-            @AuthenticationPrincipal User user,  // 로그인한 사용자 정보를 가져옴
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
+    //userId로 조회
+    @GetMapping("/userId/{userId}")
+    public ResponseEntity<Page<ReviewResponseDto>> getReviewsByUser(
+            @PathVariable Long userId,
+            @RequestParam(defaultValue="0") int page,
+            @RequestParam(defaultValue="10") int size,
             @RequestParam(defaultValue = "createdAt") String sortBy) {
-        // 로그인한 사용자의 ID를 이용해 해당 사용자의 리뷰를 조회
-        Page<ReviewResponseDto> reviews = reviewService.getReviewsByUser(user.getUserId(), page, size, sortBy);
+        Page<ReviewResponseDto> reviews = reviewService.getReviewsByUser(userId, page, size, sortBy);
         return ResponseEntity.ok(reviews);
     }
 
     //storeId로 조회
-    @GetMapping("/{storeId}")
+    @GetMapping("/storeId/{storeId}")
     public ResponseEntity<Page<ReviewResponseDto>> getReviewsByStore(
             @PathVariable UUID storeId,
             @RequestParam(defaultValue="0") int page,
