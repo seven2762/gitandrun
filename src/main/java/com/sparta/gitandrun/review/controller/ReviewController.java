@@ -35,35 +35,7 @@ public class ReviewController {
         return ResponseEntity.ok(new ReviewResponseDto(review));
     }
 
-    //리뷰 전체 조회
-    @GetMapping("/all")
-    public ResponseEntity<Page<ReviewResponseDto>> getAllReviews(
-            @RequestParam(defaultValue="0") int page,
-            @RequestParam(defaultValue="10") int size,
-            @RequestParam(defaultValue = "createdAt") String sortBy) {
-        Page<ReviewResponseDto> reviews = reviewService.getAllReviews(page, size, sortBy);
-        return ResponseEntity.ok(reviews);
-    }
-
-    //리뷰 단일 조회
-    @GetMapping("/reviewId/{reviewId}")
-    public ResponseEntity<ReviewResponseDto> getOneReview(@PathVariable UUID reviewId) {
-        ReviewResponseDto review = reviewService.getOneReview(reviewId);
-        return ResponseEntity.ok(review);
-    }
-
-    //userId로 조회
-    @GetMapping("/userId/{userId}")
-    public ResponseEntity<Page<ReviewResponseDto>> getReviewsByUser(
-            @PathVariable Long userId,
-            @RequestParam(defaultValue="0") int page,
-            @RequestParam(defaultValue="10") int size,
-            @RequestParam(defaultValue = "createdAt") String sortBy) {
-        Page<ReviewResponseDto> reviews = reviewService.getReviewsByUser(userId, page, size, sortBy);
-        return ResponseEntity.ok(reviews);
-    }
-
-    //storeId로 조회
+    //공통 - 가게별 리뷰 조회
     @GetMapping("/storeId/{storeId}")
     public ResponseEntity<Page<ReviewResponseDto>> getReviewsByStore(
             @PathVariable UUID storeId,
@@ -74,7 +46,35 @@ public class ReviewController {
         return ResponseEntity.ok(reviews);
     }
 
-    //reviewContent에서 키워드로 검색
+    // 사용자 - 본인 리뷰 조회
+    @GetMapping("/userId/{userId}")
+    public ResponseEntity<Page<ReviewResponseDto>> getReviewsByUser(
+            @PathVariable Long userId,
+            @RequestParam(defaultValue="0") int page,
+            @RequestParam(defaultValue="10") int size,
+            @RequestParam(defaultValue = "createdAt") String sortBy) {
+        Page<ReviewResponseDto> reviews = reviewService.getReviewsByUser(userId, page, size, sortBy);
+        return ResponseEntity.ok(reviews);
+    }
+
+    // 관리자 - 모든 리뷰 조회
+    @GetMapping("/all")
+    public ResponseEntity<Page<ReviewResponseDto>> getAllReviews(
+            @RequestParam(defaultValue="0") int page,
+            @RequestParam(defaultValue="10") int size,
+            @RequestParam(defaultValue = "createdAt") String sortBy) {
+        Page<ReviewResponseDto> reviews = reviewService.getAllReviews(page, size, sortBy);
+        return ResponseEntity.ok(reviews);
+    }
+
+    // 관리자 - 리뷰 아이디로 조회
+    @GetMapping("/reviewId/{reviewId}")
+    public ResponseEntity<ReviewResponseDto> getOneReview(@PathVariable UUID reviewId) {
+        ReviewResponseDto review = reviewService.getOneReview(reviewId);
+        return ResponseEntity.ok(review);
+    }
+
+    // 관리자 - 키워드로 리뷰 검색
     @GetMapping("/search")
     public ResponseEntity<Page<ReviewResponseDto>> getReviewsByKeyword(
             @RequestParam String keyword,
