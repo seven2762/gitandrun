@@ -97,7 +97,7 @@ public class OrderController {
    */
     @Secured({"ROLE_OWNER", "ROLE_MANAGER"})
     @PatchMapping("/{orderId}/reject")
-    private ResponseEntity<ApiResDto> rejectOrder(@AuthenticationPrincipal UserDetailsImpl userDetails,
+    public ResponseEntity<ApiResDto> rejectOrder(@AuthenticationPrincipal UserDetailsImpl userDetails,
                                                   @PathVariable("orderId") Long orderId) {
 
         orderService.rejectOrder(userDetails.getUser(), orderId);
