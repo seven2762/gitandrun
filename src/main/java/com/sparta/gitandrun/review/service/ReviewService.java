@@ -13,8 +13,11 @@ import com.sparta.gitandrun.user.entity.User;
 import com.sparta.gitandrun.user.repository.UserRepository;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -52,10 +55,10 @@ public class ReviewService {
     }
 
     //리뷰 전체 조회
-    public List<ReviewResponseDto> getAllReviews() {
-        return reviewRepository.findAll().stream()
-                .map(ReviewResponseDto::new)
-                .toList();
+    public Page<ReviewResponseDto> getAllReviews(int page, int size, String sortBy) {
+        Pageable pageable = optionPageable(page, size, sortBy);
+        Page<Review> reviews = reviewRepository.findAll(pageable);
+        return reviews.map(ReviewResponseDto::new);
     }
 
     //리뷰 아이디로 조회
@@ -65,28 +68,25 @@ public class ReviewService {
     }
 
     //userId로 조회
-    public List<ReviewResponseDto> getReviewsByUser(Long userId) {
+    public Page<ReviewResponseDto> getReviewsByUser(Long userId, int page, int size, String sortBy) {
         User user = getUser(userId);
-        List<Review> reviews = reviewRepository.findByUser(user);
-        return reviews.stream()
-                .map(ReviewResponseDto::new)
-                .toList();
+        Pageable pageable = optionPageable(page, size, sortBy);
+        Page<Review> reviews = reviewRepository.findByUser(user, pageable);
+        return reviews.map(ReviewResponseDto::new);
     }
 
     //storeId로 조회
-    public List<ReviewResponseDto> getReviewsByStore(UUID storeId) {
-        List<Review> reviews = reviewRepository.findByStoreId(storeId);
-        return reviews.stream()
-                .map(ReviewResponseDto::new)
-                .toList();
+    public Page<ReviewResponseDto> getReviewsByStore(UUID storeId, int page, int size, String sortBy) {
+        Pageable pageable = optionPageable(page, size, sortBy);
+        Page<Review> reviews = reviewRepository.findByStoreId(storeId, pageable);
+        return reviews.map(ReviewResponseDto::new);
     }
 
     //리뷰내용 키워드로 검색
-    public List<ReviewResponseDto> getReviewsByKeyword(String keyword) {
-        List<Review> reviews = reviewRepository.findByReviewContentContaining(keyword);
-        return reviews.stream()
-                .map(ReviewResponseDto::new)
-                .toList();
+    public Page<ReviewResponseDto> getReviewsByKeyword(String keyword, int page, int size, String sortBy) {
+        Pageable pageable = optionPageable(page, size, sortBy);
+        Page<Review> reviews = reviewRepository.findByReviewContentContaining(keyword, pageable);
+        return reviews.map(ReviewResponseDto::new);
     }
 
     //리뷰 수정
@@ -123,5 +123,12 @@ public class ReviewService {
     private Review getReview(UUID reviewId) {
         return reviewRepository.findById(reviewId)
                 .orElseThrow(() -> new IllegalArgumentException("리뷰를 찾을 수 없습니다."));
+    }
+
+    //페이지 처리 옵션
+    private Pageable optionPageable(int page, int size, String sortBy) {
+        // 기본 정렬 = createdAt, 정렬 추가 updatedAt
+        Sort sort = Sort.by(sortBy.equals("updatedAt") ? Sort.Order.desc("updatedAt") : Sort.Order.desc("createdAt"));
+        return PageRequest.of(page, size, sort);
     }
 }
