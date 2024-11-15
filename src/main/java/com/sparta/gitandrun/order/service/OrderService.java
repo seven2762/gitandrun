@@ -115,7 +115,7 @@ public class OrderService {
     @Transactional(readOnly = true)
     public ResponseEntity<ResDto<ResOrderGetByIdDTO>> getBy(Long orderId) {
 
-        Order findOrder = getFindOrder(orderId);
+        Order findOrder = getOrder(orderId);
 
         List<OrderMenu> findOrderMenus = orderMenuRepository.findByOrderId(orderId);
 
@@ -200,12 +200,7 @@ public class OrderService {
     */
 
     private Order getOrder(Long orderId) {
-        return orderRepository.findOrderById(orderId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 항목입니다."));
-    }
-
-    private Order getFindOrder(Long orderId) {
-        return orderRepository.findById(orderId)
+        return orderRepository.findByIdAndIsDeletedFalse(orderId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 항목입니다."));
     }
 
