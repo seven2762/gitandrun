@@ -68,15 +68,17 @@ public class ReviewController {
         return new ApiResDto("리뷰 조회 성공", 200, reviews);
     }
 
-    // 사용자 - 본인 리뷰 조회
-    @GetMapping("/userId/{userId}")
-    public ResponseEntity<Page<ReviewResponseDto>> getReviewsByUser(
-            @PathVariable Long userId,
+    // CUSTOEMR, OWNER - 본인이 작성한 리뷰 조회
+    @Secured({"ROLE_CUSTOMER", "ROLE_OWNER"})
+    @GetMapping("/user/myreviews")
+    public ResponseEntity<ApiResDto> getMyReviewsByUserId(
+            @AuthenticationPrincipal UserDetailsImpl userDetails,
             @RequestParam(defaultValue="0") int page,
             @RequestParam(defaultValue="10") int size,
             @RequestParam(defaultValue = "createdAt") String sortBy) {
-        Page<ReviewResponseDto> reviews = reviewService.getReviewsByUser(userId, page, size, sortBy);
-        return ResponseEntity.ok(reviews);
+        Long userId = userDetails.getUser().getUserId();
+        Page<UserReviewResponseDto> reviews = reviewService.getMyReviewsByUserId(userId, page, size, sortBy);
+        return ResponseEntity.ok().body(new ApiResDto("본인 리뷰 조회 성공", HttpStatus.OK.value(), reviews));
     }
 
     // 관리자 - 모든 리뷰 검색 (키워드)

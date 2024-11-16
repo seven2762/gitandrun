@@ -83,13 +83,13 @@ public class ReviewService {
         return reviews.map(UserReviewResponseDto::new);
     }
 
-    // 사용자 - 본인 리뷰 조회
+    // CUSTOEMR, OWNER - 본인이 작성한 리뷰 조회
     @Transactional(readOnly = true)
-    public Page<ReviewResponseDto> getReviewsByUser(Long userId, int page, int size, String sortBy) {
-        User user = getUser(userId);
+    public Page<UserReviewResponseDto> getMyReviewsByUserId(Long userId, int page, int size, String sortBy) {
         Pageable pageable = optionPageable(page, size, sortBy);
-        Page<Review> reviews = reviewRepository.findByUser(user, pageable);
-        return reviews.map(ReviewResponseDto::new);
+        Page<Review> reviews = reviewRepository.findByUserId(userId, pageable);
+        reviewEmpty(reviews);
+        return reviews.map(UserReviewResponseDto::new);
     }
 
     // 관리자 - 모든 리뷰 검색 (키워드)
