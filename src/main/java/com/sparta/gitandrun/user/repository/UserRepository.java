@@ -5,18 +5,17 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
 
-public interface UserRepository extends JpaRepository<User, Long> {
+import java.util.Optional;
+
+public interface UserRepository extends JpaRepository<User, Long> , UserRepositoryCustom {
 
     Optional<User> findByPhone(String phone);
 
-    @Query("select u from User u where u.isDeleted = false")
-    List<User> findAllActiveUsers();
 
     @Query("select u from User u where u.isDeleted = false and u.phone = :phone")
     Optional<User> findActiveUserByPhone(@Param("phone") String phone);
     Optional<User> findByEmail(String email);
+    Optional<User> findByUsername(String username);
+    Optional<User> findByNickName(String nickName);
 }
