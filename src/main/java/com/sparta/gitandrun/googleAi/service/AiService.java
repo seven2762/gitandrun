@@ -5,8 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sparta.gitandrun.googleAi.dto.AiDto;
 import com.sparta.gitandrun.googleAi.entity.Ai;
 import com.sparta.gitandrun.googleAi.repository.AiRepository;
-import com.sparta.gitandrun.menu.dto.MenuResponseDto;
-import com.sparta.gitandrun.menu.entity.Menu;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import okhttp3.*;
 import org.json.JSONArray;
@@ -14,13 +13,15 @@ import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 
 @Service
 @RequiredArgsConstructor
 public class AiService {
+
+    @Value("${google-api-url}")
+    private String SECRET_URL;
 
     @Value("${google-api-key}")
     private String SECRET_KEY;
@@ -30,9 +31,11 @@ public class AiService {
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
     //CREATE
+    @Transactional
     public String createQuestion(String text) {
 
-        String url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + SECRET_KEY;
+        String url = SECRET_URL + SECRET_KEY;
+        System.out.println(url);
 
         JSONObject jsonObject0 = new JSONObject(); // contents Field 생성
         JSONArray contents = new JSONArray();
@@ -64,7 +67,8 @@ public class AiService {
             jsonNode = objectMapper.readTree(response.body().string());
              }
         catch (IOException e) {
-            throw new RuntimeException("잘못된 Response 입니다.");
+            throw new RuntimeException("" +
+                    "잘못된 Response 입니다.");
         }
 
         String answer = jsonNode.path("candidates")
@@ -83,12 +87,8 @@ public class AiService {
 
     //Read ( 전체 조회 )
     public List<AiDto> getAllQuestions() {
-        List<Ai> aiList = aiRepository.findAll();
-        List<AiDto> responseDtoList = new ArrayList<>();
-        for (Ai ai : aiList) {
-            responseDtoList.add(new AiDto(ai));
-        }
-        return responseDtoList;
-
+        return aiRepository.findAll().stream()
+                .map(AiDto::new)
+                .toList();
     }
 }
