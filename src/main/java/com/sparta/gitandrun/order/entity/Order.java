@@ -83,4 +83,10 @@ public class Order extends BaseEntity {
         }
         this.orderStatus = OrderStatus.REJECT;
     }
+
+    // == 주문상태 변경 메서드 == //
+    public Order completeOrder() {
+        this.orderStatus = OrderStatus.COMPLETED;
+        return this;
+    }
 }
