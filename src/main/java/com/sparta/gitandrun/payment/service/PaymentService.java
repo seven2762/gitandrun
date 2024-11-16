@@ -23,13 +23,7 @@ public class PaymentService {
     @Transactional
     public void createPayment(User user, ReqPaymentPostDTO dto) {
 
-        // 1. 주문 정보 조회
         Order findOrder = getOrder(user, dto.getOrderInfo().getOrderId());
-
-        // 2. 주문 상태 확인
-        if (findOrder.getOrderStatus() != OrderStatus.PENDING) {
-            throw new IllegalArgumentException("결제가 불가능한 상태의 주문입니다.");
-        }
 
         Payment payment = Payment.createPayment(dto.getOrderInfo().getPrice(), findOrder, user);
 

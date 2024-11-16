@@ -89,4 +89,9 @@ public class Order extends BaseEntity {
         this.orderStatus = OrderStatus.COMPLETED;
         return this;
     }
+
+    // == 조회 메서드 == //
+    public int getTotalPrice() {
+        return orderMenus.stream().mapToInt(OrderMenu::getOrderPrice).sum();
+    }
 }

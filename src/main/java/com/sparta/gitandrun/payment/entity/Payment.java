@@ -2,6 +2,7 @@ package com.sparta.gitandrun.payment.entity;
 
 import com.sparta.gitandrun.common.entity.BaseEntity;
 import com.sparta.gitandrun.order.entity.Order;
+import com.sparta.gitandrun.order.entity.OrderStatus;
 import com.sparta.gitandrun.user.entity.User;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -46,6 +47,17 @@ public class Payment extends BaseEntity {
 
     // == 생성 메서드 == //
     public static Payment createPayment(int paymentPrice, Order order, User user) {
+
+        // 주문 금액 확인
+        if (paymentPrice != order.getTotalPrice()) {
+            throw new IllegalArgumentException("결제 금액이 주문 총 금액과 일치하지 않습니다.");
+        }
+
+        // 주문 상태 확인
+        if (order.getOrderStatus() != OrderStatus.PENDING) {
+            throw new IllegalArgumentException("결제가 불가능한 상태의 주문입니다.");
+        }
+
         return Payment.builder()
                 .paymentPrice(paymentPrice)
                 .order(order.completeOrder())
