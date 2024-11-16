@@ -26,7 +26,7 @@ public class StoreController {
     private final StoreService storeService;
     private final JwtUtil jwtUtil;
 
-    @Secured("ROLE_ADMIN")
+    @Secured({"ROLE_ADMIN", "ROLE_MANAGER"})
     @PostMapping("/admin")
     public ResponseEntity<ApiResDto> createStore(
             @RequestBody StoreRequestDto storeRequestDto,
@@ -49,7 +49,7 @@ public class StoreController {
     }
 
     // ADMIN 전체 가게 조회
-    @Secured("ROLE_ADMIN")
+    @Secured({"ROLE_ADMIN", "ROLE_MANAGER"})
     @GetMapping("/admin")
     public ResponseEntity<ApiResDto> getAllStores() {
         try {
@@ -90,7 +90,7 @@ public class StoreController {
     }
 
     // 관리자용 가게 수정
-    @Secured("ROLE_ADMIN")
+    @Secured({"ROLE_ADMIN", "ROLE_MANAGER"})
     @PatchMapping("/admin/{storeId}")
     public ResponseEntity<ApiResDto> updateStoreByAdmin(
             @PathVariable UUID storeId,
@@ -122,7 +122,7 @@ public class StoreController {
     }
 
     // 관리자용 가게 소프트 딜리트
-    @Secured("ROLE_ADMIN")
+    @Secured({"ROLE_ADMIN", "ROLE_MANAGER"})
     @DeleteMapping("/admin/{storeId}")
     public ResponseEntity<ApiResDto> softDeleteStoreByAdmin(@PathVariable UUID storeId) {
         try {
@@ -136,7 +136,7 @@ public class StoreController {
     }
 
     // 사용자용 가게 소프트 딜리트
-    @Secured("ROLE_OWNER")
+    @Secured({"ROLE_ADMIN", "ROLE_MANAGER"})
     @DeleteMapping("/{storeId}")
     public ResponseEntity<ApiResDto> softDeleteStoreByUser(
             @PathVariable UUID storeId,
@@ -152,7 +152,7 @@ public class StoreController {
     }
 
     // 카테고리로 검색 (관리자용)
-    @Secured("ROLE_ADMIN")
+    @Secured({"ROLE_ADMIN", "ROLE_MANAGER"})
     @GetMapping("/admin/search/category")
     public ResponseEntity<ApiResDto> searchStoresByCategoryAsAdmin(
             @RequestParam UUID categoryId,
@@ -188,7 +188,7 @@ public class StoreController {
     }
 
     // 키워드로 검색 (관리자용)
-    @Secured("ROLE_ADMIN")
+    @Secured({"ROLE_ADMIN", "ROLE_MANAGER"})
     @GetMapping("/admin/search/keyword")
     public ResponseEntity<ApiResDto> searchStoresByKeywordAsAdmin(
             @RequestParam String keyword,

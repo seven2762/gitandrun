@@ -30,7 +30,7 @@ public class CategoryController {
     }
 
     // 새로운 카테고리 추가
-    @Secured("ROLE_ADMIN")
+    @Secured({"ROLE_ADMIN", "ROLE_MANAGER"})
     @PostMapping
     public ResponseEntity<ApiResDto> createCategory(@RequestBody CategoryRequestDto categoryRequest) {
         try {
@@ -44,7 +44,7 @@ public class CategoryController {
     }
 
     // 카테고리 수정
-    @Secured("ROLE_ADMIN")
+    @Secured({"ROLE_ADMIN", "ROLE_MANAGER"})
     @PatchMapping("/{categoryId}")
     public ResponseEntity<ApiResDto> updateCategory(@PathVariable UUID categoryId, @RequestBody CategoryRequestDto categoryRequest) {
         try {
@@ -58,7 +58,7 @@ public class CategoryController {
     }
 
     // 카테고리 삭제
-    @Secured("ROLE_ADMIN")
+    @Secured({"ROLE_ADMIN", "ROLE_MANAGER"})
     @DeleteMapping("/{categoryId}")
     public ResponseEntity<ApiResDto> deleteCategory(@PathVariable UUID categoryId) {
         try {

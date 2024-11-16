@@ -19,20 +19,6 @@ public class CategoryService {
         this.categoryRepository = categoryRepository;
     }
 
-//    @PostConstruct
-//    @Transactional
-//    public void initializeCategories() {
-//        if (categoryRepository.count() == 0) {
-//            categoryRepository.saveAll(List.of(
-//                    new Category(UUID.fromString("11111111-1111-1111-1111-111111111111"), "KOREAN"),
-//                    new Category(UUID.fromString("22222222-2222-2222-2222-222222222222"), "CHINESE"),
-//                    new Category(UUID.fromString("33333333-3333-3333-3333-333333333333"), "SNACK"),
-//                    new Category(UUID.fromString("44444444-4444-4444-4444-444444444444"), "CHICKEN"),
-//                    new Category(UUID.fromString("55555555-5555-5555-5555-555555555555"), "PIZZA")
-//            ));
-//        }
-//    }
-
     @PostConstruct
     @Transactional
     public void initializeCategories() {
@@ -54,12 +40,14 @@ public class CategoryService {
         return categoryRepository.save(category);
     }
 
-    // 카테고리 조회 메서드
+    // 카테고리 조회 메서드 (읽기 전용)
+    @Transactional(readOnly = true)
     public Optional<Category> getCategoryById(UUID id) {
         return categoryRepository.findById(id);
     }
 
-    // 모든 카테고리를 조회하는 메서드
+    // 모든 카테고리를 조회하는 메서드 (읽기 전용)
+    @Transactional(readOnly = true)
     public List<Category> getAllCategories() {
         return categoryRepository.findAll();
     }

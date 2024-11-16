@@ -22,11 +22,12 @@ public class RegionService {
     @PostConstruct
     @Transactional
     public void initializeRegions() {
-        Optional<Region> existingRegion = regionRepository.findById(1L);
-        if (existingRegion.isEmpty()) {
+        // region_id = 1이 존재하지 않는 경우에만 지역 데이터 생성
+        if (regionRepository.findById(1L).isEmpty()) {
             Region seoulRegion = new Region();
+            seoulRegion.setRegionId(1L);  // region_id를 명시적으로 설정
             seoulRegion.setRegionName("서울시");
-            seoulRegion.setHirnkRegionId(null);  // 최상위 지역일 경우 null로 설정
+            seoulRegion.setHirnkRegionId(null);  // 최상위 지역이므로 null
             regionRepository.save(seoulRegion);
         }
     }
@@ -38,14 +39,14 @@ public class RegionService {
         return regionRepository.save(region);
     }
 
-
-    // 지역 전체 조회
-    // Readonly
+    // 지역 전체 조회 (읽기 전용)
+    @Transactional(readOnly = true)
     public List<Region> getAllRegions() {
         return regionRepository.findAll();
     }
 
-    // 지역 ID로 조회
+    // 지역 ID로 조회 (읽기 전용)
+    @Transactional(readOnly = true)
     public Optional<Region> getRegionById(Long regionId) {
         return regionRepository.findById(regionId);
     }
