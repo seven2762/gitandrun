@@ -57,7 +57,7 @@ public class RegionController {
 
     // 지역 수정
     @Secured({"ROLE_ADMIN", "ROLE_MANAGER"})
-    @PutMapping("/{regionId}")
+    @PatchMapping("/{regionId}")
     public ResponseEntity<ApiResDto> updateRegion(@PathVariable Long regionId,
                                                   @RequestBody RegionRequestDto regionRequest) {
         try {
