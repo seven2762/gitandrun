@@ -7,9 +7,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-import java.util.Map;
-
 import static jakarta.persistence.FetchType.LAZY;
 
 @Entity
@@ -45,23 +42,5 @@ public class OrderMenu {
     // == 연관관계 메서드 == //
     public void updateOrder(Order order) {
         this.order = order;
-    }
-
-    // == 생성 메서드 == //
-    public static List<OrderMenu> createOrderMenus(List<Menu> menus, Map<Menu, Long> menuCountMap) {
-
-        return menus.stream()
-                .map(
-                        menu -> {
-                            int count = menuCountMap.get(menu).intValue();
-
-                            return OrderMenu.builder()
-                                    .menu(menu)
-                                    .orderCount(count)
-                                    .orderPrice(menu.getMenuPrice() * count)
-                                    .build();
-                        }
-                )
-                .toList();
     }
 }
