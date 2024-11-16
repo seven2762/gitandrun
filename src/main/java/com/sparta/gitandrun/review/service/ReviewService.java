@@ -13,8 +13,6 @@ import com.sparta.gitandrun.order.repository.OrderRepository;
 import com.sparta.gitandrun.store.entity.Store;
 import com.sparta.gitandrun.store.repository.StoreRepository;
 import com.sparta.gitandrun.user.entity.Role;
-import com.sparta.gitandrun.user.entity.User;
-import com.sparta.gitandrun.user.repository.UserRepository;
 import com.sparta.gitandrun.user.security.UserDetailsImpl;
 import java.util.List;
 import java.util.UUID;
@@ -31,7 +29,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class ReviewService {
 
     private final ReviewRepository reviewRepository;
-    private final UserRepository userRepository;
     private final OrderRepository orderRepository;
     private final OrderMenuRepository orderMenuRepository;
     private final StoreRepository storeRepository;
@@ -167,8 +164,11 @@ public class ReviewService {
 
     //페이지 처리 옵션
     private Pageable optionPageable(int page, int size, String sortBy) {
-        // 기본 정렬 = createdAt, 정렬 추가 updatedAt
         String sortField = "updatedAt".equals(sortBy) ? "updatedAt" : "createdAt";
+
+        if (size != 10 && size != 30 && size != 50) {
+            throw new IllegalArgumentException("페이지 크기는 10, 30, 50 중 하나로 설정해야 합니다.");
+        }
         return PageRequest.of(page, size, Sort.by(Sort.Order.desc(sortField)));
     }
 
