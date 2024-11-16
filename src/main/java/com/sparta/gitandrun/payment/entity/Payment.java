@@ -49,16 +49,10 @@ public class Payment extends BaseEntity {
     }
 
     // == 생성 메서드 == //
-    public static Payment createPayment(int paymentPrice, List<OrderMenu> orderMenus, User user) {
-
-        Order order = orderMenus.get(0).getOrder();
-
-        if (!order.getUser().getUserId().equals(user.getUserId())) {
-            throw new IllegalArgumentException("접근 권한이 없습니다.");
-        }
+    public static Payment createPayment(int paymentPrice, Order order, User user) {
 
         // 주문 금액 확인
-        if (paymentPrice != orderMenus.stream().mapToInt(OrderMenu::getOrderPrice).sum()) {
+        if (paymentPrice != order.getTotalPrice()) {
             throw new IllegalArgumentException("결제 금액이 주문 총 금액과 일치하지 않습니다.");
         }
 
