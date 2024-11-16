@@ -3,6 +3,7 @@ package com.sparta.gitandrun.menu.dto;
 import com.sparta.gitandrun.menu.entity.Menu;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -10,9 +11,11 @@ import java.util.List;
 import java.util.UUID;
 
 @Getter
+@Setter
 @NoArgsConstructor
 public class MenuResponseDto {
 
+    private UUID storeId;
     private UUID menuId;
     private String menuName;
     private int menuPrice;
@@ -30,6 +33,7 @@ public class MenuResponseDto {
     private List<MenuResponseDto> menuList = new ArrayList<>();
 
     public MenuResponseDto(Menu menu) {
+        this.storeId = menu.getStore().getStoreId();
         this.menuId = menu.getMenuId();
         this.menuName = menu.getMenuName();
         this.menuPrice = menu.getMenuPrice();
@@ -38,9 +42,5 @@ public class MenuResponseDto {
         this.createdBy = "test create user";
         this.updatedAt = menu.getUpdatedAt();
         this.updatedBy = "test update user";
-//        this.isDeleted = menu.getIsDeleted();
-//        this.deletedAt = menu.getDeletedAt();
-//        this.deletedBy = menu.getDeletedBy();
     }
-
 }

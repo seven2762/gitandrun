@@ -4,10 +4,13 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Getter
 @Setter
 public class MenuRequestDto {
+
+    private UUID menuId;
 
     private String menuName;
 
@@ -29,5 +32,6 @@ public class MenuRequestDto {
 
     private String deletedBy;
 
+    private UUID storeId;
 
 }
