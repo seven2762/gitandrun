@@ -20,4 +20,7 @@ public interface MenuRepository extends JpaRepository<Menu, UUID> {
 
     @Query("select m from Menu m where m.store.storeId =:storeId")
     List<Menu> findAllByStoreId(@Param("storeId") UUID storeId);
+
+    @Query("SELECT m FROM Menu m JOIN m.store s WHERE s.storeName LIKE %:storeName%")
+    Page<Menu> findMenusByStoreName(@Param("storeName") String storeName, Pageable pageable);
 }

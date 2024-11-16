@@ -3,6 +3,7 @@ package com.sparta.gitandrun.menu.dto;
 import com.sparta.gitandrun.menu.entity.Menu;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -10,6 +11,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Getter
+@Setter
 @NoArgsConstructor
 public class MenuResponseDto {
 
@@ -40,9 +42,5 @@ public class MenuResponseDto {
         this.createdBy = "test create user";
         this.updatedAt = menu.getUpdatedAt();
         this.updatedBy = "test update user";
-//        this.isDeleted = menu.getIsDeleted();
-//        this.deletedAt = menu.getDeletedAt();
-//        this.deletedBy = menu.getDeletedBy();
     }
-
 }

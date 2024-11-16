@@ -4,6 +4,7 @@ package com.sparta.gitandrun.menu.controller;
 import com.sparta.gitandrun.common.entity.ApiResDto;
 import com.sparta.gitandrun.menu.dto.MenuRequestDto;
 import com.sparta.gitandrun.menu.dto.MenuResponseDto;
+import com.sparta.gitandrun.menu.dto.StoreWithMenusDto;
 import com.sparta.gitandrun.menu.service.MenuService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -54,12 +55,18 @@ public class MenuController {
     }
 
     //READ 가게 이름에 메뉴명이 들어가는 가게 조회 및 가게의 메뉴들 조회
-//    @GetMapping("/search")
-//    public List<MenuResponseDto> getOneStoreMenus(){
-//        return menuService.getStoreMenus();
-//    }
+    @GetMapping("/search/store")
+    public ResponseEntity<ApiResDto> getStoreAndMenus(
+            @RequestParam String storeName,
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        Page<StoreWithMenusDto> StoreAndMenu = menuService.getStoreAndMenus(storeName, sortBy, page, size);
+        return ResponseEntity.ok().body(new ApiResDto("메뉴명 기반 가게 검색 완료", HttpStatus.OK.value(), StoreAndMenu));
+    }
 
-    //READ ony One
+
+        //READ ony One
     @GetMapping("/{id}")
     public MenuResponseDto getOneMenu(@PathVariable("id") UUID menuId){
         return menuService.getOneMenu(menuId);
