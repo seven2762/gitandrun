@@ -1,14 +1,21 @@
 package com.sparta.gitandrun.payment.service;
 
+import com.sparta.gitandrun.order.dto.res.ResDto;
 import com.sparta.gitandrun.order.entity.Order;
 import com.sparta.gitandrun.order.repository.OrderRepository;
+import com.sparta.gitandrun.payment.dto.req.ReqPaymentCondDTO;
 import com.sparta.gitandrun.payment.dto.req.ReqPaymentPostDTO;
+import com.sparta.gitandrun.payment.dto.res.ResPaymentGetByCustomerDTO;
 import com.sparta.gitandrun.payment.entity.Payment;
 import com.sparta.gitandrun.payment.repository.PaymentRepository;
 import com.sparta.gitandrun.user.entity.Role;
 import com.sparta.gitandrun.user.entity.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,7 +26,7 @@ public class PaymentService {
 
     private final PaymentRepository paymentRepository;
     private final OrderRepository orderRepository;
-    
+
     @Transactional
     public void createPayment(User user, ReqPaymentPostDTO dto) {
 
@@ -31,6 +38,25 @@ public class PaymentService {
     }
 
     /*
+        고객 결제 목록 조회
+    */
+    @Transactional(readOnly = true)
+    public ResponseEntity<ResDto<ResPaymentGetByCustomerDTO>> getByCustomer(User user, ReqPaymentCondDTO condition, Pageable pageable) {
+
+        Page<Payment> findPaymentPage = paymentRepository.findPaymentsForUserWithConditions(user.getUserId(), condition, pageable);
+
+        return new ResponseEntity<>(
+                ResDto.<ResPaymentGetByCustomerDTO>builder()
+                        .code(HttpStatus.OK.value())
+                        .message("결제 목록 조회에 성공했습니다.")
+                        .data(ResPaymentGetByCustomerDTO.of(findPaymentPage))
+                        .build(),
+                HttpStatus.OK
+        );
+    }
+
+
+    /*
         결제 취소
     */
     @Transactional
@@ -38,8 +64,8 @@ public class PaymentService {
 
         Payment payment =
                 user.getRole() == Role.CUSTOMER
-                ? getPayment(paymentId, user.getUserId())
-                : getPayment(paymentId);
+                        ? getPayment(paymentId, user.getUserId())
+                        : getPayment(paymentId);
 
         payment.cancelPayment(user);
     }

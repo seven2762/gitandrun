@@ -12,9 +12,7 @@ public class ReqPaymentPostDTO {
     @Getter
     @NoArgsConstructor
     public static class OrderInfo {
-
         private Long orderId;
-
         private int price;
     }
 }

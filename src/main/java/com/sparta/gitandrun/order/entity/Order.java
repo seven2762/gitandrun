@@ -1,6 +1,7 @@
 package com.sparta.gitandrun.order.entity;
 
 import com.sparta.gitandrun.common.entity.BaseEntity;
+import com.sparta.gitandrun.store.entity.Store;
 import com.sparta.gitandrun.user.entity.User;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -39,14 +40,19 @@ public class Order extends BaseEntity {
     @JoinColumn(name = "p_user_id")
     private User user;
 
+    @OneToOne(fetch = LAZY)
+    @JoinColumn(name = "p_store_id")
+    private Store store;
+
     @OneToMany(mappedBy = "order", cascade = PERSIST, orphanRemoval = true)
     private List<OrderMenu> orderMenus = new ArrayList<>();
 
     @Builder
-    public Order(User user, OrderStatus status, OrderType type) {
+    public Order(User user, OrderStatus status, OrderType type, Store store) {
         this.user = user;
         this.orderStatus = status;
         this.orderType = type;
+        this.store = store;
     }
 
     public void addOrderMenus(List<OrderMenu> orderMenus) {
@@ -60,6 +66,7 @@ public class Order extends BaseEntity {
                 .user(user)
                 .status(OrderStatus.PENDING)
                 .type(type ? OrderType.DELIVERY : OrderType.VISIT)
+                .store(orderMenus.get(0).getMenu().getStore())
                 .build();
 
         order.initAuditInfo(user);
