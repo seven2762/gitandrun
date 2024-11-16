@@ -37,6 +37,7 @@ public class PaymentCustomRepositoryImpl implements PaymentCustomRepository {
                 .join(payment.order).fetchJoin()
                 .join(payment.order.store, store).fetchJoin()
                 .where(
+                        deletedFalse(),
                         userIdEq(userId),
                         statusEq(cond.getPaymentStatus())
                 )
@@ -56,6 +57,10 @@ public class PaymentCustomRepositoryImpl implements PaymentCustomRepository {
                 );
 
         return PageableExecutionUtils.getPage(results, pageable, countQuery::fetchOne);
+    }
+
+    private BooleanExpression deletedFalse() {
+        return payment.isDeleted.eq(false);
     }
 
     private BooleanExpression userIdEq(Long userId) {
