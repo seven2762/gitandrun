@@ -45,12 +45,12 @@ public class PaymentService {
     }
 
     private Payment getPayment(Long paymentId) {
-        return paymentRepository.findByIdAndIsPaidTrue(paymentId)
+        return paymentRepository.findPaidPaymentById(paymentId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 항목입니다."));
     }
 
     private Payment getPayment(Long paymentId, Long userId) {
-        return paymentRepository.findByIdAndUser_UserIdAndIsPaidTrue(paymentId, userId)
+        return paymentRepository.findPaidPaymentByIdAndUserId(paymentId, userId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 항목입니다."));
     }
 
