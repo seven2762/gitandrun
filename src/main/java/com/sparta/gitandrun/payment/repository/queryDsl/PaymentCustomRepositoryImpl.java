@@ -4,11 +4,11 @@ import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import com.sparta.gitandrun.payment.dto.req.PaymentCondition;
+import com.sparta.gitandrun.payment.dto.req.ReqPaymentCondDTO;
 import com.sparta.gitandrun.payment.entity.Payment;
-import com.sparta.gitandrun.payment.entity.PaymentStatus;
-import com.sparta.gitandrun.payment.entity.SortType;
-import com.sparta.gitandrun.payment.entity.StatusType;
+import com.sparta.gitandrun.payment.entity.enums.PaymentStatus;
+import com.sparta.gitandrun.payment.entity.enums.SortType;
+import com.sparta.gitandrun.payment.entity.enums.StatusType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -29,7 +29,7 @@ public class PaymentCustomRepositoryImpl implements PaymentCustomRepository {
 
     @Override
     public Page<Payment> findPaymentsForUserWithConditions(Long userId,
-                                                           PaymentCondition condition,
+                                                           ReqPaymentCondDTO cond,
                                                            Pageable pageable) {
 
         List<Payment> results = queryFactory
@@ -38,9 +38,9 @@ public class PaymentCustomRepositoryImpl implements PaymentCustomRepository {
                 .join(payment.order.store, store).fetchJoin()
                 .where(
                         userIdEq(userId),
-                        statusEq(condition.getPaymentStatus())
+                        statusEq(cond.getPaymentStatus())
                 )
-                .orderBy(orderSpecifier(condition.getSortType()))
+                .orderBy(orderSpecifier(cond.getSortType()))
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
@@ -52,7 +52,7 @@ public class PaymentCustomRepositoryImpl implements PaymentCustomRepository {
                 .join(payment.order.store, store).fetchJoin()
                 .where(
                         userIdEq(userId),
-                        statusEq(condition.getPaymentStatus())
+                        statusEq(cond.getPaymentStatus())
                 );
 
         return PageableExecutionUtils.getPage(results, pageable, countQuery::fetchOne);

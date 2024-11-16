@@ -1,4 +1,4 @@
-package com.sparta.gitandrun.payment.entity;
+package com.sparta.gitandrun.payment.entity.enums;
 
 import lombok.AllArgsConstructor;
 

@@ -3,6 +3,7 @@ package com.sparta.gitandrun.payment.entity;
 import com.sparta.gitandrun.common.entity.BaseEntity;
 import com.sparta.gitandrun.order.entity.Order;
 import com.sparta.gitandrun.order.entity.OrderStatus;
+import com.sparta.gitandrun.payment.entity.enums.PaymentStatus;
 import com.sparta.gitandrun.user.entity.User;
 import jakarta.persistence.*;
 import lombok.AccessLevel;

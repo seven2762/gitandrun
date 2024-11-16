@@ -2,7 +2,7 @@ package com.sparta.gitandrun.payment.dto.res;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.sparta.gitandrun.payment.entity.Payment;
-import com.sparta.gitandrun.payment.entity.PaymentStatus;
+import com.sparta.gitandrun.payment.entity.enums.PaymentStatus;
 import com.sparta.gitandrun.store.entity.Store;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

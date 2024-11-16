@@ -3,7 +3,7 @@ package com.sparta.gitandrun.payment.service;
 import com.sparta.gitandrun.order.dto.res.ResDto;
 import com.sparta.gitandrun.order.entity.Order;
 import com.sparta.gitandrun.order.repository.OrderRepository;
-import com.sparta.gitandrun.payment.dto.req.PaymentCondition;
+import com.sparta.gitandrun.payment.dto.req.ReqPaymentCondDTO;
 import com.sparta.gitandrun.payment.dto.req.ReqPaymentPostDTO;
 import com.sparta.gitandrun.payment.dto.res.ResPaymentGetByCustomerDTO;
 import com.sparta.gitandrun.payment.entity.Payment;
@@ -41,7 +41,7 @@ public class PaymentService {
         고객 결제 목록 조회
     */
     @Transactional(readOnly = true)
-    public ResponseEntity<ResDto<ResPaymentGetByCustomerDTO>> getByCustomer(User user, PaymentCondition condition, Pageable pageable) {
+    public ResponseEntity<ResDto<ResPaymentGetByCustomerDTO>> getByCustomer(User user, ReqPaymentCondDTO condition, Pageable pageable) {
 
         Page<Payment> findPaymentPage = paymentRepository.findPaymentsForUserWithConditions(user.getUserId(), condition, pageable);
 
