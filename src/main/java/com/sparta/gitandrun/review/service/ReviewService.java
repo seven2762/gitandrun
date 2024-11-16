@@ -129,17 +129,15 @@ public class ReviewService {
 
     //리뷰 삭제
     @Transactional
-    public void deleteReview(UUID reviewId) {
-        Review review = reviewRepository.findById(reviewId)
-                .orElseThrow(() -> new IllegalArgumentException("리뷰가 존재하지 않습니다."));
+    public void deleteReview(UUID reviewId, UserDetailsImpl userDetails) {
+        Review review = getReview(reviewId);
+        Long userId = userDetails.getUser().getUserId();
+        Role role = userDetails.getUser().getRole();
+        checkPermission(review, userId, role);
         review.setDeleted(true);
     }
 
-    //사용자 확인
-    private User getUser(Long userId) {
-        return userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
-    }
+    //----------------------------------------------------------------
 
     //리뷰 확인
     private Review getReview(UUID reviewId) {

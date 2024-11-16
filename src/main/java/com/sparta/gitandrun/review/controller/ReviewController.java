@@ -103,11 +103,13 @@ public class ReviewController {
         return ResponseEntity.ok().body(new ApiResDto("리뷰 수정 완료", HttpStatus.OK.value()));
     }
 
-    //리뷰 삭제
+    //리뷰 삭제 - 완료
     @DeleteMapping("{reviewId}")
-    public ResponseEntity<String> deleteReview(@PathVariable UUID reviewId) {
-        reviewService.deleteReview(reviewId);
-        return ResponseEntity.ok("리뷰가 삭제되었습니다.");
+    public ResponseEntity<ApiResDto> deleteReview(
+            @PathVariable UUID reviewId,
+            @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        reviewService.deleteReview(reviewId, userDetails);
+        return ResponseEntity.ok().body(new ApiResDto("리뷰 삭제 완료", HttpStatus.OK.value()));
     }
 }
 
