@@ -112,17 +112,41 @@ public class StoreService {
     public List<LimitedStoreResponse> getAllStoresForUser() {
         // Soft-delete되지 않은 가게만 조회
         List<Store> stores = storeRepository.findByIsDeletedFalse();
+
         // LimitedStoreResponse DTO로 변환하여 반환
         return stores.stream()
                 .map(LimitedStoreResponse::new)
                 .collect(Collectors.toList());
     }
 
-    // 가게 상세 정보 조회 (로그인한 유저의 권한에 따라 다르게 응답)
+    // Soft-Delete된 가게만 조회
+    @Transactional(readOnly = true)
+    public List<FullStoreResponse> getSoftDeletedStores() {
+        List<Store> stores = storeRepository.findByIsDeletedTrue();
+        return stores.stream()
+                .map(FullStoreResponse::new)
+                .collect(Collectors.toList());
+    }
+
+    // Soft-Delete되지 않은 가게만 조회
+    @Transactional(readOnly = true)
+    public List<FullStoreResponse> getNonDeletedStores() {
+        List<Store> stores = storeRepository.findByIsDeletedFalse();
+        return stores.stream()
+                .map(FullStoreResponse::new)
+                .collect(Collectors.toList());
+    }
+
+
     @Transactional(readOnly = true)
     public ResponseEntity<?> getStoreDetails(UUID storeId, Long userId) {
         User user = getUser(userId); // 로그인한 유저 조회
         Store store = getStore(storeId); // 가게 정보 조회
+
+        // 삭제된 가게에 대한 접근 제한 (ADMIN만 가능)
+        if (store.isDeleted() && user.getRole() != Role.ADMIN) {
+            throw new IllegalArgumentException("삭제된 가게에 접근할 권한이 없습니다.");
+        }
 
         // 유저의 역할에 따라 FullStoreResponse 또는 LimitedStoreResponse 반환
         if (user.getRole() == Role.ADMIN) {
@@ -131,6 +155,7 @@ public class StoreService {
             return ResponseEntity.ok(generateLimitedStoreDetails(store)); // 그 외 유저는 제한된 정보만 제공
         }
     }
+
 
     // 관리자 가게 수정
     @Transactional
@@ -158,9 +183,15 @@ public class StoreService {
 
     // 가게 수정
     @Transactional
-    public void updateStoreByUser(UUID storeId, StoreRequestDto storeRequestDto) {
+    public void updateStoreByUser(UUID storeId, StoreRequestDto storeRequestDto, Long userId) {
+        // 가게 조회
         Store store = storeRepository.findById(storeId)
                 .orElseThrow(() -> new IllegalArgumentException("가게를 찾을 수 없습니다."));
+
+        // 가게의 소유자와 로그인한 사용자 비교
+        if (!store.getUser().getUserId().equals(userId)) {
+            throw new IllegalArgumentException("본인이 소유한 가게만 수정할 수 있습니다.");
+        }
 
         // 제한된 필드만 수정 가능
         if (storeRequestDto.getStoreName() != null) {
@@ -172,7 +203,20 @@ public class StoreService {
         if (storeRequestDto.getAddress() != null) {
             store.setAddress(storeRequestDto.getAddress());
         }
+        if (storeRequestDto.getRegionId() != null) {
+            // regionId로 Region 조회
+            Region newRegion = regionRepository.findById(storeRequestDto.getRegionId())
+                    .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 지역입니다."));
+            store.setRegion(newRegion); // Region 필드 업데이트
+        }
+
+        // 수정 시간 및 수정자 업데이트
+        store.setUpdatedAt(LocalDateTime.now());
+        store.setUpdatedBy(userId.toString());
     }
+
+
+
 
     // ADMIN 권한으로 삭제
     @Transactional
@@ -320,6 +364,30 @@ public class StoreService {
         return stores.stream()
                 .map(store -> user.getRole() == Role.ADMIN ? new FullStoreResponse(store) : new LimitedStoreResponse(store))
                 .collect(Collectors.toList());
+    }
+
+    public Page<?> searchDeletedStoresByCategory(UUID categoryId, String sortField, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, sortField));
+        Page<Store> stores = storeRepository.findByCategoryIdAndIsDeletedTrue(categoryId, pageable);
+        return stores.map(FullStoreResponse::new); // 관리자 전용 FullStoreResponse 반환
+    }
+
+    public Page<?> searchNonDeletedStoresByCategory(UUID categoryId, String sortField, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, sortField));
+        Page<Store> stores = storeRepository.findByCategoryIdAndIsDeletedFalse(categoryId, pageable);
+        return stores.map(FullStoreResponse::new); // 관리자 전용 FullStoreResponse 반환
+    }
+
+    public Page<?> searchDeletedStoresByKeyword(String keyword, String sortField, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, sortField));
+        Page<Store> stores = storeRepository.searchStoresAndIsDeletedTrue(keyword, pageable);
+        return stores.map(FullStoreResponse::new); // 관리자 전용 FullStoreResponse 반환
+    }
+
+    public Page<?> searchNonDeletedStoresByKeyword(String keyword, String sortField, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, sortField));
+        Page<Store> stores = storeRepository.searchStoresAndIsDeletedFalse(keyword, pageable);
+        return stores.map(FullStoreResponse::new); // 관리자 전용 FullStoreResponse 반환
     }
 
 }
