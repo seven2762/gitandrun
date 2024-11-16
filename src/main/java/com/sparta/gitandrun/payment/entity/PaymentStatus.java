@@ -1,16 +1,15 @@
 package com.sparta.gitandrun.payment.entity;
 
+import lombok.AllArgsConstructor;
+
+@AllArgsConstructor
 public enum PaymentStatus {
 
     PENDING(Status.PENDING),
     CANCEL(Status.CANCEL),
     PAID(Status.PAID);
 
-    private String status;
-
-    PaymentStatus (String status) {
-        this.status = status;
-    }
+    public final String status;
 
     public static class Status {
         public static final String PENDING = "PAY_PENDING";
