@@ -22,6 +22,9 @@ import java.util.List;
 @RequiredArgsConstructor
 public class AiService {
 
+    @Value("${google-api-url}")
+    private String SECRET_URL;
+
     @Value("${google-api-key}")
     private String SECRET_KEY;
 
@@ -32,7 +35,8 @@ public class AiService {
     //CREATE
     public String createQuestion(String text) {
 
-        String url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + SECRET_KEY;
+        String url = SECRET_URL + SECRET_KEY;
+        System.out.println(url);
 
         JSONObject jsonObject0 = new JSONObject(); // contents Field 생성
         JSONArray contents = new JSONArray();
@@ -64,7 +68,8 @@ public class AiService {
             jsonNode = objectMapper.readTree(response.body().string());
              }
         catch (IOException e) {
-            throw new RuntimeException("잘못된 Response 입니다.");
+            throw new RuntimeException("" +
+                    "잘못된 Response 입니다.");
         }
 
         String answer = jsonNode.path("candidates")
