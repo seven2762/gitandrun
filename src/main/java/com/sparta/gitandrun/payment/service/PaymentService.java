@@ -1,7 +1,9 @@
 package com.sparta.gitandrun.payment.service;
 
 import com.sparta.gitandrun.order.entity.Order;
+import com.sparta.gitandrun.order.entity.OrderMenu;
 import com.sparta.gitandrun.order.entity.OrderStatus;
+import com.sparta.gitandrun.order.repository.OrderMenuRepository;
 import com.sparta.gitandrun.order.repository.OrderRepository;
 import com.sparta.gitandrun.payment.dto.req.ReqPaymentPostDTO;
 import com.sparta.gitandrun.payment.entity.Payment;
@@ -12,26 +14,23 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j(topic = "Payment-Service")
 public class PaymentService {
 
     private final PaymentRepository paymentRepository;
-    private final OrderRepository orderRepository;
+    private final OrderMenuRepository orderMenuRepository;
 
     @Transactional
     public void createPayment(User user, ReqPaymentPostDTO dto) {
 
-        Order findOrder = getOrder(user, dto.getOrderInfo().getOrderId());
+        List<OrderMenu> orderMenus = orderMenuRepository.findByOrderId(dto.getOrderInfo().getOrderId());
 
-        Payment payment = Payment.createPayment(dto.getOrderInfo().getPrice(), findOrder, user);
+        Payment payment = Payment.createPayment(dto.getOrderInfo().getPrice(), orderMenus, user);
 
         paymentRepository.save(payment);
-    }
-
-    private Order getOrder(User user, Long orderId) {
-        return orderRepository.findByIdAndUser_UserId(orderId, user.getUserId())
-                .orElseThrow(() -> new IllegalArgumentException("주문 정보를 찾을 수 없습니다."));
     }
 }
