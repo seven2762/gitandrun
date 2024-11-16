@@ -170,12 +170,13 @@ public class StoreController {
     }
 
     // 사용자용 가게 소프트 딜리트
-    @Secured({"ROLE_OWNER", "ROLE_MANAGER", "ROLE_ADMIN"})
     @DeleteMapping("/{storeId}")
+    @Secured({"ROLE_OWNER", "ROLE_MANAGER", "ROLE_ADMIN"})
     public ResponseEntity<ApiResDto> softDeleteStoreByUser(
             @PathVariable UUID storeId,
-            @RequestParam Long userId) {
+            @AuthenticationPrincipal UserDetailsImpl userDetails) {
         try {
+            Long userId = userDetails.getUser().getUserId(); // 인증된 사용자 ID 가져오기
             storeService.softDeleteStoreByOwner(storeId, userId);
             ApiResDto response = new ApiResDto("가게가 성공적으로 삭제되었습니다.", HttpStatus.OK.value());
             return ResponseEntity.ok(response);
@@ -184,6 +185,7 @@ public class StoreController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
         }
     }
+
 
     // 카테고리로 검색 (관리자용)
     @Secured({"ROLE_ADMIN", "ROLE_MANAGER"})
