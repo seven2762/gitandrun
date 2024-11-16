@@ -1,5 +1,6 @@
 package com.sparta.gitandrun.review.service;
 
+import com.sparta.gitandrun.review.dto.AdminReviewResponseDto;
 import com.sparta.gitandrun.review.dto.ReviewRequestDto;
 import com.sparta.gitandrun.review.dto.ReviewResponseDto;
 import com.sparta.gitandrun.review.entity.Review;
@@ -70,13 +71,22 @@ public class ReviewService {
         return reviews.map(ReviewResponseDto::new);
     }
 
-    // 관리자 - 모든 리뷰 조회
-    @Secured({"ROLE_MANAGER", "ROLE_ADMIN"})
+    // 관리자 - 모든 리뷰 검색 (키워드)
     @Transactional(readOnly = true)
-    public Page<ReviewResponseDto> getAllReviews(int page, int size, String sortBy) {
-        Pageable pageable = optionPageable(page, size, sortBy);
-        Page<Review> reviews = reviewRepository.findAll(pageable);
-        return reviews.map(ReviewResponseDto::new);
+    public Page<AdminReviewResponseDto> searchReviewsWithKeyword(
+            String keyword, int page, int size, String sortBy) {
+            Pageable pageable = optionPageable(page, size, sortBy);
+
+        // keyword가 null이거나 공백인 경우 전체 조회
+        if (keyword == null || keyword.trim().isEmpty()) {
+            Page<Review> allReviews = reviewRepository.findAll(pageable);
+            reviewEmpty(allReviews);
+            return allReviews.map(AdminReviewResponseDto::new);
+        }
+
+        Page<Review> reviews = reviewRepository.searchReviewsWithKeyword(keyword, pageable);
+        reviewEmpty(reviews);
+        return reviews.map(AdminReviewResponseDto::new);
     }
 
     // 관리자 - 리뷰 아이디로 조회
@@ -141,6 +151,13 @@ public class ReviewService {
             throw new IllegalArgumentException("완료된 주문만 리뷰 작성이 가능합니다.");
         }
         return order;
+    }
+
+    // 리뷰가 비어있는지 확인
+    private void reviewEmpty(Page<Review> reviews) {
+        if (reviews.isEmpty()) {
+            throw new IllegalArgumentException("리뷰가 존재하지 않습니다.");
+        }
     }
 
     //페이지 처리 옵션
