@@ -5,6 +5,7 @@ import com.sparta.gitandrun.order.repository.OrderRepository;
 import com.sparta.gitandrun.payment.dto.req.ReqPaymentPostDTO;
 import com.sparta.gitandrun.payment.entity.Payment;
 import com.sparta.gitandrun.payment.repository.PaymentRepository;
+import com.sparta.gitandrun.user.entity.Role;
 import com.sparta.gitandrun.user.entity.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,6 +28,30 @@ public class PaymentService {
         Payment payment = Payment.createPayment(dto.getOrderInfo().getPrice(), order, user);
 
         paymentRepository.save(payment);
+    }
+
+    /*
+        결제 취소
+    */
+    @Transactional
+    public void cancelPayment(User user, Long paymentId) {
+
+        Payment payment =
+                user.getRole() == Role.CUSTOMER
+                ? getPayment(paymentId, user.getUserId())
+                : getPayment(paymentId);
+
+        payment.cancelPayment(user);
+    }
+
+    private Payment getPayment(Long paymentId) {
+        return paymentRepository.findByIdAndIsPaidTrue(paymentId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 항목입니다."));
+    }
+
+    private Payment getPayment(Long paymentId, Long userId) {
+        return paymentRepository.findByIdAndUser_UserIdAndIsPaidTrue(paymentId, userId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 항목입니다."));
     }
 
     private Order getOrder(User user, ReqPaymentPostDTO dto) {

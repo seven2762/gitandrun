@@ -2,7 +2,6 @@ package com.sparta.gitandrun.payment.entity;
 
 import com.sparta.gitandrun.common.entity.BaseEntity;
 import com.sparta.gitandrun.order.entity.Order;
-import com.sparta.gitandrun.order.entity.OrderMenu;
 import com.sparta.gitandrun.order.entity.OrderStatus;
 import com.sparta.gitandrun.user.entity.User;
 import jakarta.persistence.*;
@@ -10,8 +9,6 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
-import java.util.List;
 
 import static jakarta.persistence.FetchType.LAZY;
 
@@ -28,8 +25,12 @@ public class Payment extends BaseEntity {
     @Column(name = "payment_price", nullable = false)
     private int paymentPrice;
 
-    @Column(name = "is_paid")
-    private boolean isPaid;
+    @Column(name = "is_deleted")
+    private boolean isDeleted;
+
+    @Column(name = "payment_status")
+    @Enumerated(value = EnumType.STRING)
+    private PaymentStatus paymentStatus;
 
     @OneToOne(fetch = LAZY)
     @JoinColumn(name = "p_order_id")
@@ -42,7 +43,7 @@ public class Payment extends BaseEntity {
     @Builder
     private Payment(int paymentPrice, Order order, User user) {
         this.paymentPrice = paymentPrice;
-        this.isPaid = true;
+        this.paymentStatus = PaymentStatus.PAID;
         this.order = order;
         this.user = user;
         initAuditInfo(user);
@@ -66,5 +67,13 @@ public class Payment extends BaseEntity {
                 .order(order.completeOrder())
                 .user(user)
                 .build();
+    }
+
+
+    // == 결제 취소 메서드 == //
+    public void cancelPayment(User user) {
+        this.paymentStatus = PaymentStatus.CANCEL;
+        this.order.cancelOrder();
+        setUpdatedBy(user.getUsername());
     }
 }
