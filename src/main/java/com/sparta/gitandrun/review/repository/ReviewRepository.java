@@ -16,7 +16,13 @@ public interface ReviewRepository extends JpaRepository<Review, UUID> {
 
     Page<Review> findByUser(User user, Pageable pageable);
 
-    Page<Review> findByStoreId(UUID storeId, Pageable pageable);
+    // OWNER: 본인 가게의 사용자의 리뷰를 조회
+    @Query("SELECT r FROM Review r WHERE r.storeId = :storeId AND r.user.userId = :userId AND r.isDeleted = false")
+    Page<Review> findByStoreIdAndUserId(UUID storeId, Long userId, Pageable pageable);
+
+    // CUSTOMER: 특정 가게의 리뷰를 조회
+    @Query("SELECT r FROM Review r WHERE r.storeId = :storeId AND r.isDeleted = false")
+    Page<Review> findByStoreId(@Param("storeId") UUID storeId, Pageable pageable);
 
     @Query("SELECT r FROM Review r " +
             "WHERE (:keyword IS NULL OR " +
