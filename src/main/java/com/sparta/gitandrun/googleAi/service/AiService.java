@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sparta.gitandrun.googleAi.dto.AiDto;
 import com.sparta.gitandrun.googleAi.entity.Ai;
 import com.sparta.gitandrun.googleAi.repository.AiRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import okhttp3.*;
 import org.json.JSONArray;
@@ -30,6 +31,7 @@ public class AiService {
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
     //CREATE
+    @Transactional
     public String createQuestion(String text) {
 
         String url = SECRET_URL + SECRET_KEY;
