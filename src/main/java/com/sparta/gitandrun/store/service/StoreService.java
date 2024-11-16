@@ -205,6 +205,7 @@ public class StoreService {
     }
 
     // 카테고리로 검색
+    @Transactional(readOnly = true)
     public Page<?> searchStoresByCategory(UUID categoryId, String sortField, int page, int size, boolean isAdmin) {
         validatePageSize(size);
 
@@ -227,6 +228,7 @@ public class StoreService {
         }
     }
 
+    @Transactional(readOnly = true)
     public Page<?> searchStoresByKeyword(String keyword, String sortField, int page, int size, boolean isAdmin) {
         validatePageSize(size);
 
@@ -308,6 +310,7 @@ public class StoreService {
 //    }
 
     // 지역 이름으로 가게 조회
+    @Transactional(readOnly = true)
     public List<?> getStoresByRegionName(Long userId, String regionName) {
         User user = getUser(userId);
 
