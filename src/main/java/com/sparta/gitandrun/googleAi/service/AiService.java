@@ -5,8 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sparta.gitandrun.googleAi.dto.AiDto;
 import com.sparta.gitandrun.googleAi.entity.Ai;
 import com.sparta.gitandrun.googleAi.repository.AiRepository;
-import com.sparta.gitandrun.menu.dto.MenuResponseDto;
-import com.sparta.gitandrun.menu.entity.Menu;
 import lombok.RequiredArgsConstructor;
 import okhttp3.*;
 import org.json.JSONArray;
@@ -14,7 +12,6 @@ import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 
@@ -88,12 +85,8 @@ public class AiService {
 
     //Read ( 전체 조회 )
     public List<AiDto> getAllQuestions() {
-        List<Ai> aiList = aiRepository.findAll();
-        List<AiDto> responseDtoList = new ArrayList<>();
-        for (Ai ai : aiList) {
-            responseDtoList.add(new AiDto(ai));
-        }
-        return responseDtoList;
-
+        return aiRepository.findAll().stream()
+                .map(AiDto::new)
+                .toList();
     }
 }
