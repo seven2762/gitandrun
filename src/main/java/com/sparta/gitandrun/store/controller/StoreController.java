@@ -89,6 +89,34 @@ public class StoreController {
         return storeService.getStoreDetails(storeId, userId);  // 권한에 맞는 가게 정보 반환
     }
 
+    // 관리자용 Soft-Delete된 가게 조회
+    @Secured("ROLE_ADMIN")
+    @GetMapping("/admin/deleted")
+    public ResponseEntity<ApiResDto> getSoftDeletedStores() {
+        try {
+            var stores = storeService.getSoftDeletedStores();
+            ApiResDto response = new ApiResDto("Soft-Delete된 가게 조회 성공", HttpStatus.OK.value(), stores);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            ApiResDto errorResponse = new ApiResDto("Soft-Delete된 가게 조회 중 오류가 발생했습니다.", HttpStatus.INTERNAL_SERVER_ERROR.value());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
+    }
+
+    // 관리자용 Soft-Delete되지 않은 가게 조회
+    @Secured("ROLE_ADMIN")
+    @GetMapping("/admin/not-deleted")
+    public ResponseEntity<ApiResDto> getNonDeletedStores() {
+        try {
+            var stores = storeService.getNonDeletedStores();
+            ApiResDto response = new ApiResDto("Soft-Delete되지 않은 가게 조회 성공", HttpStatus.OK.value(), stores);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            ApiResDto errorResponse = new ApiResDto("Soft-Delete되지 않은 가게 조회 중 오류가 발생했습니다.", HttpStatus.INTERNAL_SERVER_ERROR.value());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
+    }
+
     // 관리자용 가게 수정
     @Secured({"ROLE_ADMIN", "ROLE_MANAGER"})
     @PatchMapping("/admin/{storeId}")
@@ -110,16 +138,22 @@ public class StoreController {
     @PatchMapping("/{storeId}")
     public ResponseEntity<ApiResDto> updateStoreByUser(
             @PathVariable UUID storeId,
-            @RequestBody StoreRequestDto storeRequestDto) {
+            @RequestBody StoreRequestDto storeRequestDto,
+            @AuthenticationPrincipal UserDetailsImpl userDetails) {
         try {
-            storeService.updateStoreByUser(storeId, storeRequestDto);
+            Long userId = userDetails.getUser().getUserId(); // 현재 로그인한 사용자의 ID
+            storeService.updateStoreByUser(storeId, storeRequestDto, userId);
             ApiResDto response = new ApiResDto("가게가 성공적으로 수정되었습니다.", HttpStatus.OK.value());
             return ResponseEntity.ok(response);
+        } catch (IllegalArgumentException e) {
+            ApiResDto errorResponse = new ApiResDto("가게 수정 중 오류가 발생했습니다: " + e.getMessage(), HttpStatus.BAD_REQUEST.value());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
         } catch (Exception e) {
-            ApiResDto errorResponse = new ApiResDto("가게 수정 중 오류가 발생했습니다.", HttpStatus.INTERNAL_SERVER_ERROR.value());
+            ApiResDto errorResponse = new ApiResDto("서버 오류가 발생했습니다.", HttpStatus.INTERNAL_SERVER_ERROR.value());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
         }
     }
+
 
     // 관리자용 가게 소프트 딜리트
     @Secured({"ROLE_ADMIN", "ROLE_MANAGER"})
@@ -136,7 +170,7 @@ public class StoreController {
     }
 
     // 사용자용 가게 소프트 딜리트
-    @Secured({"ROLE_ADMIN", "ROLE_MANAGER"})
+    @Secured({"ROLE_OWNER", "ROLE_MANAGER", "ROLE_ADMIN"})
     @DeleteMapping("/{storeId}")
     public ResponseEntity<ApiResDto> softDeleteStoreByUser(
             @PathVariable UUID storeId,
@@ -238,4 +272,81 @@ public class StoreController {
                     .body(new ApiResDto("가게 목록 조회 실패: " + e.getMessage(), 404));
         }
     }
+
+
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ApiResDto> handleIllegalArgumentException(IllegalArgumentException ex) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(new ApiResDto(ex.getMessage(), HttpStatus.FORBIDDEN.value()));
+    }
+
+    // Soft-Delete된 가게만 카테고리로 검색
+    @Secured("ROLE_ADMIN")
+    @GetMapping("/admin/search/category/deleted")
+    public ResponseEntity<ApiResDto> searchDeletedStoresByCategory(
+            @RequestParam UUID categoryId,
+            @RequestParam(defaultValue = "createdAt") String sortField,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        try {
+            Page<?> stores = storeService.searchDeletedStoresByCategory(categoryId, sortField, page, size);
+            return ResponseEntity.ok(new ApiResDto("Soft-Delete된 가게 카테고리 검색 성공", 200, stores));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ApiResDto("Soft-Delete된 가게 카테고리 검색 중 오류 발생", 500));
+        }
+    }
+
+    // Soft-Delete되지 않은 가게만 카테고리로 검색
+    @Secured("ROLE_ADMIN")
+    @GetMapping("/admin/search/category/not-deleted")
+    public ResponseEntity<ApiResDto> searchNonDeletedStoresByCategory(
+            @RequestParam UUID categoryId,
+            @RequestParam(defaultValue = "createdAt") String sortField,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        try {
+            Page<?> stores = storeService.searchNonDeletedStoresByCategory(categoryId, sortField, page, size);
+            return ResponseEntity.ok(new ApiResDto("Soft-Delete되지 않은 가게 카테고리 검색 성공", 200, stores));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ApiResDto("Soft-Delete되지 않은 가게 카테고리 검색 중 오류 발생", 500));
+        }
+    }
+
+    // Soft-Delete된 가게만 키워드로 검색
+    @Secured("ROLE_ADMIN")
+    @GetMapping("/admin/search/keyword/deleted")
+    public ResponseEntity<ApiResDto> searchDeletedStoresByKeyword(
+            @RequestParam String keyword,
+            @RequestParam(defaultValue = "createdAt") String sortField,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        try {
+            Page<?> stores = storeService.searchDeletedStoresByKeyword(keyword, sortField, page, size);
+            return ResponseEntity.ok(new ApiResDto("Soft-Delete된 가게 키워드 검색 성공", 200, stores));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ApiResDto("Soft-Delete된 가게 키워드 검색 중 오류 발생", 500));
+        }
+    }
+
+    // Soft-Delete되지 않은 가게만 키워드로 검색
+    @Secured("ROLE_ADMIN")
+    @GetMapping("/admin/search/keyword/not-deleted")
+    public ResponseEntity<ApiResDto> searchNonDeletedStoresByKeyword(
+            @RequestParam String keyword,
+            @RequestParam(defaultValue = "createdAt") String sortField,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        try {
+            Page<?> stores = storeService.searchNonDeletedStoresByKeyword(keyword, sortField, page, size);
+            return ResponseEntity.ok(new ApiResDto("Soft-Delete되지 않은 가게 키워드 검색 성공", 200, stores));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ApiResDto("Soft-Delete되지 않은 가게 키워드 검색 중 오류 발생", 500));
+        }
+    }
 }
+
