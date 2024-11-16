@@ -7,6 +7,8 @@ import com.sparta.gitandrun.menu.entity.Menu;
 import com.sparta.gitandrun.menu.repository.MenuRepository;
 import com.sparta.gitandrun.store.entity.Store;
 import com.sparta.gitandrun.store.repository.StoreRepository;
+import com.sparta.gitandrun.user.entity.User;
+import com.sparta.gitandrun.user.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -15,6 +17,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -25,6 +28,7 @@ public class MenuService {
 
     private final MenuRepository menuRepository;
     private final StoreRepository storeRepository;
+    private final UserRepository userRepository;
 
     //CREATE
     public MenuResponseDto createMenu(MenuRequestDto requestDto) {
@@ -43,16 +47,23 @@ public class MenuService {
     public MenuResponseDto updateMenu(MenuRequestDto requestDto, UUID menuId) {
         findMenuId(menuId);
         Menu menu = menuRepository.findById(menuId).get();
-
         menu.update(requestDto);
         return new MenuResponseDto(menu);
     }
 
     //DELETE
+    @Transactional
     public void deleteMenu(UUID menuId) {
         findMenuId(menuId);
-        menuRepository.deleteById(menuId);
+        Menu menu = menuRepository.findById(menuId).get();
+
+        menu.setDeletedBy(menu.getStore().getUser().getUsername());
+        menu.setDeletedAt(LocalDateTime.now());
+        menu.setDeleted(true);
+        menuRepository.save(menu);
     }
+
+
 
     //READ ( 전체 조회 )
     public List<MenuResponseDto> getAllMenus() {
@@ -96,7 +107,8 @@ public class MenuService {
         return menus.map(menu -> new StoreWithMenusDto(
                 menu.getStore().getStoreName(),
                 menu.getMenuName(),
-                menu.getMenuContent()
+                menu.getMenuContent(),
+                menu.getMenuPrice()
         ));
     }
 
@@ -124,4 +136,6 @@ public class MenuService {
 
         return menuList.map(MenuResponseDto::new);
     }
+
+
 }

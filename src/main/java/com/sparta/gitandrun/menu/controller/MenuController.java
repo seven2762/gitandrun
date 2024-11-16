@@ -23,7 +23,7 @@ public class MenuController {
     private final MenuService menuService;
 
     //CREATE
-    @Secured({"ROLE_OWNER","ROLE_MANAGER","ROLE_ADMIN"})
+//    @Secured({"ROLE_OWNER","ROLE_MANAGER","ROLE_ADMIN"})
     @PostMapping
     public ResponseEntity<ApiResDto> createMenu(@RequestBody MenuRequestDto requestDto) {
         menuService.createMenu(requestDto);
@@ -31,7 +31,7 @@ public class MenuController {
     }
 
     //UPDATE
-    @Secured({"ROLE_OWNER","ROLE_MANAGER","ROLE_ADMIN"})
+//    @Secured({"ROLE_OWNER","ROLE_MANAGER","ROLE_ADMIN"})
     @PatchMapping("/{menuId}")
     public ResponseEntity<ApiResDto> updateMenu(@RequestBody MenuRequestDto requestDto, @PathVariable("menuId") UUID menuId) {
         menuService.updateMenu(requestDto, menuId);
@@ -39,30 +39,31 @@ public class MenuController {
 
     }
     //DELETE
-    @Secured({"ROLE_OWNER","ROLE_MANAGER","ROLE_ADMIN"})
+//    @Secured({"ROLE_OWNER","ROLE_MANAGER","ROLE_ADMIN"})
     @DeleteMapping("/{menuId}")
     public ResponseEntity<ApiResDto> deleteMenu(@PathVariable("menuId") UUID menuId){
         menuService.deleteMenu(menuId);
         return ResponseEntity.ok().body(new ApiResDto("삭제 완료", HttpStatus.OK.value()));
     }
 
-    //READ 모든 필드 조회(SECURED ADMIN, MANAGER)
+    //READ
+    // Menu에 있는 모든 필드 조회(단순 전체 테이블 검색)
     @Secured({"ROLE_ADMIN", "ROLE_MANAGER"})
     @GetMapping
     public List<MenuResponseDto> getAllMenus(){
         return menuService.getAllMenus();
     }
 
-      //READ 가게의 모든 메뉴에 대한 이름, 내용, 가격들 조회
+      //READ
+      //StoreId에 해당하는 모든 메뉴에 대한 필드 조회
       @Secured({"ROLE_OWNER","ROLE_MANAGER","ROLE_ADMIN"})
       @GetMapping("/search/{storeId}")
     public List<MenuResponseDto> getDetailMenu(@PathVariable UUID storeId){
         return menuService.getDetailMenu(storeId);
     }
 
-
-
-    //READ 가게 이름에 메뉴명이 들어가는 가게 조회 및 가게의 메뉴들 조회
+    //READ
+    // 가게 이름에 메뉴명이 들어가는 가게 조회 및 가게의 메뉴들의 모든 조회
     @GetMapping("/search/store")
     public ResponseEntity<ApiResDto> getStoreAndMenus(
             @RequestParam String storeName,
@@ -74,7 +75,7 @@ public class MenuController {
     }
 
 
-        //READ ony One
+    //READ ony One
     @GetMapping("/{id}")
     @Secured({"ROLE_MANAGER","ROLE_ADMIN"})
     public MenuResponseDto getOneMenu(@PathVariable("id") UUID menuId){
@@ -82,12 +83,12 @@ public class MenuController {
     }
 
     //메뉴 Table의 모든 항목 조회
-    @Secured({"ROLE_MANAGER","ROLE_ADMIN"})
+//    @Secured({"ROLE_MANAGER","ROLE_ADMIN"})
     @GetMapping("/paging")
     public Page<MenuResponseDto> getMenuPage(
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size,
-            @RequestParam("sortBy") String sortBy // 생성일, 수정일 기준
+            @RequestParam("sortBy") String sortBy
             ) {
         return menuService.getAllMenusTest(page-1, size, sortBy);
     }
