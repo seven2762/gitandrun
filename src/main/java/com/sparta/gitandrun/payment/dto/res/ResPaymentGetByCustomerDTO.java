@@ -23,19 +23,19 @@ public class ResPaymentGetByCustomerDTO {
 
     private PaymentPage paymentPage;
 
-    public static ResPaymentGetByCustomerDTO of(Page<Payment> paymentPage, Store store) {
+    public static ResPaymentGetByCustomerDTO of(Page<Payment> paymentPage) {
         return ResPaymentGetByCustomerDTO.builder()
-                .paymentPage(new PaymentPage(paymentPage, store))
+                .paymentPage(new PaymentPage(paymentPage))
                 .build();
     }
 
     @Getter
     public static class PaymentPage extends PagedModel<PaymentPage.PaymentSummary> {
 
-        public PaymentPage(Page<Payment> paymentPage, Store store) {
+        public PaymentPage(Page<Payment> paymentPage) {
             super(
                     new PageImpl<>(
-                            PaymentSummary.from(paymentPage.getContent(), store),
+                            PaymentSummary.from(paymentPage.getContent()),
                             paymentPage.getPageable(),
                             paymentPage.getTotalElements()
                     )
@@ -51,18 +51,19 @@ public class ResPaymentGetByCustomerDTO {
             private PaymentDTO paymentDTO;
             private StoreDTO storeDTO;
 
-            private static List<PaymentSummary> from(List<Payment> payments, Store store) {
+            private static List<PaymentSummary> from(List<Payment> payments) {
                 return payments.stream()
-                        .map(payment -> PaymentSummary.from(payment, store))
+                        .map(PaymentSummary::from)
                         .toList();
             }
 
-            private static PaymentSummary from(Payment payment, Store store) {
+            private static PaymentSummary from(Payment payment) {
                 return PaymentSummary.builder()
                         .paymentDTO(PaymentDTO.from(payment))
-                        .storeDTO(StoreDTO.from(store))
+                        .storeDTO(StoreDTO.from(payment.getOrder().getStore()))
                         .build();
             }
+
 
             @Getter
             @Builder
