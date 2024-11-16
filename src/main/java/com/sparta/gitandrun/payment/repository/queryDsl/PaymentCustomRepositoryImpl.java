@@ -34,7 +34,7 @@ public class PaymentCustomRepositoryImpl implements PaymentCustomRepository {
 
         List<Payment> results = queryFactory
                 .selectFrom(payment)
-                .join(payment.order).fetchJoin()
+                .join(payment.order, order).fetchJoin()
                 .join(payment.order.store, store).fetchJoin()
                 .where(
                         deletedFalse(),
