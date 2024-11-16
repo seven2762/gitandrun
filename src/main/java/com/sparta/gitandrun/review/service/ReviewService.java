@@ -2,7 +2,6 @@ package com.sparta.gitandrun.review.service;
 
 import com.sparta.gitandrun.review.dto.AdminReviewResponseDto;
 import com.sparta.gitandrun.review.dto.ReviewRequestDto;
-import com.sparta.gitandrun.review.dto.ReviewResponseDto;
 import com.sparta.gitandrun.review.dto.UserReviewResponseDto;
 import com.sparta.gitandrun.review.entity.Review;
 import com.sparta.gitandrun.review.repository.ReviewRepository;
@@ -13,8 +12,10 @@ import com.sparta.gitandrun.order.repository.OrderMenuRepository;
 import com.sparta.gitandrun.order.repository.OrderRepository;
 import com.sparta.gitandrun.store.entity.Store;
 import com.sparta.gitandrun.store.repository.StoreRepository;
+import com.sparta.gitandrun.user.entity.Role;
 import com.sparta.gitandrun.user.entity.User;
 import com.sparta.gitandrun.user.repository.UserRepository;
+import com.sparta.gitandrun.user.security.UserDetailsImpl;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +23,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.security.access.annotation.Secured;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -112,13 +112,16 @@ public class ReviewService {
 
     //리뷰 수정
     @Transactional
-    public void updateReview(UUID reviewId, ReviewRequestDto requestDto) {
+    public void updateReview(UUID reviewId, UserDetailsImpl userDetails, ReviewRequestDto requestDto) {
         Review review = getReview(reviewId);
+        Long userId = userDetails.getUser().getUserId();
+        Role role = userDetails.getUser().getRole();
+
+        checkPermission(review, userId, role);
 
         if (requestDto.getReviewContent() != null && !requestDto.getReviewContent().isEmpty()) {
             review.setReviewContent(requestDto.getReviewContent());
         }
-
         if (requestDto.getReviewRating() != null) {
             review.setReviewRating(requestDto.getReviewRating());
         }
@@ -169,5 +172,14 @@ public class ReviewService {
         // 기본 정렬 = createdAt, 정렬 추가 updatedAt
         String sortField = "updatedAt".equals(sortBy) ? "updatedAt" : "createdAt";
         return PageRequest.of(page, size, Sort.by(Sort.Order.desc(sortField)));
+    }
+
+    // CUSTOMER 또는 OWNER 권한 확인
+    private void checkPermission(Review review, Long userId, Role role) {
+        if (role.equals(Role.CUSTOMER) || role.equals(Role.OWNER)) {
+            if (!review.getUser().getUserId().equals(userId)) {
+                throw new IllegalArgumentException("본인의 리뷰만 가능합니다.");
+            }
+        }
     }
 }

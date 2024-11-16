@@ -93,19 +93,14 @@ public class ReviewController {
         return new ApiResDto("리뷰 조회 성공", 200, reviews);
     }
 
-    // 관리자 - 리뷰 아이디로 조회
-    @GetMapping("/reviewId/{reviewId}")
-    public ResponseEntity<ReviewResponseDto> getOneReview(@PathVariable UUID reviewId) {
-        ReviewResponseDto review = reviewService.getOneReview(reviewId);
-        return ResponseEntity.ok(review);
-    }
-
-    //리뷰 수정
+    //리뷰 수정 - 완료
     @PatchMapping("/{reviewId}")
-    public ResponseEntity<String> updateReview(@PathVariable UUID reviewId,
-                                               @RequestBody ReviewRequestDto requestDto) {
-        reviewService.updateReview(reviewId, requestDto);
-        return ResponseEntity.ok("리뷰가 성공적으로 수정되었습니다.");
+    public ResponseEntity<ApiResDto> updateReview(
+            @AuthenticationPrincipal UserDetailsImpl userDetails,
+            @PathVariable UUID reviewId,
+            @RequestBody ReviewRequestDto requestDto) {
+        reviewService.updateReview(reviewId, userDetails, requestDto);
+        return ResponseEntity.ok().body(new ApiResDto("리뷰 수정 완료", HttpStatus.OK.value()));
     }
 
     //리뷰 삭제
