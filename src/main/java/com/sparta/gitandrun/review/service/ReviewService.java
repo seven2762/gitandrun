@@ -110,23 +110,6 @@ public class ReviewService {
         return reviews.map(AdminReviewResponseDto::new);
     }
 
-    // 관리자 - 리뷰 아이디로 조회
-    @Secured({"ROLE_MANAGER", "ROLE_ADMIN"})
-    @Transactional(readOnly = true)
-    public ReviewResponseDto getOneReview(UUID reviewId) {
-        Review review = getReview(reviewId);
-        return new ReviewResponseDto(review);
-    }
-
-    // 관리자 - 키워드로 리뷰 검색
-    @Secured({"ROLE_MANAGER", "ROLE_ADMIN"})
-    @Transactional(readOnly = true)
-    public Page<ReviewResponseDto> getReviewsByKeyword(String keyword, int page, int size, String sortBy) {
-        Pageable pageable = optionPageable(page, size, sortBy);
-        Page<Review> reviews = reviewRepository.findByReviewContentContaining(keyword, pageable);
-        return reviews.map(ReviewResponseDto::new);
-    }
-
     //리뷰 수정
     @Transactional
     public void updateReview(UUID reviewId, ReviewRequestDto requestDto) {
