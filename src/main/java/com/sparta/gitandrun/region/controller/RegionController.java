@@ -22,7 +22,7 @@ public class RegionController {
     }
 
     // 지역 생성
-    @Secured("ROLE_ADMIN")
+    @Secured({"ROLE_ADMIN", "ROLE_MANAGER"})
     @PostMapping
     public ResponseEntity<?> createRegion(@RequestBody RegionRequestDto regionRequest) {
         try {
@@ -56,7 +56,7 @@ public class RegionController {
     }
 
     // 지역 수정
-    @Secured("ROLE_ADMIN")
+    @Secured({"ROLE_ADMIN", "ROLE_MANAGER"})
     @PutMapping("/{regionId}")
     public ResponseEntity<ApiResDto> updateRegion(@PathVariable Long regionId,
                                                   @RequestBody RegionRequestDto regionRequest) {
@@ -73,7 +73,7 @@ public class RegionController {
     }
 
     // 지역 삭제
-    @Secured("ROLE_ADMIN")
+    @Secured({"ROLE_ADMIN", "ROLE_MANAGER"})
     @DeleteMapping("/{regionId}")
     public ResponseEntity<ApiResDto> deleteRegion(@PathVariable Long regionId) {
         try {
