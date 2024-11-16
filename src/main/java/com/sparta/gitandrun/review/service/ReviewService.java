@@ -3,6 +3,7 @@ package com.sparta.gitandrun.review.service;
 import com.sparta.gitandrun.review.dto.AdminReviewResponseDto;
 import com.sparta.gitandrun.review.dto.ReviewRequestDto;
 import com.sparta.gitandrun.review.dto.ReviewResponseDto;
+import com.sparta.gitandrun.review.dto.UserReviewResponseDto;
 import com.sparta.gitandrun.review.entity.Review;
 import com.sparta.gitandrun.review.repository.ReviewRepository;
 import com.sparta.gitandrun.order.entity.Order;
@@ -10,6 +11,8 @@ import com.sparta.gitandrun.order.entity.OrderMenu;
 import com.sparta.gitandrun.order.entity.OrderStatus;
 import com.sparta.gitandrun.order.repository.OrderMenuRepository;
 import com.sparta.gitandrun.order.repository.OrderRepository;
+import com.sparta.gitandrun.store.entity.Store;
+import com.sparta.gitandrun.store.repository.StoreRepository;
 import com.sparta.gitandrun.user.entity.User;
 import com.sparta.gitandrun.user.repository.UserRepository;
 import java.util.List;
@@ -31,6 +34,7 @@ public class ReviewService {
     private final UserRepository userRepository;
     private final OrderRepository orderRepository;
     private final OrderMenuRepository orderMenuRepository;
+    private final StoreRepository storeRepository;
 
     // 리뷰 작성
     @Transactional
@@ -54,12 +58,29 @@ public class ReviewService {
         reviewRepository.save(review);
     }
 
-    //공통 - 가게별 리뷰 조회
+    // OWNER: 본인 가게 리뷰 조회
     @Transactional(readOnly = true)
-    public Page<ReviewResponseDto> getReviewsByStore(UUID storeId, int page, int size, String sortBy) {
+    public Page<UserReviewResponseDto> getOwnerReviewsByStore(Long userId, UUID storeId, int page, int size, String sortBy) {
+        List<Store> stores = storeRepository.findByUser_UserId(userId);
+        boolean isStoreOwner = stores.stream().anyMatch(store -> store.getStoreId().equals(storeId));
+
+        if (!isStoreOwner) {
+            throw new IllegalArgumentException("본인 가게가 아닙니다.");
+        }
+
+        Pageable pageable = optionPageable(page, size, sortBy);
+        Page<Review> reviews = reviewRepository.findByStoreIdAndUserId(storeId, userId, pageable);
+        reviewEmpty(reviews);
+        return reviews.map(UserReviewResponseDto::new);
+    }
+
+    // CUSTOMER: 모든 가게 리뷰 조회
+    @Transactional(readOnly = true)
+    public Page<UserReviewResponseDto> getCustomerReviewsByStore(UUID storeId, int page, int size, String sortBy) {
         Pageable pageable = optionPageable(page, size, sortBy);
         Page<Review> reviews = reviewRepository.findByStoreId(storeId, pageable);
-        return reviews.map(ReviewResponseDto::new);
+        reviewEmpty(reviews);
+        return reviews.map(UserReviewResponseDto::new);
     }
 
     // 사용자 - 본인 리뷰 조회
