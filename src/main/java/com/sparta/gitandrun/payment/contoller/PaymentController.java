@@ -10,10 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -31,5 +28,15 @@ public class PaymentController {
         paymentService.createPayment(userDetails.getUser(), dto);
 
         return ResponseEntity.ok().body(new ApiResDto("결제 성공", HttpStatus.OK.value()));
+    }
+
+    @Secured({"ROLE_CUSTOMER", "ROLE_MANAGER"})
+    @PatchMapping("/{paymentId}")
+    public ResponseEntity<ApiResDto> cancelPayment(@AuthenticationPrincipal UserDetailsImpl userDetails,
+                                                   @PathVariable("paymentId") Long paymentId) {
+
+        paymentService.cancelPayment(userDetails.getUser(), paymentId);
+
+        return ResponseEntity.ok().body(new ApiResDto("취소 성공", HttpStatus.OK.value()));
     }
 }
