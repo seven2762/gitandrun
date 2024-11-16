@@ -5,6 +5,7 @@ import com.sparta.gitandrun.order.entity.Order;
 import com.sparta.gitandrun.user.entity.User;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -33,4 +34,22 @@ public class Payment extends BaseEntity {
     @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "p_user_id")
     private User user;
+
+    @Builder
+    private Payment(int paymentPrice, Order order, User user) {
+        this.paymentPrice = paymentPrice;
+        this.isPaid = true;
+        this.order = order;
+        this.user = user;
+        initAuditInfo(user);
+    }
+
+    // == 생성 메서드 == //
+    public static Payment createPayment(int paymentPrice, Order order, User user) {
+        return Payment.builder()
+                .paymentPrice(paymentPrice)
+                .order(order.completeOrder())
+                .user(user)
+                .build();
+    }
 }
