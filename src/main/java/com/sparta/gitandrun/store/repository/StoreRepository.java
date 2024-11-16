@@ -13,9 +13,15 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface StoreRepository extends JpaRepository<Store, UUID> {
-    List<Store> findByIsDeletedFalse();
     Optional<Store> findById(UUID storeId); // Store의 ID로 조회하는 메서드
+
     List<Store> findByUser_UserId(Long userId);
+
+    // Soft-Delete된 가게만 조회
+    List<Store> findByIsDeletedTrue();
+
+    // Soft-Delete되지 않은 가게만 조회
+    List<Store> findByIsDeletedFalse();
 
     @Query("SELECT s FROM Store s WHERE s.category.id = :categoryId")
     Page<Store> findByCategoryId(UUID categoryId, Pageable pageable);
@@ -39,4 +45,25 @@ public interface StoreRepository extends JpaRepository<Store, UUID> {
                                                @Param("isAdmin") boolean isAdmin,
                                                Pageable pageable);
 
+    // Soft-Delete된 가게 카테고리로 검색
+    @Query("SELECT s FROM Store s WHERE s.category.id = :categoryId AND s.isDeleted = true")
+    Page<Store> findByCategoryIdAndIsDeletedTrue(@Param("categoryId") UUID categoryId, Pageable pageable);
+
+    // Soft-Delete된 가게 키워드로 검색
+    @Query("SELECT s FROM Store s WHERE " +
+            "(LOWER(s.storeName) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
+            "OR LOWER(s.address.address) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
+            "OR LOWER(s.address.addressDetail) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
+            "OR LOWER(s.category.name) LIKE LOWER(CONCAT('%', :keyword, '%'))) " +
+            "AND s.isDeleted = true")
+    Page<Store> searchStoresAndIsDeletedTrue(@Param("keyword") String keyword, Pageable pageable);
+
+    // Soft-Delete되지 않은 가게 키워드로 검색
+    @Query("SELECT s FROM Store s WHERE " +
+            "(LOWER(s.storeName) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
+            "OR LOWER(s.address.address) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
+            "OR LOWER(s.address.addressDetail) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
+            "OR LOWER(s.category.name) LIKE LOWER(CONCAT('%', :keyword, '%'))) " +
+            "AND s.isDeleted = false")
+    Page<Store> searchStoresAndIsDeletedFalse(@Param("keyword") String keyword, Pageable pageable);
 }
