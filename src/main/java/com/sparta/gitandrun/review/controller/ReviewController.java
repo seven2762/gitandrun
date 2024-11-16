@@ -1,13 +1,16 @@
 package com.sparta.gitandrun.review.controller;
 
+import com.sparta.gitandrun.common.entity.ApiResDto;
 import com.sparta.gitandrun.review.dto.ReviewRequestDto;
-import com.sparta.gitandrun.review.dto.ReviewResponseDto;
-import com.sparta.gitandrun.review.entity.Review;
 import com.sparta.gitandrun.review.service.ReviewService;
+import com.sparta.gitandrun.user.security.UserDetailsImpl;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -26,13 +29,15 @@ public class ReviewController {
     private final ReviewService reviewService;
 
     //리뷰 작성
-    @PostMapping("/write")
-    public ResponseEntity<ReviewResponseDto> createReview(
+    @Secured({"ROLE_CUSTOMER", "ROLE_OWNER"})
+    @PostMapping("/write/{orderId}")
+    public ResponseEntity<ApiResDto> createReview(
+            @AuthenticationPrincipal UserDetailsImpl userDetails,
             @RequestBody ReviewRequestDto requestDto,
-            @RequestParam Long userId,
-            @RequestParam Long orderId) {
-        Review review = reviewService.createReview(requestDto, userId, orderId);
-        return ResponseEntity.ok(new ReviewResponseDto(review));
+            @PathVariable Long orderId) {
+        Long userId = userDetails.getUser().getUserId();
+        reviewService.createReview(requestDto, userId, orderId);
+        return ResponseEntity.ok().body(new ApiResDto("리뷰 작성 완료", HttpStatus.OK.value()));
     }
 
     //공통 - 가게별 리뷰 조회
