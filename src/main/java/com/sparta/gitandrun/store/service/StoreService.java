@@ -188,6 +188,11 @@ public class StoreService {
         Store store = storeRepository.findById(storeId)
                 .orElseThrow(() -> new IllegalArgumentException("가게를 찾을 수 없습니다."));
 
+        // 삭제된 가게인지 확인
+        if (store.isDeleted()) {
+            throw new IllegalArgumentException("삭제된 가게는 수정할 수 없습니다.");
+        }
+
         // 가게의 소유자와 로그인한 사용자 비교
         if (!store.getUser().getUserId().equals(userId)) {
             throw new IllegalArgumentException("본인이 소유한 가게만 수정할 수 있습니다.");
@@ -214,6 +219,7 @@ public class StoreService {
         store.setUpdatedAt(LocalDateTime.now());
         store.setUpdatedBy(userId.toString());
     }
+
 
 
 
