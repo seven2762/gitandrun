@@ -6,6 +6,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.UUID;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 public interface ReviewRepository extends JpaRepository<Review, UUID> {
 
@@ -16,5 +18,11 @@ public interface ReviewRepository extends JpaRepository<Review, UUID> {
 
     Page<Review> findByStoreId(UUID storeId, Pageable pageable);
 
-    Page<Review> findByReviewContentContaining(String keyword, Pageable pageable);
+    @Query("SELECT r FROM Review r " +
+            "WHERE (:keyword IS NULL OR " +
+            "LOWER(r.reviewContent) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+            "CONCAT(r.reviewId, '') LIKE CONCAT('%', :keyword, '%') OR " +
+            "CONCAT(r.user.userId, '') LIKE CONCAT('%', :keyword, '%') OR " +
+            "CONCAT(r.storeId, '') LIKE CONCAT('%', :keyword, '%'))")
+    Page<Review> searchReviewsWithKeyword(@Param("keyword") String keyword, Pageable pageable);
 }
