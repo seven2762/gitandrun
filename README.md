@@ -82,3 +82,8 @@ Github, Notion, Postman, IntelliJ IDEA, ZEP
 
 ● 리뷰 관리
 
+---
+인프라 설계도
+---
+<img width="698" alt="image" src="https://github.com/user-attachments/assets/514c3044-4ced-4786-a094-ca8c1c6f55c2">
+
