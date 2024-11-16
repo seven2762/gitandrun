@@ -3,6 +3,7 @@ package com.sparta.gitandrun.review.controller;
 import com.sparta.gitandrun.common.entity.ApiResDto;
 import com.sparta.gitandrun.review.dto.AdminReviewResponseDto;
 import com.sparta.gitandrun.review.dto.ReviewRequestDto;
+import com.sparta.gitandrun.review.dto.UserReviewResponseDto;
 import com.sparta.gitandrun.review.service.ReviewService;
 import com.sparta.gitandrun.user.security.UserDetailsImpl;
 import java.util.UUID;
@@ -41,15 +42,30 @@ public class ReviewController {
         return ResponseEntity.ok().body(new ApiResDto("리뷰 작성 완료", HttpStatus.OK.value()));
     }
 
-    //공통 - 가게별 리뷰 조회
-    @GetMapping("/storeId/{storeId}")
-    public ResponseEntity<Page<ReviewResponseDto>> getReviewsByStore(
+    // OWNER: 본인 가게 리뷰만 조회
+    @Secured("ROLE_OWNER")
+    @GetMapping("/owner/{storeId}")
+    public ApiResDto getOwnerReviewsByStore(
+            @AuthenticationPrincipal UserDetailsImpl userDetails,
             @PathVariable UUID storeId,
             @RequestParam(defaultValue="0") int page,
             @RequestParam(defaultValue="10") int size,
             @RequestParam(defaultValue = "createdAt") String sortBy) {
-        Page<ReviewResponseDto> reviews = reviewService.getReviewsByStore(storeId, page, size, sortBy);
-        return ResponseEntity.ok(reviews);
+        Long userId = userDetails.getUser().getUserId();
+        Page<UserReviewResponseDto> reviews = reviewService.getOwnerReviewsByStore(userId, storeId, page, size, sortBy);
+        return new ApiResDto("리뷰 조회 성공", 200, reviews);
+    }
+
+    // 모든 가게 리뷰 조회 (OWNER 제외)
+    @Secured({"ROLE_ADMIN", "ROLE_MANAGER", "ROLE_CUSTOMER"})
+    @GetMapping("/store/{storeId}")
+    public ApiResDto getCustomerReviewsByStore(
+            @PathVariable UUID storeId,
+            @RequestParam(defaultValue="0") int page,
+            @RequestParam(defaultValue="10") int size,
+            @RequestParam(defaultValue = "createdAt") String sortBy) {
+        Page<UserReviewResponseDto> reviews = reviewService.getCustomerReviewsByStore(storeId, page, size, sortBy);
+        return new ApiResDto("리뷰 조회 성공", 200, reviews);
     }
 
     // 사용자 - 본인 리뷰 조회
