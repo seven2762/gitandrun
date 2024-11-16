@@ -27,6 +27,7 @@ public class MenuResponseDto {
     private boolean isDeleted;
     private LocalDateTime deletedAt;
     private String deletedBy;
+
     LocalDateTime localDateTime = LocalDateTime.now();
 
     public MenuResponseDto(Menu menu) {
@@ -39,5 +40,8 @@ public class MenuResponseDto {
         this.createdBy = menu.getCreatedBy();
         this.updatedAt = menu.getUpdatedAt();
         this.updatedBy = menu.getUpdatedBy();
+        this.isDeleted = menu.isDeleted();
+        this.deletedAt = menu.getDeletedAt();
+        this.deletedBy = menu.getDeletedBy();
     }
 }
