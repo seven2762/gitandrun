@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.UUID;
@@ -22,6 +23,7 @@ public class MenuController {
     private final MenuService menuService;
 
     //CREATE
+    @Secured({"ROLE_OWNER","ROLE_MANAGER","ROLE_ADMIN"})
     @PostMapping
     public ResponseEntity<ApiResDto> createMenu(@RequestBody MenuRequestDto requestDto) {
         menuService.createMenu(requestDto);
@@ -29,6 +31,7 @@ public class MenuController {
     }
 
     //UPDATE
+    @Secured({"ROLE_OWNER","ROLE_MANAGER","ROLE_ADMIN"})
     @PatchMapping("/{menuId}")
     public ResponseEntity<ApiResDto> updateMenu(@RequestBody MenuRequestDto requestDto, @PathVariable("menuId") UUID menuId) {
         menuService.updateMenu(requestDto, menuId);
@@ -36,6 +39,7 @@ public class MenuController {
 
     }
     //DELETE
+    @Secured({"ROLE_OWNER","ROLE_MANAGER","ROLE_ADMIN"})
     @DeleteMapping("/{menuId}")
     public ResponseEntity<ApiResDto> deleteMenu(@PathVariable("menuId") UUID menuId){
         menuService.deleteMenu(menuId);
@@ -43,16 +47,20 @@ public class MenuController {
     }
 
     //READ 모든 필드 조회(SECURED ADMIN, MANAGER)
+    @Secured({"ROLE_ADMIN", "ROLE_MANAGER"})
     @GetMapping
     public List<MenuResponseDto> getAllMenus(){
         return menuService.getAllMenus();
     }
 
       //READ 가게의 모든 메뉴에 대한 이름, 내용, 가격들 조회
-    @GetMapping("/search/{storeId}")
+      @Secured({"ROLE_OWNER","ROLE_MANAGER","ROLE_ADMIN"})
+      @GetMapping("/search/{storeId}")
     public List<MenuResponseDto> getDetailMenu(@PathVariable UUID storeId){
         return menuService.getDetailMenu(storeId);
     }
+
+
 
     //READ 가게 이름에 메뉴명이 들어가는 가게 조회 및 가게의 메뉴들 조회
     @GetMapping("/search/store")
@@ -68,11 +76,13 @@ public class MenuController {
 
         //READ ony One
     @GetMapping("/{id}")
+    @Secured({"ROLE_MANAGER","ROLE_ADMIN"})
     public MenuResponseDto getOneMenu(@PathVariable("id") UUID menuId){
         return menuService.getOneMenu(menuId);
     }
 
-    //메뉴 페이징
+    //메뉴 Table의 모든 항목 조회
+    @Secured({"ROLE_MANAGER","ROLE_ADMIN"})
     @GetMapping("/paging")
     public Page<MenuResponseDto> getMenuPage(
             @RequestParam(defaultValue = "1") int page,
