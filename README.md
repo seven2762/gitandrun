@@ -1,8 +1,24 @@
 # 💻 Git And Run (8조) 프로젝트
 : AI 검증 비즈니스 배달 플랫폼
+|분류|내용|
+|---|---|
+|WBS|[LINK](http://hexagonal-taleggio-d78.notion.site/Git-and-Run-1363121c7bfd80f1839ccd358e83756d?pvs=73)|
+|ERD|[LINK](https://www.erdcloud.com/d/zwwsd7gtExGqthiYH)|
+|API|[LINK]([https://www.erdcloud.com/d/zwwsd7gtExGqthiYH](https://hexagonal-taleggio-d78.notion.site/API-1363121c7bfd80e2bce1ee1295028abc))|
 
 ## 🤔 프로젝트 개요
 가게 관리 및 사용자 중심 서비스를 제공하는 배달 플랫폼입니다. 이 프로젝트는 가게 소유자, 관리자, 고객을 대상으로 각각의 역할에 적합한 기능을 제공하며, 특히 생성형 인공지능 서비스(API)와 연동하여 메뉴 설명을 도와 사용자 친화적인 플랫폼을 목표로 합니다.
+
+### 기획 배경
+- 효율적이고 자동화된 온라인 주문 관리 시스템 요구
+
+### 프로젝트 목표
+- 추후 확장성을 고려한 유연한 데이터 설계
+- 효율적인 가게 관리 시스템 구축
+- 사용자 친화적인 메뉴 관리
+- 검색을 통한 고객 맞춤형 서비스 제공
+- 역할 기반의 권한 제어
+- 지역 기반 서비스
 
 ### ● 기대 효과
 AI를 통해 AI가 생성한 자연스러운 메뉴 설명으로 고객에게 메뉴의 매력을 효과적으로 전달.
@@ -23,13 +39,17 @@ AI를 통해 AI가 생성한 자연스러운 메뉴 설명으로 고객에게 �
 
 ## 💻 개발 환경
 ### ● 데이터베이스
-PostgreSQL
+PostgreSQL, Amazon RDS, Redis
 
 ### ● 백엔드
 JAVA, Spring Boot 3.3.5, Spring Data JPA, Spring Security
 
 ### ● API
-구글 gemini API, JWT (JSON Web Token)
+구글 Gemini API, JWT (JSON Web Token)
+
+### ● Tools
+Github, Notion, Postman, IntelliJ IDEA, ZEP
+
 
 ## 📚주요 기능
 
