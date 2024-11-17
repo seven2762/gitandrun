@@ -2,9 +2,10 @@ package com.sparta.gitandrun.payment.contoller;
 
 import com.sparta.gitandrun.common.entity.ApiResDto;
 import com.sparta.gitandrun.order.dto.res.ResDto;
+import com.sparta.gitandrun.payment.dto.req.ReqPaymentCondByManagerDTO;
 import com.sparta.gitandrun.payment.dto.req.ReqPaymentCondDTO;
 import com.sparta.gitandrun.payment.dto.req.ReqPaymentPostDTO;
-import com.sparta.gitandrun.payment.dto.res.ResPaymentGetByCustomerDTO;
+import com.sparta.gitandrun.payment.dto.res.ResPaymentGetByUserIdDTO;
 import com.sparta.gitandrun.payment.service.PaymentService;
 import com.sparta.gitandrun.user.security.UserDetailsImpl;
 import lombok.RequiredArgsConstructor;
@@ -38,11 +39,19 @@ public class PaymentController {
 
     @Secured("ROLE_CUSTOMER")
     @GetMapping
-    public ResponseEntity<ResDto<ResPaymentGetByCustomerDTO>> readPayment(@AuthenticationPrincipal UserDetailsImpl userDetails,
-                                                                          @RequestBody ReqPaymentCondDTO condition,
-                                                                          @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+    public ResponseEntity<ResDto<ResPaymentGetByUserIdDTO>> readPayment(@AuthenticationPrincipal UserDetailsImpl userDetails,
+                                                                        @RequestBody ReqPaymentCondDTO condition,
+                                                                        @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
 
         return paymentService.getByCustomer(userDetails.getUser(), condition, pageable);
+    }
+
+    @Secured("ROLE_MANAGER")
+    @GetMapping("/manager")
+    public ResponseEntity<ResDto<ResPaymentGetByUserIdDTO>> readPayment(@RequestBody ReqPaymentCondByManagerDTO condition,
+                                                                        @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+
+        return paymentService.getByManager(condition, pageable);
     }
 
     @Secured({"ROLE_CUSTOMER", "ROLE_MANAGER"})
