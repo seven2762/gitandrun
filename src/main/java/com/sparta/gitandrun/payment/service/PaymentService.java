@@ -3,15 +3,15 @@ package com.sparta.gitandrun.payment.service;
 import com.sparta.gitandrun.order.dto.res.ResDto;
 import com.sparta.gitandrun.order.entity.Order;
 import com.sparta.gitandrun.order.repository.OrderRepository;
+import com.sparta.gitandrun.payment.dto.req.ReqPaymentCondByManagerDTO;
 import com.sparta.gitandrun.payment.dto.req.ReqPaymentCondDTO;
 import com.sparta.gitandrun.payment.dto.req.ReqPaymentPostDTO;
-import com.sparta.gitandrun.payment.dto.res.ResPaymentGetByCustomerDTO;
+import com.sparta.gitandrun.payment.dto.res.ResPaymentGetByUserIdDTO;
 import com.sparta.gitandrun.payment.entity.Payment;
 import com.sparta.gitandrun.payment.repository.PaymentRepository;
 import com.sparta.gitandrun.user.entity.Role;
 import com.sparta.gitandrun.user.entity.User;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -21,7 +21,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-@Slf4j(topic = "Payment-Service")
 public class PaymentService {
 
     private final PaymentRepository paymentRepository;
@@ -41,15 +40,33 @@ public class PaymentService {
         고객 결제 목록 조회
     */
     @Transactional(readOnly = true)
-    public ResponseEntity<ResDto<ResPaymentGetByCustomerDTO>> getByCustomer(User user, ReqPaymentCondDTO condition, Pageable pageable) {
+    public ResponseEntity<ResDto<ResPaymentGetByUserIdDTO>> getByCustomer(User user, ReqPaymentCondDTO condition, Pageable pageable) {
 
         Page<Payment> findPaymentPage = paymentRepository.findPaymentsForUserWithConditions(user.getUserId(), condition, pageable);
 
         return new ResponseEntity<>(
-                ResDto.<ResPaymentGetByCustomerDTO>builder()
+                ResDto.<ResPaymentGetByUserIdDTO>builder()
                         .code(HttpStatus.OK.value())
                         .message("결제 목록 조회에 성공했습니다.")
-                        .data(ResPaymentGetByCustomerDTO.of(findPaymentPage))
+                        .data(ResPaymentGetByUserIdDTO.of(findPaymentPage))
+                        .build(),
+                HttpStatus.OK
+        );
+    }
+
+    /*
+        매니저 결제 목록 조회
+    */
+    @Transactional(readOnly = true)
+    public ResponseEntity<ResDto<ResPaymentGetByUserIdDTO>> getByManager(ReqPaymentCondByManagerDTO condition, Pageable pageable) {
+
+        Page<Payment> findPaymentPage = paymentRepository.findCustomerPaymentsWithConditions(condition, pageable);
+
+        return new ResponseEntity<>(
+                ResDto.<ResPaymentGetByUserIdDTO>builder()
+                        .code(HttpStatus.OK.value())
+                        .message("결제 목록 조회에 성공했습니다.")
+                        .data(ResPaymentGetByUserIdDTO.of(findPaymentPage))
                         .build(),
                 HttpStatus.OK
         );
