@@ -1,5 +1,10 @@
 package com.sparta.gitandrun.order.entity;
 
+import lombok.Getter;
+
+import java.util.Objects;
+
+@Getter
 public enum OrderType {
     DELIVERY(Type.DELIVERY),
     VISIT(Type.VISIT);
@@ -10,12 +15,14 @@ public enum OrderType {
         this.type = type;
     }
 
-    public String getType() {
-        return this.type;
-    }
-
     public static class Type {
         public static final String DELIVERY = "DELIVERY";
         public static final String VISIT = "VISIT";
+    }
+
+    public static OrderType fromString(String type) {
+        if (type == null) return DELIVERY;
+        return Objects.equals(type.toUpperCase(), OrderType.DELIVERY.getType())
+                ? DELIVERY : VISIT;
     }
 }
