@@ -70,4 +70,14 @@ public class PaymentController {
 
         return ResponseEntity.ok().body(new ApiResDto("취소 성공", HttpStatus.OK.value()));
     }
+
+    @Secured("ROLE_ADMIN")
+    @DeleteMapping("/{paymentId}")
+    public ResponseEntity<ApiResDto> deletePayment(@AuthenticationPrincipal UserDetailsImpl userDetails,
+                                                   @PathVariable("paymentId")Long paymentId) {
+
+        paymentService.deletePayment(userDetails.getUser(), paymentId);
+
+        return ResponseEntity.ok().body(new ApiResDto("취소 성공", HttpStatus.OK.value()));
+    }
 }
