@@ -41,6 +41,8 @@ AI를 통해 AI가 생성한 자연스러운 메뉴 설명으로 고객에게 �
 
 ---
 
+---
+
 ## 💻 개발 환경
 
 ![example workflow](https://github.com/jabberwocker04/gitandrun/actions/workflows/gradle.yml/badge.svg)
