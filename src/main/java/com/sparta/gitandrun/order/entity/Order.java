@@ -9,6 +9,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -84,11 +85,12 @@ public class Order extends BaseEntity {
     }
 
     // == 주문 거절 메서드 == //
-    public void rejectOrder() {
+    public void rejectOrder(User user) {
         if (!Objects.equals(this.getOrderStatus().status, OrderStatus.PENDING.status)) {
             throw new IllegalArgumentException("해당 주문은 이미 취소, 완료 또는 거절된 상태입니다.");
         }
         this.orderStatus = OrderStatus.REJECT;
+        this.setUpdatedBy(user.getUsername());
     }
 
     // == 주문상태 변경 메서드 == //
@@ -100,5 +102,11 @@ public class Order extends BaseEntity {
     // == 조회 메서드 == //
     public int getTotalPrice() {
         return orderMenus.stream().mapToInt(OrderMenu::getOrderPrice).sum();
+    }
+
+    public void deleteOrder(User user) {
+        this.isDeleted = false;
+        this.setDeletedAt(LocalDateTime.now());
+        this.setDeletedBy(user.getUsername());
     }
 }
