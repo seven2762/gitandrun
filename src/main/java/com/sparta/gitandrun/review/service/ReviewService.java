@@ -42,14 +42,7 @@ public class ReviewService {
             throw new IllegalArgumentException("이미 리뷰가 작성된 주문입니다.");
         }
 
-        // order-store 관계 맵핑 시 제거 예정
-        List<OrderMenu> orderMenus = orderMenuRepository.findByOrderId(order.getId());
-        if (orderMenus.isEmpty()) {
-            throw new IllegalArgumentException("주문 메뉴가 존재하지 않습니다.");
-        }
-
-        //UUID storeId = order.getStore().getStoreId();
-        UUID storeId = orderMenus.get(0).getMenu().getStore().getStoreId();
+        UUID storeId = order.getStore().getStoreId();
 
         Review review = new Review(requestDto, order.getUser(), storeId, order);
         reviewRepository.save(review);
