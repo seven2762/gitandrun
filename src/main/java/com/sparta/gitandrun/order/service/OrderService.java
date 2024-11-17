@@ -147,7 +147,14 @@ public class OrderService {
                 ? getOrderByIdAndOwner(user, orderId)
                 : getOrderById(orderId);
 
-        order.rejectOrder();
+        order.rejectOrder(user);
+    }
+
+
+    // 주문 삭제
+    @Transactional
+    public void deleteOrder(User user, Long orderId) {
+        getOrderById(orderId).deleteOrder(user);
     }
 
     /*

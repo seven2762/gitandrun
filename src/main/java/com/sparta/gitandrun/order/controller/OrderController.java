@@ -102,4 +102,18 @@ public class OrderController {
 
         return ResponseEntity.ok().body(new ApiResDto("주문 거절 완료", HttpStatus.OK.value()));
     }
+
+    /*
+        주문 삭제
+        - 어드민은 주문을 삭제할 수 있다.
+    */
+    @Secured("ROLE_ADMIN")
+    @DeleteMapping("/{orderId}")
+    public ResponseEntity<ApiResDto> deleteOrder(@AuthenticationPrincipal UserDetailsImpl userDetails,
+                                                 @PathVariable("orderId") Long orderId) {
+
+        orderService.deleteOrder(userDetails.getUser(), orderId);
+
+        return ResponseEntity.ok().body(new ApiResDto("주문 삭제 완료", HttpStatus.OK.value()));
+    }
 }

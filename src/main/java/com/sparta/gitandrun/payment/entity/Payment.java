@@ -11,6 +11,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 import static jakarta.persistence.FetchType.LAZY;
 
 @Entity
@@ -75,6 +77,13 @@ public class Payment extends BaseEntity {
     public void cancelPayment(User user) {
         this.paymentStatus = PaymentStatus.CANCEL;
         this.order.cancelOrder();
-        setUpdatedBy(user.getUsername());
+        this.setUpdatedBy(user.getUsername());
+    }
+
+    public void deletePayment(User user) {
+        this.isDeleted = true;
+        this.setDeletedAt(LocalDateTime.now());
+        this.setUpdatedBy(user.getUsername());
+        this.setDeletedBy(user.getUsername());
     }
 }

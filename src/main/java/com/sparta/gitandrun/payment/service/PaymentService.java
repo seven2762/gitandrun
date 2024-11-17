@@ -110,6 +110,12 @@ public class PaymentService {
         payment.cancelPayment(user);
     }
 
+    @Transactional
+    public void deletePayment(User user, Long paymentId) {
+        getPayment(paymentId).deletePayment(user);
+    }
+
+
     private Payment getPaymentBy(Long paymentId) {
         return paymentRepository.findById(paymentId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 항목입니다."));
