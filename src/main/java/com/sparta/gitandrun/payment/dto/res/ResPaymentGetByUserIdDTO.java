@@ -19,12 +19,12 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ResPaymentGetByCustomerDTO {
+public class ResPaymentGetByUserIdDTO {
 
     private PaymentPage paymentPage;
 
-    public static ResPaymentGetByCustomerDTO of(Page<Payment> paymentPage) {
-        return ResPaymentGetByCustomerDTO.builder()
+    public static ResPaymentGetByUserIdDTO of(Page<Payment> paymentPage) {
+        return ResPaymentGetByUserIdDTO.builder()
                 .paymentPage(new PaymentPage(paymentPage))
                 .build();
     }
