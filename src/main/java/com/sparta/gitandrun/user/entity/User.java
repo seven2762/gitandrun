@@ -72,7 +72,7 @@ public class User extends BaseEntity {
         return user;
     }
 
-    public void updatePassword(String password) {
+    public void changePassword(String password) {
         this.password = password;
         this.initAuditInfo(this);
     }
