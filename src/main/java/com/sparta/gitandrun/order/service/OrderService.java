@@ -154,10 +154,7 @@ public class OrderService {
     // 주문 삭제
     @Transactional
     public void deleteOrder(User user, Long orderId) {
-
-        Order findOrder = getOrderById(orderId);
-
-        findOrder.deleteOrder(user);
+        getOrderById(orderId).deleteOrder(user);
     }
 
     /*

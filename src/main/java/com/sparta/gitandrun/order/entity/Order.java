@@ -107,6 +107,7 @@ public class Order extends BaseEntity {
     public void deleteOrder(User user) {
         this.isDeleted = true;
         this.setDeletedAt(LocalDateTime.now());
+        this.setUpdatedBy(user.getUsername());
         this.setDeletedBy(user.getUsername());
     }
 }
