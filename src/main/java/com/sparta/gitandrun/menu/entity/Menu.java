@@ -19,7 +19,6 @@ import java.util.UUID;
 @Setter
 @Table(name = "p_menu")
 @NoArgsConstructor
-@SoftDelete(columnName = "is_deleted")
 public class Menu extends BaseEntity {
 
     @Id
@@ -36,7 +35,7 @@ public class Menu extends BaseEntity {
     @Column(name = "menuContent", nullable = false, length = 100)
     private String menuContent;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 100)
     @CreatedDate
     private LocalDateTime createdAt;
 
@@ -50,10 +49,10 @@ public class Menu extends BaseEntity {
     @Column(nullable = false)
     private String updatedBy;
 
-    @Column(name = "is_deleted", nullable = false, insertable = false, updatable = false)
+    @Column(name = "is_deleted", nullable = false)
     private boolean isDeleted;
 
-    @Column(nullable = true)
+    @Column(nullable = true, length = 100)
     private LocalDateTime deletedAt;
 
     @Column(nullable = true, length = 100)
@@ -69,17 +68,17 @@ public class Menu extends BaseEntity {
             this.menuPrice = requestDto.getMenuPrice();
             this.menuContent = requestDto.getMenuContent();
             this.createdAt = requestDto.getCreatedAt();
-            this.createdBy = "test created user";
+            this.createdBy = store.getUser().getUsername();
             this.updatedAt = requestDto.getUpdatedAt();
-            this.updatedBy = "test updated user";
+            this.updatedBy = store.getUser().getUsername();
             this.isDeleted = Boolean.FALSE;
-            this.deletedAt = requestDto.getDeletedAt();
-            this.deletedBy = "test deleted User";
         }
 
     public void update(MenuRequestDto requestDto) {
         this.menuName = requestDto.getMenuName();
         this.menuPrice = requestDto.getMenuPrice();
         this.menuContent = requestDto.getMenuContent();
+        this.updatedBy = store.getUser().getUsername();
     }
+
 }

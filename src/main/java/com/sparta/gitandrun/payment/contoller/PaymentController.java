@@ -1,11 +1,19 @@
 package com.sparta.gitandrun.payment.contoller;
 
 import com.sparta.gitandrun.common.entity.ApiResDto;
+import com.sparta.gitandrun.order.dto.res.ResDto;
+import com.sparta.gitandrun.payment.dto.req.ReqPaymentCondByManagerDTO;
+import com.sparta.gitandrun.payment.dto.req.ReqPaymentCondDTO;
 import com.sparta.gitandrun.payment.dto.req.ReqPaymentPostDTO;
+import com.sparta.gitandrun.payment.dto.res.ResPaymentGetByIdDTO;
+import com.sparta.gitandrun.payment.dto.res.ResPaymentGetByUserIdDTO;
 import com.sparta.gitandrun.payment.service.PaymentService;
 import com.sparta.gitandrun.user.security.UserDetailsImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
@@ -30,10 +38,33 @@ public class PaymentController {
         return ResponseEntity.ok().body(new ApiResDto("결제 성공", HttpStatus.OK.value()));
     }
 
+    @Secured("ROLE_CUSTOMER")
+    @GetMapping
+    public ResponseEntity<ResDto<ResPaymentGetByUserIdDTO>> readPayment(@AuthenticationPrincipal UserDetailsImpl userDetails,
+                                                                        @RequestBody ReqPaymentCondDTO condition,
+                                                                        @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+
+        return paymentService.getByCustomer(userDetails.getUser(), condition, pageable);
+    }
+
+    @Secured("ROLE_MANAGER")
+    @GetMapping("/manager")
+    public ResponseEntity<ResDto<ResPaymentGetByUserIdDTO>> readPayment(@RequestBody ReqPaymentCondByManagerDTO condition,
+                                                                        @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+
+        return paymentService.getByManager(condition, pageable);
+    }
+
+
+    @GetMapping("/{paymentId}")
+    public ResponseEntity<ResDto<ResPaymentGetByIdDTO>> readPayment(@PathVariable("paymentId")Long paymentId) {
+        return paymentService.getBy(paymentId);
+    }
+
     @Secured({"ROLE_CUSTOMER", "ROLE_MANAGER"})
     @PatchMapping("/{paymentId}")
     public ResponseEntity<ApiResDto> cancelPayment(@AuthenticationPrincipal UserDetailsImpl userDetails,
-                                                   @PathVariable("paymentId") Long paymentId) {
+                                                   @PathVariable("paymentId")Long paymentId) {
 
         paymentService.cancelPayment(userDetails.getUser(), paymentId);
 

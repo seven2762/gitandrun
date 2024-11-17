@@ -1,25 +1,37 @@
 package com.sparta.gitandrun.payment.service;
 
+import com.sparta.gitandrun.order.dto.res.ResDto;
 import com.sparta.gitandrun.order.entity.Order;
+import com.sparta.gitandrun.order.entity.OrderMenu;
+import com.sparta.gitandrun.order.repository.OrderMenuRepository;
 import com.sparta.gitandrun.order.repository.OrderRepository;
+import com.sparta.gitandrun.payment.dto.req.ReqPaymentCondByManagerDTO;
+import com.sparta.gitandrun.payment.dto.req.ReqPaymentCondDTO;
 import com.sparta.gitandrun.payment.dto.req.ReqPaymentPostDTO;
+import com.sparta.gitandrun.payment.dto.res.ResPaymentGetByIdDTO;
+import com.sparta.gitandrun.payment.dto.res.ResPaymentGetByUserIdDTO;
 import com.sparta.gitandrun.payment.entity.Payment;
 import com.sparta.gitandrun.payment.repository.PaymentRepository;
 import com.sparta.gitandrun.user.entity.Role;
 import com.sparta.gitandrun.user.entity.User;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
-@Slf4j(topic = "Payment-Service")
 public class PaymentService {
 
     private final PaymentRepository paymentRepository;
     private final OrderRepository orderRepository;
-    
+    private final OrderMenuRepository orderMenuRepository;
+
     @Transactional
     public void createPayment(User user, ReqPaymentPostDTO dto) {
 
@@ -31,6 +43,60 @@ public class PaymentService {
     }
 
     /*
+        고객 결제 목록 조회
+    */
+    @Transactional(readOnly = true)
+    public ResponseEntity<ResDto<ResPaymentGetByUserIdDTO>> getByCustomer(User user, ReqPaymentCondDTO condition, Pageable pageable) {
+
+        Page<Payment> findPaymentPage = paymentRepository.findMyPaymentsWithConditions(user.getUserId(), condition, pageable);
+
+        return new ResponseEntity<>(
+                ResDto.<ResPaymentGetByUserIdDTO>builder()
+                        .code(HttpStatus.OK.value())
+                        .message("결제 목록 조회에 성공했습니다.")
+                        .data(ResPaymentGetByUserIdDTO.of(findPaymentPage))
+                        .build(),
+                HttpStatus.OK
+        );
+    }
+
+    /*
+        매니저 결제 목록 조회
+    */
+    @Transactional(readOnly = true)
+    public ResponseEntity<ResDto<ResPaymentGetByUserIdDTO>> getByManager(ReqPaymentCondByManagerDTO condition, Pageable pageable) {
+
+        Page<Payment> findPaymentPage = paymentRepository.findCustomerPaymentsWithConditions(condition, pageable);
+
+        return new ResponseEntity<>(
+                ResDto.<ResPaymentGetByUserIdDTO>builder()
+                        .code(HttpStatus.OK.value())
+                        .message("결제 목록 조회에 성공했습니다.")
+                        .data(ResPaymentGetByUserIdDTO.of(findPaymentPage))
+                        .build(),
+                HttpStatus.OK
+        );
+    }
+
+    @Transactional(readOnly = true)
+    public ResponseEntity<ResDto<ResPaymentGetByIdDTO>> getBy(Long paymentId) {
+
+        Payment findPayment = getPaymentBy(paymentId);
+
+        List<OrderMenu> findOrderMenus = orderMenuRepository.findByOrderId(findPayment.getOrder().getId());
+
+        return new ResponseEntity<>(
+                ResDto.<ResPaymentGetByIdDTO>builder()
+                        .code(HttpStatus.OK.value())
+                        .message("결제 상세 조회에 성공했습니다.")
+                        .data(ResPaymentGetByIdDTO.of(findPayment, findPayment.getOrder(), findOrderMenus))
+                        .build(),
+                HttpStatus.OK
+        );
+    }
+
+
+    /*
         결제 취소
     */
     @Transactional
@@ -38,10 +104,15 @@ public class PaymentService {
 
         Payment payment =
                 user.getRole() == Role.CUSTOMER
-                ? getPayment(paymentId, user.getUserId())
-                : getPayment(paymentId);
+                        ? getPayment(paymentId, user.getUserId())
+                        : getPayment(paymentId);
 
         payment.cancelPayment(user);
+    }
+
+    private Payment getPaymentBy(Long paymentId) {
+        return paymentRepository.findById(paymentId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 항목입니다."));
     }
 
     private Payment getPayment(Long paymentId) {

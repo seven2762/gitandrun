@@ -30,8 +30,6 @@ public class MenuResponseDto {
 
     LocalDateTime localDateTime = LocalDateTime.now();
 
-    private List<MenuResponseDto> menuList = new ArrayList<>();
-
     public MenuResponseDto(Menu menu) {
         this.storeId = menu.getStore().getStoreId();
         this.menuId = menu.getMenuId();
@@ -39,8 +37,11 @@ public class MenuResponseDto {
         this.menuPrice = menu.getMenuPrice();
         this.menuContent = menu.getMenuContent();
         this.createdAt = menu.getCreatedAt();
-        this.createdBy = "test create user";
+        this.createdBy = menu.getCreatedBy();
         this.updatedAt = menu.getUpdatedAt();
-        this.updatedBy = "test update user";
+        this.updatedBy = menu.getUpdatedBy();
+        this.isDeleted = menu.isDeleted();
+        this.deletedAt = menu.getDeletedAt();
+        this.deletedBy = menu.getDeletedBy();
     }
 }
