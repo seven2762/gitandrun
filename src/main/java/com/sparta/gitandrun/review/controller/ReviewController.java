@@ -6,6 +6,7 @@ import com.sparta.gitandrun.review.dto.ReviewRequestDto;
 import com.sparta.gitandrun.review.dto.UserReviewResponseDto;
 import com.sparta.gitandrun.review.service.ReviewService;
 import com.sparta.gitandrun.user.security.UserDetailsImpl;
+import jakarta.validation.Valid;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -32,10 +33,10 @@ public class ReviewController {
 
     //리뷰 작성
     @Secured({"ROLE_CUSTOMER", "ROLE_OWNER"})
-    @PostMapping("/write/{orderId}")
+    @PostMapping("/{orderId}")
     public ResponseEntity<ApiResDto> createReview(
             @AuthenticationPrincipal UserDetailsImpl userDetails,
-            @RequestBody ReviewRequestDto requestDto,
+            @RequestBody @Valid ReviewRequestDto requestDto,
             @PathVariable Long orderId) {
         Long userId = userDetails.getUser().getUserId();
         reviewService.createReview(requestDto, userId, orderId);
@@ -70,7 +71,7 @@ public class ReviewController {
 
     // CUSTOEMR, OWNER - 본인이 작성한 리뷰 조회
     @Secured({"ROLE_CUSTOMER", "ROLE_OWNER"})
-    @GetMapping("/user/myreviews")
+    @GetMapping("/myReviews")
     public ResponseEntity<ApiResDto> getMyReviewsByUserId(
             @AuthenticationPrincipal UserDetailsImpl userDetails,
             @RequestParam(defaultValue="0") int page,
@@ -81,29 +82,33 @@ public class ReviewController {
         return ResponseEntity.ok().body(new ApiResDto("본인 리뷰 조회 성공", HttpStatus.OK.value(), reviews));
     }
 
-    // 관리자 - 모든 리뷰 검색 (키워드)
+    // 관리자 - 모든 리뷰 검색 (reviewContent, userId, reviewId, storeId)
     @Secured({"ROLE_MANAGER", "ROLE_ADMIN"})
     @GetMapping("/admin")
-    public ApiResDto getReviewsByKeyword(
-            @RequestParam(required = false) String keyword,
+    public ApiResDto getReviewsByFilters(
+            @RequestParam(required = false) String keyword,    // 키워드 검색
+            @RequestParam(required = false) Long userId,      // userId로 검색
+            @RequestParam(required = false) UUID reviewId,    // reviewId로 검색
+            @RequestParam(required = false) UUID storeId,     // storeId로 검색
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "createdAt") String sortBy) {
-        Page<AdminReviewResponseDto> reviews = reviewService.searchReviewsWithKeyword(keyword, page, size, sortBy);
+        Page<AdminReviewResponseDto> reviews = reviewService.searchReviewsWithFilters(
+                keyword, userId, reviewId, storeId, page, size, sortBy);
         return new ApiResDto("리뷰 조회 성공", 200, reviews);
     }
 
-    //리뷰 수정 - 완료
+    //리뷰 수정
     @PatchMapping("/{reviewId}")
     public ResponseEntity<ApiResDto> updateReview(
             @AuthenticationPrincipal UserDetailsImpl userDetails,
             @PathVariable UUID reviewId,
-            @RequestBody ReviewRequestDto requestDto) {
+            @RequestBody @Valid ReviewRequestDto requestDto) {
         reviewService.updateReview(reviewId, userDetails, requestDto);
         return ResponseEntity.ok().body(new ApiResDto("리뷰 수정 완료", HttpStatus.OK.value()));
     }
 
-    //리뷰 삭제 - 완료
+    //리뷰 삭제
     @DeleteMapping("{reviewId}")
     public ResponseEntity<ApiResDto> deleteReview(
             @PathVariable UUID reviewId,

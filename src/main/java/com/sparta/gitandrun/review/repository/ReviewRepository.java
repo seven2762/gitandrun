@@ -18,18 +18,22 @@ public interface ReviewRepository extends JpaRepository<Review, UUID> {
     Page<Review> findByUserId(@Param("userId") Long userId, Pageable pageable);
 
     // OWNER: 본인 가게의 사용자의 리뷰를 조회
-    @Query("SELECT r FROM Review r WHERE r.storeId = :storeId AND r.user.userId = :userId AND r.isDeleted = false")
+    @Query("SELECT r FROM Review r WHERE r.store.storeId = :storeId AND r.user.userId = :userId AND r.isDeleted = false")
     Page<Review> findByStoreIdAndUserId(UUID storeId, Long userId, Pageable pageable);
 
     // CUSTOMER: 특정 가게의 리뷰를 조회
-    @Query("SELECT r FROM Review r WHERE r.storeId = :storeId AND r.isDeleted = false")
+    @Query("SELECT r FROM Review r WHERE r.store.storeId = :storeId AND r.isDeleted = false")
     Page<Review> findByStoreId(@Param("storeId") UUID storeId, Pageable pageable);
 
     @Query("SELECT r FROM Review r " +
-            "WHERE (:keyword IS NULL OR " +
-            "LOWER(r.reviewContent) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
-            "CONCAT(r.reviewId, '') LIKE CONCAT('%', :keyword, '%') OR " +
-            "CONCAT(r.user.userId, '') LIKE CONCAT('%', :keyword, '%') OR " +
-            "CONCAT(r.storeId, '') LIKE CONCAT('%', :keyword, '%'))")
-    Page<Review> searchReviewsWithKeyword(@Param("keyword") String keyword, Pageable pageable);
+            "WHERE (:keyword IS NULL OR LOWER(r.reviewContent) LIKE LOWER(CONCAT('%', :keyword, '%'))) " +
+            "AND (:userId IS NULL OR r.user.userId = :userId) " +
+            "AND (:reviewId IS NULL OR r.reviewId = :reviewId) " +
+            "AND (:storeId IS NULL OR r.store.storeId = :storeId)")
+    Page<Review> searchReviewsWithFilters(
+            @Param("keyword") String keyword,
+            @Param("userId") Long userId,
+            @Param("reviewId") UUID reviewId,
+            @Param("storeId") UUID storeId,
+            Pageable pageable);
 }
