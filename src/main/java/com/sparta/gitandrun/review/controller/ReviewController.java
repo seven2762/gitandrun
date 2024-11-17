@@ -6,6 +6,7 @@ import com.sparta.gitandrun.review.dto.ReviewRequestDto;
 import com.sparta.gitandrun.review.dto.UserReviewResponseDto;
 import com.sparta.gitandrun.review.service.ReviewService;
 import com.sparta.gitandrun.user.security.UserDetailsImpl;
+import jakarta.validation.Valid;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -35,7 +36,7 @@ public class ReviewController {
     @PostMapping("/{orderId}")
     public ResponseEntity<ApiResDto> createReview(
             @AuthenticationPrincipal UserDetailsImpl userDetails,
-            @RequestBody ReviewRequestDto requestDto,
+            @RequestBody @Valid ReviewRequestDto requestDto,
             @PathVariable Long orderId) {
         Long userId = userDetails.getUser().getUserId();
         reviewService.createReview(requestDto, userId, orderId);
@@ -102,7 +103,7 @@ public class ReviewController {
     public ResponseEntity<ApiResDto> updateReview(
             @AuthenticationPrincipal UserDetailsImpl userDetails,
             @PathVariable UUID reviewId,
-            @RequestBody ReviewRequestDto requestDto) {
+            @RequestBody @Valid ReviewRequestDto requestDto) {
         reviewService.updateReview(reviewId, userDetails, requestDto);
         return ResponseEntity.ok().body(new ApiResDto("리뷰 수정 완료", HttpStatus.OK.value()));
     }
