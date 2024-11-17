@@ -38,17 +38,20 @@ AI를 통해 AI가 생성한 자연스러운 메뉴 설명으로 고객에게 �
 팀원 3 : 홍유진 - 리뷰 도메인
 
 ## 💻 개발 환경
+
+![example workflow](https://github.com/jabberwocker04/gitandrun/actions/workflows/gradle.yml/badge.svg)
+
 ### ● 데이터베이스
-PostgreSQL, Amazon RDS, Redis
+<img src="https://img.shields.io/badge/PostgreSQL-4169E1?style=flat&logo=postgresql&logoColor=white"> <img src="https://img.shields.io/badge/Amazon RDS-527FFF?style=flat&logo=amazonrds&logoColor=white"> <img src="https://img.shields.io/badge/Redis-DC382D?style=flat&logo=Redis&logoColor=white"> 
 
 ### ● 백엔드
-JAVA, Spring Boot 3.3.5, Spring Data JPA, Spring Security
+<img src="https://img.shields.io/badge/java-007396?style=flat&logo=java&logoColor=white"> <img src="https://img.shields.io/badge/Gradle 8.10.2-02303A?style=flat&logo=gradle&logoColor=white"> <img src="https://img.shields.io/badge/Spring Boot 3.3.5-6DB33F?style=flat&logo=Spring Boot&logoColor=yellow"> <img src="https://img.shields.io/badge/Spring Security-6DB33F?style=flat&logo=Spring Security&logoColor=green"> <img src="https://img.shields.io/badge/Spring Data JPA-6DB33F?style=flat"> <img src="https://img.shields.io/badge/Hibernate-59666C?style=flat&logo=Hibernate&logoColor=white"> <img src="https://img.shields.io/badge/Docker-2496ED?style=flat&logo=Docker&logoColor=white"> <img src="https://img.shields.io/badge/GitHub Actions-2088FF?style=flat&logo=GitHub Actions&logoColor=white">
 
 ### ● API
-구글 Gemini API, JWT (JSON Web Token)
+<img src="https://img.shields.io/badge/Google Gemini-8E75B2?style=flat&logo=Google Gemini&logoColor=white"> <img src="https://img.shields.io/badge/Json Web Tokens-80247B?style=flat&logo=jsonwebtokens&logoColor=white">
 
 ### ● Tools
-Github, Notion, Postman, IntelliJ IDEA, ZEP
+<img src="https://img.shields.io/badge/GitHub-181717?style=flat&logo=GitHub&logoColor=white"> <img src="https://img.shields.io/badge/Notion-000000?style=flat&logo=notion&logoColor=white"> <img src="https://img.shields.io/badge/Postman-FF6C37?style=flat&logo=Postman&logoColor=white"> <img src="https://img.shields.io/badge/Intellij IDEA-3B00B9?style=flat&logo=Intellij IDEA&logoColor=white"> <img src="https://img.shields.io/badge/ZEP-0049D7?style=flat"> 
 
 
 ## 📚주요 기능
