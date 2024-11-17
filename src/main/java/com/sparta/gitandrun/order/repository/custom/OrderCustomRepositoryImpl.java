@@ -95,9 +95,12 @@ public class OrderCustomRepositoryImpl implements OrderCustomRepository {
 
 
     private BooleanExpression storeIdOrUserIdEq(Long userId, UUID storeId) {
-        return storeId != null
-                ? order.store.storeId.eq(storeId)
-                : order.store.user.userId.eq(userId);
+        if (storeId != null) {
+            return order.store.storeId.eq(storeId)
+                    .and(order.store.user.userId.eq(userId));
+        } else {
+            return order.store.user.userId.eq(userId);
+        }
     }
 
     private BooleanExpression deletedFalse() {
