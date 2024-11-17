@@ -60,12 +60,10 @@ public class OrderController {
 
     @Secured("ROLE_OWNER")
     @GetMapping("/owner")
-    public ResponseEntity<ResDto<ResOrderGetByOwnerDTO>> readByOwner(
-            @AuthenticationPrincipal UserDetailsImpl userDetails,
-            @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
-            @RequestParam(name = "storeId", required = false) UUID storeId) {
+    public ResponseEntity<ResDto<ResOrderGetByOwnerDTO>> readByOwner(@AuthenticationPrincipal UserDetailsImpl userDetails,
+                                                                     @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
 
-        return orderService.readByOwner(userDetails.getUser(), pageable, storeId);
+        return orderService.readByOwner(userDetails.getUser(), pageable);
     }
 
     /*
@@ -97,7 +95,7 @@ public class OrderController {
     @Secured({"ROLE_OWNER", "ROLE_MANAGER"})
     @PatchMapping("/{orderId}/reject")
     public ResponseEntity<ApiResDto> rejectOrder(@AuthenticationPrincipal UserDetailsImpl userDetails,
-                                                  @PathVariable("orderId") Long orderId) {
+                                                 @PathVariable("orderId") Long orderId) {
 
         orderService.rejectOrder(userDetails.getUser(), orderId);
 

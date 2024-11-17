@@ -18,11 +18,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     Page<Order> findByUser_UserIdAndIsDeletedFalse(Long userId, Pageable pageable);
 
-    @Query("select o from Order o " +
-            "join fetch o.user " +
-            "where o.id in :orderIds " +
-            "and o.isDeleted = false ")
-    Page<Order> findByIdInAndIsDeletedFalse(@Param("orderIds") List<Long> orderIds, Pageable pageable);
+    Page<Order> findByStore_User_UserIdAndIsDeletedFalse(Long userId, Pageable pageable);
 
     Optional<Order> findByIdAndStore_User_UserId(Long orderId, Long userId);
 }

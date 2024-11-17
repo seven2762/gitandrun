@@ -12,7 +12,6 @@ import com.sparta.gitandrun.order.entity.Order;
 import com.sparta.gitandrun.order.entity.OrderMenu;
 import com.sparta.gitandrun.order.repository.OrderMenuRepository;
 import com.sparta.gitandrun.order.repository.OrderRepository;
-import com.sparta.gitandrun.store.entity.Store;
 import com.sparta.gitandrun.store.repository.StoreRepository;
 import com.sparta.gitandrun.user.entity.Role;
 import com.sparta.gitandrun.user.entity.User;
@@ -93,11 +92,11 @@ public class OrderService {
         Owner 본인 가게 주문 조회
     */
     @Transactional(readOnly = true)
-    public ResponseEntity<ResDto<ResOrderGetByOwnerDTO>> readByOwner(User user, Pageable pageable, UUID storeId) {
+    public ResponseEntity<ResDto<ResOrderGetByOwnerDTO>> readByOwner(User user, Pageable pageable) {
 
-        List<OrderMenu> findOrderMenus = getOrderMenusByUserAndStoreId(user, storeId);
+        Page<Order> findOrderPage = orderRepository.findByStore_User_UserIdAndIsDeletedFalse(user.getUserId(), pageable);
 
-        Page<Order> findOrderPage = orderRepository.findByIdInAndIsDeletedFalse(getIdsByOrders(findOrderMenus), pageable);
+        List<OrderMenu> findOrderMenus = getOrderMenusByOrderIds(getIdsByOrders(findOrderPage));
 
         return new ResponseEntity<>(
                 ResDto.<ResOrderGetByOwnerDTO>builder()
@@ -212,29 +211,6 @@ public class OrderService {
         return orders.getContent().stream()
                 .map(Order::getId)
                 .toList();
-    }
-
-    /*
-        본인 가게 주문 조회 메서드
-    */
-    private static List<Long> getIdsByOrders(List<OrderMenu> findOrderMenus) {
-        return findOrderMenus.stream()
-                .map(orderMenu -> orderMenu.getOrder().getId())
-                .toList();
-    }
-
-    private List<OrderMenu> getOrderMenusByUserAndStoreId(User user, UUID storeId) {
-        List<Store> findStores = getStoreByUser(user);
-
-        List<UUID> storeIds = findStores.stream()
-                .map(Store::getStoreId)
-                .toList();
-
-        return orderMenuRepository.findOrderMenusByStoreId(storeId, storeIds);
-    }
-
-    private List<Store> getStoreByUser(User user) {
-        return storeRepository.findByUser_UserId(user.getUserId());
     }
 
     /*
