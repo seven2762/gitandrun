@@ -2,10 +2,13 @@ package com.sparta.gitandrun.payment.service;
 
 import com.sparta.gitandrun.order.dto.res.ResDto;
 import com.sparta.gitandrun.order.entity.Order;
+import com.sparta.gitandrun.order.entity.OrderMenu;
+import com.sparta.gitandrun.order.repository.OrderMenuRepository;
 import com.sparta.gitandrun.order.repository.OrderRepository;
 import com.sparta.gitandrun.payment.dto.req.ReqPaymentCondByManagerDTO;
 import com.sparta.gitandrun.payment.dto.req.ReqPaymentCondDTO;
 import com.sparta.gitandrun.payment.dto.req.ReqPaymentPostDTO;
+import com.sparta.gitandrun.payment.dto.res.ResPaymentGetByIdDTO;
 import com.sparta.gitandrun.payment.dto.res.ResPaymentGetByUserIdDTO;
 import com.sparta.gitandrun.payment.entity.Payment;
 import com.sparta.gitandrun.payment.repository.PaymentRepository;
@@ -19,12 +22,15 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class PaymentService {
 
     private final PaymentRepository paymentRepository;
     private final OrderRepository orderRepository;
+    private final OrderMenuRepository orderMenuRepository;
 
     @Transactional
     public void createPayment(User user, ReqPaymentPostDTO dto) {
@@ -72,6 +78,23 @@ public class PaymentService {
         );
     }
 
+    @Transactional(readOnly = true)
+    public ResponseEntity<ResDto<ResPaymentGetByIdDTO>> getBy(Long paymentId) {
+
+        Payment findPayment = getPaymentBy(paymentId);
+
+        List<OrderMenu> findOrderMenus = orderMenuRepository.findByOrderId(findPayment.getOrder().getId());
+
+        return new ResponseEntity<>(
+                ResDto.<ResPaymentGetByIdDTO>builder()
+                        .code(HttpStatus.OK.value())
+                        .message("결제 상세 조회에 성공했습니다.")
+                        .data(ResPaymentGetByIdDTO.of(findPayment, findPayment.getOrder(), findOrderMenus))
+                        .build(),
+                HttpStatus.OK
+        );
+    }
+
 
     /*
         결제 취소
@@ -85,6 +108,11 @@ public class PaymentService {
                         : getPayment(paymentId);
 
         payment.cancelPayment(user);
+    }
+
+    private Payment getPaymentBy(Long paymentId) {
+        return paymentRepository.findById(paymentId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 항목입니다."));
     }
 
     private Payment getPayment(Long paymentId) {
