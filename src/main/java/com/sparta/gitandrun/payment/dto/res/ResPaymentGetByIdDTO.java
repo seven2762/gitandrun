@@ -122,6 +122,7 @@ public class ResPaymentGetByIdDTO {
             @AllArgsConstructor
             private static class StoreDTO {
                 private UUID id;
+                private String name;
                 private String zipcode;
                 private String address;
                 private String addressDetail;
@@ -129,6 +130,7 @@ public class ResPaymentGetByIdDTO {
                 private static StoreDTO from(Store store) {
                     return StoreDTO.builder()
                             .id(store.getStoreId())
+                            .name(store.getStoreName())
                             .zipcode(store.getAddress().getZipCode())
                             .address(store.getAddress().getAddress())
                             .addressDetail(store.getAddress().getAddressDetail())
