@@ -3,6 +3,7 @@ package com.sparta.gitandrun.user.controller;
 
 import com.sparta.gitandrun.common.entity.ApiResDto;
 import com.sparta.gitandrun.user.dto.request.SignUpReqDTO;
+import com.sparta.gitandrun.user.dto.request.UserChangePasswordReqDto;
 import com.sparta.gitandrun.user.dto.request.UserSearchReqDto;
 import com.sparta.gitandrun.user.dto.response.*;
 import com.sparta.gitandrun.user.entity.User;
@@ -33,19 +34,17 @@ public class UserController {
         SignUpResDTO signUpResDTO = userService.signUp(signUpReqDTO);
         return ResponseEntity.ok(new UserApiResDto("회원 가입이 완료되었습니다.", 200, signUpResDTO));
     }
-
-
-    @PutMapping("/password")
-    public ResponseEntity<ApiResDto> updatePassword(@AuthenticationPrincipal UserDetailsImpl userDetails,   @RequestBody Map<String, String> request) {
-        User user = userDetails.getUser();
-        userService.updatePassword(user, request);
-        return ResponseEntity.ok(new ApiResDto("비밀번호가 성공적으로 변경되었습니다.", 200));
-    }
-
     @DeleteMapping("/delete")
     public ResponseEntity<ApiResDto> softDeleteUser(@RequestParam String phone) {
         userService.softDeleteUser(phone);
         return ResponseEntity.ok(new ApiResDto("회원 소프트 딜리트 완료", 200));
+    }
+
+    @PutMapping("/password")
+    public ResponseEntity<ApiResDto> changePassword(@AuthenticationPrincipal UserDetailsImpl userDetails, @Valid @RequestBody UserChangePasswordReqDto request
+    ) {
+        userService.changePassword(userDetails, request);
+        return ResponseEntity.ok(new ApiResDto("비밀번호가 성공적으로 변경되었습니다." , 200));
     }
 
     @Secured({"ROLE_ADMIN", "ROLE_MANAGER"})
