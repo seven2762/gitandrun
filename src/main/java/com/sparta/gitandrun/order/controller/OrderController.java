@@ -1,6 +1,7 @@
 package com.sparta.gitandrun.order.controller;
 
 import com.sparta.gitandrun.common.entity.ApiResDto;
+import com.sparta.gitandrun.order.dto.req.ReqOrderCondByCustomerDTO;
 import com.sparta.gitandrun.order.dto.req.ReqOrderCondByOwnerDTO;
 import com.sparta.gitandrun.order.dto.req.ReqOrderPostDTO;
 import com.sparta.gitandrun.order.dto.res.ResDto;
@@ -45,11 +46,11 @@ public class OrderController {
    */
     @Secured("ROLE_CUSTOMER")
     @GetMapping("/customer")
-    public ResponseEntity<ResDto<ResOrderGetByCustomerDTO>> readByCustomer(
-            @AuthenticationPrincipal UserDetailsImpl userDetails,
-            @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+    public ResponseEntity<ResDto<ResOrderGetByCustomerDTO>> readByCustomer(@AuthenticationPrincipal UserDetailsImpl userDetails,
+                                                                           @RequestBody ReqOrderCondByCustomerDTO cond,
+                                                                           @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
 
-        return orderService.readByCustomer(userDetails.getUser(), pageable);
+        return orderService.readByCustomer(userDetails.getUser(), cond, pageable);
     }
 
     /*

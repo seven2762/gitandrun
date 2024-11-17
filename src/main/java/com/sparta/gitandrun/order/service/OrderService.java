@@ -3,6 +3,7 @@ package com.sparta.gitandrun.order.service;
 
 import com.sparta.gitandrun.menu.entity.Menu;
 import com.sparta.gitandrun.menu.repository.MenuRepository;
+import com.sparta.gitandrun.order.dto.req.ReqOrderCondByCustomerDTO;
 import com.sparta.gitandrun.order.dto.req.ReqOrderCondByOwnerDTO;
 import com.sparta.gitandrun.order.dto.req.ReqOrderPostDTO;
 import com.sparta.gitandrun.order.dto.res.ResDto;
@@ -66,11 +67,11 @@ public class OrderService {
         Customer 본인 주문 내역 조회
     */
     @Transactional(readOnly = true)
-    public ResponseEntity<ResDto<ResOrderGetByCustomerDTO>> readByCustomer(User user, Pageable pageable) {
+    public ResponseEntity<ResDto<ResOrderGetByCustomerDTO>> readByCustomer(User user, ReqOrderCondByCustomerDTO cond, Pageable pageable) {
         /*
             주문 조회 : userId 를 기준으로
         */
-        Page<Order> findOrderPage = orderRepository.findByUser_UserIdAndIsDeletedFalse(user.getUserId(), pageable);
+        Page<Order> findOrderPage = orderRepository.findMyOrderListWithConditions(user.getUserId(), cond, pageable);
 
         /*
             주문 목록 조회 : 앞서 구한 order 의 id 를 기준으로

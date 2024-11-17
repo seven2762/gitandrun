@@ -5,6 +5,7 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import com.sparta.gitandrun.order.dto.req.ReqOrderCondByCustomerDTO;
 import com.sparta.gitandrun.order.dto.req.ReqOrderCondByOwnerDTO;
 import com.sparta.gitandrun.order.entity.Order;
 import com.sparta.gitandrun.order.entity.OrderStatus;
@@ -60,6 +61,38 @@ public class OrderCustomRepositoryImpl implements OrderCustomRepository {
         return PageableExecutionUtils.getPage(results, pageable, countQuery::fetchOne);
     }
 
+    @Override
+    public Page<Order> findMyOrderListWithConditions(Long userId, ReqOrderCondByCustomerDTO cond, Pageable pageable) {
+
+        List<Order> results = queryFactory
+                .select(order)
+                .from(order)
+                .where(
+                        order.user.userId.eq(userId),
+                        deletedFalse(),
+                        statusEq(cond.getCondition().getStatus()),
+                        typeEq(cond.getCondition().getType())
+                )
+                .orderBy(
+                        orderSpecifier(cond.getCondition().getSort())
+                )
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetch();
+
+        JPQLQuery<Long> countQuery = queryFactory
+                .select(order.count())
+                .from(order)
+                .where(
+                        order.user.userId.eq(userId),
+                        deletedFalse(),
+                        statusEq(cond.getCondition().getStatus()),
+                        typeEq(cond.getCondition().getType())
+                );
+
+        return PageableExecutionUtils.getPage(results, pageable, countQuery::fetchOne);
+    }
+
 
     private BooleanExpression storeIdOrUserIdEq(Long userId, UUID storeId) {
         return storeId != null
@@ -84,7 +117,6 @@ public class OrderCustomRepositoryImpl implements OrderCustomRepository {
         SortType sortType = SortType.fromString(sort);
 
         return switch (sortType) {
-            case LATEST -> order.createdAt.desc();
             case OLDEST -> order.createdAt.asc();
             case PRICE_HIGH -> new OrderSpecifier<>(
                     com.querydsl.core.types.Order.DESC,
@@ -94,6 +126,7 @@ public class OrderCustomRepositoryImpl implements OrderCustomRepository {
                     com.querydsl.core.types.Order.ASC,
                     getOrderPriceSumByOrderIdQuery()
             );
+            default -> order.createdAt.desc();
         };
     }
 
