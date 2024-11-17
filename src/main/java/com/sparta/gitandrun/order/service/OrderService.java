@@ -46,12 +46,12 @@ public class OrderService {
         /*
             유저 조회
         */
-        User findUser = getUser(user.getUserId());
+        User findUser = getUserById(user.getUserId());
 
         /*
             주문 목록 생성
         */
-        List<OrderMenu> orderMenus = getOrderMenus(dto);
+        List<OrderMenu> orderMenus = getOrderMenusByUserAndStoreId(dto);
         /*
             주문 생성
         */
@@ -68,7 +68,7 @@ public class OrderService {
         Customer 본인 주문 내역 조회
     */
     @Transactional(readOnly = true)
-    public ResponseEntity<ResDto<ResOrderGetByCustomerDTO>> getByCustomer(User user, Pageable pageable) {
+    public ResponseEntity<ResDto<ResOrderGetByCustomerDTO>> readByCustomer(User user, Pageable pageable) {
         /*
             주문 조회 : userId 를 기준으로
         */
@@ -77,7 +77,7 @@ public class OrderService {
         /*
             주문 목록 조회 : 앞서 구한 order 의 id 를 기준으로
         */
-        List<OrderMenu> orderMenus = getOrderMenusBy(getIdsBy(findOrderPage));
+        List<OrderMenu> orderMenus = getOrderMenusByOrderIds(getIdsByOrders(findOrderPage));
 
         return new ResponseEntity<>(
                 ResDto.<ResOrderGetByCustomerDTO>builder()
@@ -93,11 +93,11 @@ public class OrderService {
         Owner 본인 가게 주문 조회
     */
     @Transactional(readOnly = true)
-    public ResponseEntity<ResDto<ResOrderGetByOwnerDTO>> getByOwner(User user, Pageable pageable, UUID storeId) {
+    public ResponseEntity<ResDto<ResOrderGetByOwnerDTO>> readByOwner(User user, Pageable pageable, UUID storeId) {
 
-        List<OrderMenu> findOrderMenus = getOrderMenus(user, storeId);
+        List<OrderMenu> findOrderMenus = getOrderMenusByUserAndStoreId(user, storeId);
 
-        Page<Order> findOrderPage = orderRepository.findByIdInAndIsDeletedFalse(getIdsBy(findOrderMenus), pageable);
+        Page<Order> findOrderPage = orderRepository.findByIdInAndIsDeletedFalse(getIdsByOrders(findOrderMenus), pageable);
 
         return new ResponseEntity<>(
                 ResDto.<ResOrderGetByOwnerDTO>builder()
@@ -113,19 +113,17 @@ public class OrderService {
         주문 단일 및 상세 조회
     */
     @Transactional(readOnly = true)
-    public ResponseEntity<ResDto<ResOrderGetByIdDTO>> getBy(Long orderId) {
+    public ResponseEntity<ResDto<ResOrderGetByIdDTO>> readById(Long orderId) {
 
-        Order findOrder = getOrder(orderId);
+        Order findOrder = getOrderById(orderId);
 
         List<OrderMenu> findOrderMenus = orderMenuRepository.findByOrderId(orderId);
-
-        Store store = findOrderMenus.get(0).getMenu().getStore();
 
         return new ResponseEntity<>(
                 ResDto.<ResOrderGetByIdDTO>builder()
                         .code(HttpStatus.OK.value())
                         .message("주문 조회에 성공했습니다.")
-                        .data(ResOrderGetByIdDTO.of(findOrder, findOrderMenus, store))
+                        .data(ResOrderGetByIdDTO.of(findOrder, findOrderMenus))
                         .build(),
                 HttpStatus.OK
         );
@@ -136,8 +134,8 @@ public class OrderService {
     public void cancelOrder(User user, Long orderId) {
 
         Order order = user.getRole() == Role.CUSTOMER
-                ? getOrder(user, orderId)
-                : getOrder(orderId);
+                ? getOrderByIdAndUser(user, orderId)
+                : getOrderById(orderId);
 
         order.cancelOrder();
     }
@@ -146,13 +144,9 @@ public class OrderService {
     @Transactional
     public void rejectOrder(User user, Long orderId) {
 
-        List<Store> findStore = getStoreBy(user);
-
-        List<OrderMenu> findOrderMenus = getOrderMenusBy(orderId);
-
         Order order = user.getRole() == Role.OWNER
-                ? validateOwnerAccess(findOrderMenus, findStore)
-                : getOrder(orderId);
+                ? getOrderByIdAndOwner(user, orderId)
+                : getOrderById(orderId);
 
         order.rejectOrder();
     }
@@ -165,7 +159,7 @@ public class OrderService {
         주문 생성 private 메서드
     */
 
-    private List<OrderMenu> getOrderMenus(ReqOrderPostDTO dto) {
+    private List<OrderMenu> getOrderMenusByUserAndStoreId(ReqOrderPostDTO dto) {
         List<UUID> menuIds = dto.getOrderItems().stream()
                 .map(ReqOrderPostDTO.OrderItem::getMenuId)
                 .toList();
@@ -194,25 +188,27 @@ public class OrderService {
         주문 조회 private 메서드
     */
 
-    private Order getOrder(Long orderId) {
+    private Order getOrderById(Long orderId) {
         return orderRepository.findByIdAndIsDeletedFalse(orderId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 항목입니다."));
     }
 
-    private Order getOrder(User user, Long orderId) {
+    private Order getOrderByIdAndUser(User user, Long orderId) {
         return orderRepository.findByIdAndUser_UserId(orderId, user.getUserId())
                 .orElseThrow(() -> new IllegalArgumentException("접근 권한이 없습니다."));
     }
 
-    private List<OrderMenu> getOrderMenusBy(Long orderId) {
-        return orderMenuRepository.findByOrderId(orderId);
+    private Order getOrderByIdAndOwner(User user, Long orderId) {
+        return orderRepository.findByIdAndStore_User_UserId(orderId, user.getUserId())
+                .orElseThrow(() -> new IllegalArgumentException("접근 권한이 없습니다."));
     }
 
-    private List<OrderMenu> getOrderMenusBy(List<Long> orderIds) {
+
+    private List<OrderMenu> getOrderMenusByOrderIds(List<Long> orderIds) {
         return orderMenuRepository.findByOrderIds(orderIds);
     }
 
-    private static List<Long> getIdsBy(Page<Order> orders) {
+    private static List<Long> getIdsByOrders(Page<Order> orders) {
         return orders.getContent().stream()
                 .map(Order::getId)
                 .toList();
@@ -221,18 +217,14 @@ public class OrderService {
     /*
         본인 가게 주문 조회 메서드
     */
-    private static List<Long> getIdsBy(List<OrderMenu> findOrderMenus) {
+    private static List<Long> getIdsByOrders(List<OrderMenu> findOrderMenus) {
         return findOrderMenus.stream()
                 .map(orderMenu -> orderMenu.getOrder().getId())
                 .toList();
     }
 
-    private List<Store> getStoreBy(User user) {
-        return storeRepository.findByUser_UserId(user.getUserId());
-    }
-
-    private List<OrderMenu> getOrderMenus(User user, UUID storeId) {
-        List<Store> findStores = getStoreBy(user);
+    private List<OrderMenu> getOrderMenusByUserAndStoreId(User user, UUID storeId) {
+        List<Store> findStores = getStoreByUser(user);
 
         List<UUID> storeIds = findStores.stream()
                 .map(Store::getStoreId)
@@ -241,23 +233,14 @@ public class OrderService {
         return orderMenuRepository.findOrderMenusByStoreId(storeId, storeIds);
     }
 
-    /*
-        주문 거절 검증 메서드
-    */
-
-    private Order validateOwnerAccess(List<OrderMenu> findOrderMenus, List<Store> findStore) {
-
-        if (!findStore.contains(findOrderMenus.get(0).getMenu().getStore())) {
-            throw new IllegalArgumentException("해당 주문에 접근할 권한이 없습니다.");
-        }
-
-        return findOrderMenus.get(0).getOrder();
+    private List<Store> getStoreByUser(User user) {
+        return storeRepository.findByUser_UserId(user.getUserId());
     }
 
     /*
         유저 조회 private 메서드
     */
-    private User getUser(Long userId) {
+    private User getUserById(Long userId) {
         return userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 유저입니다."));
     }
