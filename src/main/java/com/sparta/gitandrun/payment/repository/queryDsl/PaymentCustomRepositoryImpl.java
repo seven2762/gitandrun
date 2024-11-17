@@ -29,9 +29,9 @@ public class PaymentCustomRepositoryImpl implements PaymentCustomRepository {
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public Page<Payment> findPaymentsForUserWithConditions(Long userId,
-                                                           ReqPaymentCondDTO cond,
-                                                           Pageable pageable) {
+    public Page<Payment> findMyPaymentsWithConditions(Long userId,
+                                                      ReqPaymentCondDTO cond,
+                                                      Pageable pageable) {
 
         List<Payment> results = queryFactory
                 .selectFrom(payment)

@@ -8,7 +8,7 @@ import org.springframework.data.domain.Pageable;
 
 public interface PaymentCustomRepository {
 
-    Page<Payment> findPaymentsForUserWithConditions(Long userId, ReqPaymentCondDTO condition, Pageable pageable);
+    Page<Payment> findMyPaymentsWithConditions(Long userId, ReqPaymentCondDTO condition, Pageable pageable);
 
     Page<Payment> findCustomerPaymentsWithConditions(ReqPaymentCondByManagerDTO condition, Pageable pageable);
 }
