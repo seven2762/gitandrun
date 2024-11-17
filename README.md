@@ -4,7 +4,7 @@
 |---|---|
 |WBS|[LINK](http://hexagonal-taleggio-d78.notion.site/Git-and-Run-1363121c7bfd80f1839ccd358e83756d?pvs=73)|
 |ERD|[LINK](https://www.erdcloud.com/d/zwwsd7gtExGqthiYH)|
-|API|[LINK](https://www.erdcloud.com/d/zwwsd7gtExGqthiYH](https://hexagonal-taleggio-d78.notion.site/API-1363121c7bfd80e2bce1ee1295028abc))|
+|API|[LINK](https://hexagonal-taleggio-d78.notion.site/API-1363121c7bfd80e2bce1ee1295028abc?pvs=74)|
 
 ## 🤔 프로젝트 개요
 가게 관리 및 사용자 중심 서비스를 제공하는 배달 플랫폼입니다. 이 프로젝트는 가게 소유자, 관리자, 고객을 대상으로 각각의 역할에 적합한 기능을 제공하며, 특히 생성형 인공지능 서비스(API)와 연동하여 메뉴 설명을 도와 사용자 친화적인 플랫폼을 목표로 합니다.
@@ -23,6 +23,8 @@
 ### ● 기대 효과
 AI를 통해 AI가 생성한 자연스러운 메뉴 설명으로 고객에게 메뉴의 매력을 효과적으로 전달.
 
+---
+
 ## ⏳ 개발 기간
 24.11.06 ~ 24.11.18
 
@@ -37,19 +39,45 @@ AI를 통해 AI가 생성한 자연스러운 메뉴 설명으로 고객에게 �
 
 팀원 3 : 홍유진 - 리뷰 도메인
 
+---
+
 ## 💻 개발 환경
+
+![example workflow](https://github.com/jabberwocker04/gitandrun/actions/workflows/gradle.yml/badge.svg)
+
 ### ● 데이터베이스
-PostgreSQL, Amazon RDS, Redis
+<img src="https://img.shields.io/badge/PostgreSQL-4169E1?style=flat&logo=postgresql&logoColor=white"> <img src="https://img.shields.io/badge/Amazon RDS-527FFF?style=flat&logo=amazonrds&logoColor=white"> <img src="https://img.shields.io/badge/Redis-DC382D?style=flat&logo=Redis&logoColor=white"> 
 
 ### ● 백엔드
-JAVA, Spring Boot 3.3.5, Spring Data JPA, Spring Security
+<img src="https://img.shields.io/badge/java-007396?style=flat&logo=java&logoColor=white"> <img src="https://img.shields.io/badge/Gradle 8.10.2-02303A?style=flat&logo=gradle&logoColor=white"> <img src="https://img.shields.io/badge/Spring Boot 3.3.5-6DB33F?style=flat&logo=Spring Boot&logoColor=yellow"> <img src="https://img.shields.io/badge/Spring Security-6DB33F?style=flat&logo=Spring Security&logoColor=green"> <img src="https://img.shields.io/badge/Spring Data JPA-6DB33F?style=flat"> <img src="https://img.shields.io/badge/Hibernate-59666C?style=flat&logo=Hibernate&logoColor=white"> <img src="https://img.shields.io/badge/Docker-2496ED?style=flat&logo=Docker&logoColor=white"> <img src="https://img.shields.io/badge/GitHub Actions-2088FF?style=flat&logo=GitHub Actions&logoColor=white">
 
 ### ● API
-구글 Gemini API, JWT (JSON Web Token)
+<img src="https://img.shields.io/badge/Google Gemini-8E75B2?style=flat&logo=Google Gemini&logoColor=white"> <img src="https://img.shields.io/badge/Json Web Tokens-80247B?style=flat&logo=jsonwebtokens&logoColor=white">
 
 ### ● Tools
-Github, Notion, Postman, IntelliJ IDEA, ZEP
+<img src="https://img.shields.io/badge/GitHub-181717?style=flat&logo=GitHub&logoColor=white"> <img src="https://img.shields.io/badge/Notion-000000?style=flat&logo=notion&logoColor=white"> <img src="https://img.shields.io/badge/Postman-FF6C37?style=flat&logo=Postman&logoColor=white"> <img src="https://img.shields.io/badge/Intellij IDEA-3B00B9?style=flat&logo=Intellij IDEA&logoColor=white"> <img src="https://img.shields.io/badge/ZEP-0049D7?style=flat"> 
 
+---
+## ▶️ 실행 방법
+
+## 서비스 구성 및 실행 방법
+
+### 1. 레포지토리 클론
+```bash
+git clone https://github.com/jabberwocker04/gitandrun.git
+```
+
+### 2. 의존성 설치 및 빌드
+```bash
+./gradlew build
+```
+
+### 3. 개발 서버 실행
+```bash
+./gradlew bootRun
+```
+
+---
 
 ## 📚주요 기능
 
