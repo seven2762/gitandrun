@@ -19,4 +19,15 @@ public enum OrderStatus {
         public static final String COMPLETED = "ORDER_COMPLETED";
         public static final String REJECT = "ORDER_REJECT";
     }
+
+    public static OrderStatus fromString(String status) {
+        if (status == null) return COMPLETED;
+
+        return switch (status.toUpperCase()) {
+            case Status.CANCEL -> CANCEL;
+            case Status.COMPLETED ->  COMPLETED;
+            case Status.REJECT -> REJECT;
+            default -> PENDING;
+        };
+    }
 }

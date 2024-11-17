@@ -3,6 +3,8 @@ package com.sparta.gitandrun.order.service;
 
 import com.sparta.gitandrun.menu.entity.Menu;
 import com.sparta.gitandrun.menu.repository.MenuRepository;
+import com.sparta.gitandrun.order.dto.req.ReqOrderCondByCustomerDTO;
+import com.sparta.gitandrun.order.dto.req.ReqOrderCondByOwnerDTO;
 import com.sparta.gitandrun.order.dto.req.ReqOrderPostDTO;
 import com.sparta.gitandrun.order.dto.res.ResDto;
 import com.sparta.gitandrun.order.dto.res.ResOrderGetByCustomerDTO;
@@ -12,8 +14,6 @@ import com.sparta.gitandrun.order.entity.Order;
 import com.sparta.gitandrun.order.entity.OrderMenu;
 import com.sparta.gitandrun.order.repository.OrderMenuRepository;
 import com.sparta.gitandrun.order.repository.OrderRepository;
-import com.sparta.gitandrun.store.entity.Store;
-import com.sparta.gitandrun.store.repository.StoreRepository;
 import com.sparta.gitandrun.user.entity.Role;
 import com.sparta.gitandrun.user.entity.User;
 import com.sparta.gitandrun.user.repository.UserRepository;
@@ -38,7 +38,6 @@ public class OrderService {
     private final OrderMenuRepository orderMenuRepository;
     private final MenuRepository menuRepository;
     private final UserRepository userRepository;
-    private final StoreRepository storeRepository;
 
     // 주문 생성
     @Transactional
@@ -68,11 +67,11 @@ public class OrderService {
         Customer 본인 주문 내역 조회
     */
     @Transactional(readOnly = true)
-    public ResponseEntity<ResDto<ResOrderGetByCustomerDTO>> readByCustomer(User user, Pageable pageable) {
+    public ResponseEntity<ResDto<ResOrderGetByCustomerDTO>> readByCustomer(User user, ReqOrderCondByCustomerDTO cond, Pageable pageable) {
         /*
             주문 조회 : userId 를 기준으로
         */
-        Page<Order> findOrderPage = orderRepository.findByUser_UserIdAndIsDeletedFalse(user.getUserId(), pageable);
+        Page<Order> findOrderPage = orderRepository.findMyOrderListWithConditions(user.getUserId(), cond, pageable);
 
         /*
             주문 목록 조회 : 앞서 구한 order 의 id 를 기준으로
@@ -93,11 +92,11 @@ public class OrderService {
         Owner 본인 가게 주문 조회
     */
     @Transactional(readOnly = true)
-    public ResponseEntity<ResDto<ResOrderGetByOwnerDTO>> readByOwner(User user, Pageable pageable, UUID storeId) {
+    public ResponseEntity<ResDto<ResOrderGetByOwnerDTO>> readByOwner(User user, ReqOrderCondByOwnerDTO cond, Pageable pageable) {
 
-        List<OrderMenu> findOrderMenus = getOrderMenusByUserAndStoreId(user, storeId);
+        Page<Order> findOrderPage = orderRepository.findOwnerOrderListWithConditions(user.getUserId(), cond, pageable);
 
-        Page<Order> findOrderPage = orderRepository.findByIdInAndIsDeletedFalse(getIdsByOrders(findOrderMenus), pageable);
+        List<OrderMenu> findOrderMenus = getOrderMenusByOrderIds(getIdsByOrders(findOrderPage));
 
         return new ResponseEntity<>(
                 ResDto.<ResOrderGetByOwnerDTO>builder()
@@ -212,29 +211,6 @@ public class OrderService {
         return orders.getContent().stream()
                 .map(Order::getId)
                 .toList();
-    }
-
-    /*
-        본인 가게 주문 조회 메서드
-    */
-    private static List<Long> getIdsByOrders(List<OrderMenu> findOrderMenus) {
-        return findOrderMenus.stream()
-                .map(orderMenu -> orderMenu.getOrder().getId())
-                .toList();
-    }
-
-    private List<OrderMenu> getOrderMenusByUserAndStoreId(User user, UUID storeId) {
-        List<Store> findStores = getStoreByUser(user);
-
-        List<UUID> storeIds = findStores.stream()
-                .map(Store::getStoreId)
-                .toList();
-
-        return orderMenuRepository.findOrderMenusByStoreId(storeId, storeIds);
-    }
-
-    private List<Store> getStoreByUser(User user) {
-        return storeRepository.findByUser_UserId(user.getUserId());
     }
 
     /*

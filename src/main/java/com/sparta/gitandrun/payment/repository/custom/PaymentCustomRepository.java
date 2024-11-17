@@ -1,4 +1,4 @@
-package com.sparta.gitandrun.payment.repository.queryDsl;
+package com.sparta.gitandrun.payment.repository.custom;
 
 import com.sparta.gitandrun.payment.dto.req.ReqPaymentCondByManagerDTO;
 import com.sparta.gitandrun.payment.dto.req.ReqPaymentCondDTO;

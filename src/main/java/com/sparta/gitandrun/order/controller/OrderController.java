@@ -1,6 +1,8 @@
 package com.sparta.gitandrun.order.controller;
 
 import com.sparta.gitandrun.common.entity.ApiResDto;
+import com.sparta.gitandrun.order.dto.req.ReqOrderCondByCustomerDTO;
+import com.sparta.gitandrun.order.dto.req.ReqOrderCondByOwnerDTO;
 import com.sparta.gitandrun.order.dto.req.ReqOrderPostDTO;
 import com.sparta.gitandrun.order.dto.res.ResDto;
 import com.sparta.gitandrun.order.dto.res.ResOrderGetByCustomerDTO;
@@ -17,8 +19,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.UUID;
 
 @RequestMapping("/order")
 @RestController
@@ -46,11 +46,11 @@ public class OrderController {
    */
     @Secured("ROLE_CUSTOMER")
     @GetMapping("/customer")
-    public ResponseEntity<ResDto<ResOrderGetByCustomerDTO>> readByCustomer(
-            @AuthenticationPrincipal UserDetailsImpl userDetails,
-            @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+    public ResponseEntity<ResDto<ResOrderGetByCustomerDTO>> readByCustomer(@AuthenticationPrincipal UserDetailsImpl userDetails,
+                                                                           @RequestBody ReqOrderCondByCustomerDTO cond,
+                                                                           @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
 
-        return orderService.readByCustomer(userDetails.getUser(), pageable);
+        return orderService.readByCustomer(userDetails.getUser(), cond, pageable);
     }
 
     /*
@@ -60,12 +60,11 @@ public class OrderController {
 
     @Secured("ROLE_OWNER")
     @GetMapping("/owner")
-    public ResponseEntity<ResDto<ResOrderGetByOwnerDTO>> readByOwner(
-            @AuthenticationPrincipal UserDetailsImpl userDetails,
-            @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
-            @RequestParam(name = "storeId", required = false) UUID storeId) {
+    public ResponseEntity<ResDto<ResOrderGetByOwnerDTO>> readByOwner(@AuthenticationPrincipal UserDetailsImpl userDetails,
+                                                                     @RequestBody ReqOrderCondByOwnerDTO cond,
+                                                                     @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
 
-        return orderService.readByOwner(userDetails.getUser(), pageable, storeId);
+        return orderService.readByOwner(userDetails.getUser(), cond, pageable);
     }
 
     /*
@@ -97,7 +96,7 @@ public class OrderController {
     @Secured({"ROLE_OWNER", "ROLE_MANAGER"})
     @PatchMapping("/{orderId}/reject")
     public ResponseEntity<ApiResDto> rejectOrder(@AuthenticationPrincipal UserDetailsImpl userDetails,
-                                                  @PathVariable("orderId") Long orderId) {
+                                                 @PathVariable("orderId") Long orderId) {
 
         orderService.rejectOrder(userDetails.getUser(), orderId);
 

@@ -1,7 +1,7 @@
 package com.sparta.gitandrun.payment.repository;
 
 import com.sparta.gitandrun.payment.entity.Payment;
-import com.sparta.gitandrun.payment.repository.queryDsl.PaymentCustomRepository;
+import com.sparta.gitandrun.payment.repository.custom.PaymentCustomRepository;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

@@ -11,6 +11,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.web.PagedModel;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -53,6 +54,7 @@ public class ResOrderGetByCustomerDTO {
             private Long orderId;
             private String status;
             private String type;
+            private LocalDateTime createdAt;
             private List<OrderMenuDTO> orderMenuDTOS;
             private StoreDTO storeDTO;
             private int totalPrice;
@@ -71,6 +73,7 @@ public class ResOrderGetByCustomerDTO {
                         .orderId(order.getId())
                         .status(order.getOrderStatus().status)
                         .type(order.getOrderType().getType())
+                        .createdAt(order.getCreatedAt())
                         .orderMenuDTOS(orderMenuDTOS)
                         .totalPrice(sumFrom(orderMenuDTOS))
                         .storeDTO(StoreDTO.from(order.getStore()))
