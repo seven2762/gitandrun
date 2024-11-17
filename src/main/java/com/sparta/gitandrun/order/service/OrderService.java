@@ -3,6 +3,7 @@ package com.sparta.gitandrun.order.service;
 
 import com.sparta.gitandrun.menu.entity.Menu;
 import com.sparta.gitandrun.menu.repository.MenuRepository;
+import com.sparta.gitandrun.order.dto.req.ReqOrderCondByOwnerDTO;
 import com.sparta.gitandrun.order.dto.req.ReqOrderPostDTO;
 import com.sparta.gitandrun.order.dto.res.ResDto;
 import com.sparta.gitandrun.order.dto.res.ResOrderGetByCustomerDTO;
@@ -12,7 +13,6 @@ import com.sparta.gitandrun.order.entity.Order;
 import com.sparta.gitandrun.order.entity.OrderMenu;
 import com.sparta.gitandrun.order.repository.OrderMenuRepository;
 import com.sparta.gitandrun.order.repository.OrderRepository;
-import com.sparta.gitandrun.store.repository.StoreRepository;
 import com.sparta.gitandrun.user.entity.Role;
 import com.sparta.gitandrun.user.entity.User;
 import com.sparta.gitandrun.user.repository.UserRepository;
@@ -37,7 +37,6 @@ public class OrderService {
     private final OrderMenuRepository orderMenuRepository;
     private final MenuRepository menuRepository;
     private final UserRepository userRepository;
-    private final StoreRepository storeRepository;
 
     // 주문 생성
     @Transactional
@@ -92,9 +91,9 @@ public class OrderService {
         Owner 본인 가게 주문 조회
     */
     @Transactional(readOnly = true)
-    public ResponseEntity<ResDto<ResOrderGetByOwnerDTO>> readByOwner(User user, Pageable pageable) {
+    public ResponseEntity<ResDto<ResOrderGetByOwnerDTO>> readByOwner(User user, ReqOrderCondByOwnerDTO cond, Pageable pageable) {
 
-        Page<Order> findOrderPage = orderRepository.findByStore_User_UserIdAndIsDeletedFalse(user.getUserId(), pageable);
+        Page<Order> findOrderPage = orderRepository.findOwnerOrderListWithConditions(user.getUserId(), cond, pageable);
 
         List<OrderMenu> findOrderMenus = getOrderMenusByOrderIds(getIdsByOrders(findOrderPage));
 

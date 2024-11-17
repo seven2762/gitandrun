@@ -1,16 +1,14 @@
 package com.sparta.gitandrun.order.repository;
 
 import com.sparta.gitandrun.order.entity.Order;
+import com.sparta.gitandrun.order.repository.queryDsl.OrderCustomRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 
-import java.util.List;
 import java.util.Optional;
 
-public interface OrderRepository extends JpaRepository<Order, Long> {
+public interface OrderRepository extends JpaRepository<Order, Long>, OrderCustomRepository {
 
     Optional<Order> findByIdAndIsDeletedFalse(Long orderId);
 

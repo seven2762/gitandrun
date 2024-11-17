@@ -7,7 +7,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
-public interface OrderMenuRepository extends JpaRepository<OrderMenu, Long>, OrderMenuCustomRepository {
+public interface OrderMenuRepository extends JpaRepository<OrderMenu, Long> {
     @Query("select om " +
             "from OrderMenu om " +
             "join fetch om.menu " +

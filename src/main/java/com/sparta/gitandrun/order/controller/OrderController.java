@@ -1,6 +1,7 @@
 package com.sparta.gitandrun.order.controller;
 
 import com.sparta.gitandrun.common.entity.ApiResDto;
+import com.sparta.gitandrun.order.dto.req.ReqOrderCondByOwnerDTO;
 import com.sparta.gitandrun.order.dto.req.ReqOrderPostDTO;
 import com.sparta.gitandrun.order.dto.res.ResDto;
 import com.sparta.gitandrun.order.dto.res.ResOrderGetByCustomerDTO;
@@ -17,8 +18,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.UUID;
 
 @RequestMapping("/order")
 @RestController
@@ -61,9 +60,10 @@ public class OrderController {
     @Secured("ROLE_OWNER")
     @GetMapping("/owner")
     public ResponseEntity<ResDto<ResOrderGetByOwnerDTO>> readByOwner(@AuthenticationPrincipal UserDetailsImpl userDetails,
+                                                                     @RequestBody ReqOrderCondByOwnerDTO cond,
                                                                      @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
 
-        return orderService.readByOwner(userDetails.getUser(), pageable);
+        return orderService.readByOwner(userDetails.getUser(), cond, pageable);
     }
 
     /*
