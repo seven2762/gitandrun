@@ -1,6 +1,7 @@
 package com.sparta.gitandrun.user.service;
 
 import com.sparta.gitandrun.user.dto.request.SignUpReqDTO;
+import com.sparta.gitandrun.user.dto.request.UserChangePasswordReqDto;
 import com.sparta.gitandrun.user.dto.request.UserSearchReqDto;
 import com.sparta.gitandrun.user.dto.response.*;
 import com.sparta.gitandrun.user.entity.Role;
@@ -9,6 +10,7 @@ import com.sparta.gitandrun.user.exception.ErrorCode;
 import com.sparta.gitandrun.user.exception.UserException;
 import com.sparta.gitandrun.user.jwt.JwtUtil;
 import com.sparta.gitandrun.user.repository.UserRepository;
+import com.sparta.gitandrun.user.security.UserDetailsImpl;
 import lombok.Builder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,8 +23,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Map;
-
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -32,6 +32,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder passwordEncoder;  // 추가
     private final JwtUtil jwtUtil;
+
     @Transactional
     public SignUpResDTO signUp(SignUpReqDTO signUpReqDTO) {
         
@@ -69,12 +70,7 @@ public class UserService {
             throw new UserException(ErrorCode.DUPLICATED_EMAIL);
         }
     }
-    @Transactional
-    public void updatePassword(User user, Map<String, String> request) {
-        String encodedPassword = passwordEncoder.encode(request.get("password"));
-        user.updatePassword(encodedPassword);
-        userRepository.save(user);
-    }
+
     @Transactional
     public void softDeleteUser(String phone) {
         User user = userRepository.findActiveUserByPhone(phone)
@@ -82,6 +78,16 @@ public class UserService {
 
         user.softDelete();
     }
+    @Transactional
+    public void changePassword(UserDetailsImpl userDetails, UserChangePasswordReqDto request) {
+
+        User user = userRepository.findById(userDetails.getUser().getUserId())
+                .orElseThrow(() -> new UserException(ErrorCode.USER_NOT_FOUND));
+        request.validate(userDetails.getUser(), passwordEncoder);
+        // 영속 상태의 엔티티 수정 -> 더티체킹 동작
+        user.changePassword(passwordEncoder.encode(request.getNewPassword()));
+    }
+
 
     @Transactional(readOnly = true)
     public ResponseEntity<PageResDto<PagedUserResponseDTO>> getPagedUsers(UserSearchReqDto searchDto, Pageable pageable, int size) {
