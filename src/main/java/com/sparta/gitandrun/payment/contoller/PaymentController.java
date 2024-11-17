@@ -5,6 +5,7 @@ import com.sparta.gitandrun.order.dto.res.ResDto;
 import com.sparta.gitandrun.payment.dto.req.ReqPaymentCondByManagerDTO;
 import com.sparta.gitandrun.payment.dto.req.ReqPaymentCondDTO;
 import com.sparta.gitandrun.payment.dto.req.ReqPaymentPostDTO;
+import com.sparta.gitandrun.payment.dto.res.ResPaymentGetByIdDTO;
 import com.sparta.gitandrun.payment.dto.res.ResPaymentGetByUserIdDTO;
 import com.sparta.gitandrun.payment.service.PaymentService;
 import com.sparta.gitandrun.user.security.UserDetailsImpl;
@@ -54,10 +55,16 @@ public class PaymentController {
         return paymentService.getByManager(condition, pageable);
     }
 
+
+    @GetMapping("/{paymentId}")
+    public ResponseEntity<ResDto<ResPaymentGetByIdDTO>> readPayment(@PathVariable("paymentId")Long paymentId) {
+        return paymentService.getBy(paymentId);
+    }
+
     @Secured({"ROLE_CUSTOMER", "ROLE_MANAGER"})
     @PatchMapping("/{paymentId}")
     public ResponseEntity<ApiResDto> cancelPayment(@AuthenticationPrincipal UserDetailsImpl userDetails,
-                                                   @PathVariable("paymentId") Long paymentId) {
+                                                   @PathVariable("paymentId")Long paymentId) {
 
         paymentService.cancelPayment(userDetails.getUser(), paymentId);
 
