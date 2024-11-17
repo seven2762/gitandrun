@@ -1,4 +1,4 @@
-package com.sparta.gitandrun.order.repository.queryDsl;
+package com.sparta.gitandrun.order.repository.custom;
 
 import com.sparta.gitandrun.order.dto.req.ReqOrderCondByCustomerDTO;
 import com.sparta.gitandrun.order.dto.req.ReqOrderCondByOwnerDTO;

@@ -1,4 +1,4 @@
-package com.sparta.gitandrun.order.repository.queryDsl;
+package com.sparta.gitandrun.order.repository.custom;
 
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
