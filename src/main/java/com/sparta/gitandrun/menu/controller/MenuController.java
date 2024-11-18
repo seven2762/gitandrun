@@ -43,7 +43,7 @@ public class MenuController {
     @DeleteMapping("/{menuId}")
     public ResponseEntity<ApiResDto> deleteMenu(@PathVariable("menuId") UUID menuId){
         menuService.deleteMenu(menuId);
-        return ResponseEntity.ok().body(new ApiResDto("삭제 완료", HttpStatus.OK.value()));
+        return ResponseEntity.ok().body(new ApiResDto("메뉴 삭제 완료", HttpStatus.OK.value()));
     }
 
     //READ
@@ -77,15 +77,15 @@ public class MenuController {
     public ResponseEntity<ApiResDto> getStoreAndMenus(
             @RequestParam String storeName,
             @RequestParam(defaultValue = "createdAt") String sortBy,
-            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
-        Page<StoreWithMenusDto> StoreAndMenu = menuService.getStoreAndMenus(storeName, sortBy, page-1, size);
+        Page<StoreWithMenusDto> StoreAndMenu = menuService.getStoreAndMenus(storeName, sortBy, page, size);
         return ResponseEntity.ok().body(new ApiResDto("메뉴명으로 가게 검색 완료", HttpStatus.OK.value(), StoreAndMenu));
     }
 
     //READ ony One
     @GetMapping("/{menuid}")
-    @Secured({"ROLE_MANAGER","ROLE_ADMIN"})
+    @Secured({"ROLE_MANAGER","ROLE_ADMIN", "ROLE_OWNER"})
     public MenuResponseDto getOneMenu(@PathVariable("menuid") UUID menuId){
         return menuService.getOneMenu(menuId);
     }

@@ -76,7 +76,7 @@ public class MenuService {
         return menuList.map(menu -> new MenuResponseDto(menu));
     }
 
-    //하나의 가게에 있 모든 메뉴 검색
+    //하나의 가게에 있는 모든 메뉴 검색
     @Transactional(readOnly = true)
     public Page<MenuResponseDto> getDetailMenu(UUID storeId, String sortBy, int page, int size) {
         int realSize = ConfirmPageSize(size);

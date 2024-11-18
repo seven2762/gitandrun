@@ -35,24 +35,24 @@ public class Menu extends BaseEntity {
     @Column(name = "menuContent", nullable = false, length = 100)
     private String menuContent;
 
-    @Column(nullable = false, length = 100)
+    @Column(nullable = false)
     @CreatedDate
     private LocalDateTime createdAt;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 100)
     private String createdBy;
 
-    @Column(nullable = false, length = 100)
+    @Column(nullable = false)
     @LastModifiedDate
     private LocalDateTime updatedAt;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 100)
     private String updatedBy;
 
     @Column(name = "is_deleted", nullable = false)
     private boolean isDeleted;
 
-    @Column(nullable = true, length = 100)
+    @Column(nullable = true)
     private LocalDateTime deletedAt;
 
     @Column(nullable = true, length = 100)
