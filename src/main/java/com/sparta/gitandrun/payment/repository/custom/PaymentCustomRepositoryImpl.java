@@ -9,7 +9,6 @@ import com.sparta.gitandrun.payment.dto.req.ReqPaymentCondByCustomerDTO;
 import com.sparta.gitandrun.payment.entity.Payment;
 import com.sparta.gitandrun.payment.entity.enums.PaymentStatus;
 import com.sparta.gitandrun.payment.entity.enums.SortType;
-import com.sparta.gitandrun.payment.entity.enums.StatusType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -65,8 +64,7 @@ public class PaymentCustomRepositoryImpl implements PaymentCustomRepository {
     }
 
     @Override
-    public Page<Payment> findCustomerPaymentsWithConditions(ReqPaymentCondByManagerDTO cond,
-                                                            Pageable pageable) {
+    public Page<Payment> findCustomerPaymentsWithConditions(ReqPaymentCondByManagerDTO cond, Pageable pageable) {
 
         List<Payment> results = queryFactory
                 .selectFrom(payment)
@@ -90,6 +88,9 @@ public class PaymentCustomRepositoryImpl implements PaymentCustomRepository {
                 .join(payment.order, order).fetchJoin()
                 .join(payment.order.store, store).fetchJoin()
                 .where(
+                        usernameLike(cond.getCustomer().getName()),
+                        storeNameLike(cond.getStore().getName()),
+                        deletedEq(cond.getCondition().isDeleted()),
                         userIdEq(cond.getCustomer().getId()),
                         statusEq(cond.getCondition().getStatus())
                 );
@@ -114,17 +115,11 @@ public class PaymentCustomRepositoryImpl implements PaymentCustomRepository {
     }
 
     private BooleanExpression deletedEq(boolean cond) {
-        return cond ? payment.isDeleted.eq(true) : payment.isDeleted.eq(false);
+        return payment.isDeleted.eq(cond);
     }
 
     private BooleanExpression statusEq(String status) {
-        StatusType statusType = StatusType.fromString(status);
-
-        return switch (statusType) {
-            case PAID -> payment.paymentStatus.eq(PaymentStatus.PAID);
-            case CANCEL -> payment.paymentStatus.eq(PaymentStatus.CANCEL);
-            case ALL -> payment.paymentStatus.in(PaymentStatus.PAID, PaymentStatus.CANCEL);
-        };
+        return status != null ? payment.paymentStatus.eq(PaymentStatus.fromString(status)) : null;
     }
 
     private OrderSpecifier<?> orderSpecifier(String order) {
