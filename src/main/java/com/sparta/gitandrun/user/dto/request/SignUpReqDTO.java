@@ -19,6 +19,9 @@ public class SignUpReqDTO {
     )
     private String username;
 
+
+    @Pattern(regexp = "^[가-힣a-zA-Z0-9]{2,10}$",
+            message = "한글과 영문 대소문자 숫자로 2-10자리만 가능합니다")
     private String nickName;
     private String email;
 
