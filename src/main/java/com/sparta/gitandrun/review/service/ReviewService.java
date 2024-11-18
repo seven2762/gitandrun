@@ -72,9 +72,9 @@ public class ReviewService {
         return reviews.map(UserReviewResponseDto::new);
     }
 
-    // 모든 가게 리뷰 조회 (OWNER 제외)
+    // 모든 가게 리뷰 조회
     @Transactional(readOnly = true)
-    public Page<UserReviewResponseDto> getCustomerReviewsByStore(UUID storeId, int page, int size, String sortBy) {
+    public Page<UserReviewResponseDto> getReviewsByStore(UUID storeId, int page, int size, String sortBy) {
         Pageable pageable = pageable(page, size, sortBy, false);
         Page<Review> reviews = reviewRepository.findByStoreId(storeId, pageable);
         reviewEmpty(reviews);

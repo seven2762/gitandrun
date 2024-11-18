@@ -57,15 +57,14 @@ public class ReviewController {
         return new ApiResDto("리뷰 조회 성공", 200, reviews);
     }
 
-    // 모든 가게 리뷰 조회 (OWNER 제외)
-    @Secured({"ROLE_ADMIN", "ROLE_MANAGER", "ROLE_CUSTOMER"})
+    // 모든 가게 리뷰 조회
     @GetMapping("/store/{storeId}")
-    public ApiResDto getCustomerReviewsByStore(
+    public ApiResDto getReviewsByStore(
             @PathVariable UUID storeId,
             @RequestParam(defaultValue="0") int page,
             @RequestParam(defaultValue="10") int size,
             @RequestParam(defaultValue = "createdAt") String sortBy) {
-        Page<UserReviewResponseDto> reviews = reviewService.getCustomerReviewsByStore(storeId, page, size, sortBy);
+        Page<UserReviewResponseDto> reviews = reviewService.getReviewsByStore(storeId, page, size, sortBy);
         return new ApiResDto("리뷰 조회 성공", 200, reviews);
     }
 
