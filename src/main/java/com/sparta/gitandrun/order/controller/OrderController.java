@@ -69,7 +69,7 @@ public class OrderController {
          - 매니저 권한의 유저가 모든 가게 및 고객에 대한 주문 조회를 할 수 있음
          - 조회 간 가게 이름별 / 고객 이름별 조회 가능
     */
-    @Secured("ROLE_MANAGER")
+    @Secured({"ROLE_MANAGER", "ROLE_ADMIN"})
     @GetMapping("/manager")
     public ResponseEntity<ResDto<ResOrderGetByManagerDTO>> readByManager(@RequestBody ReqOrderCondByManagerDTO cond,
                                                                          @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {

@@ -47,7 +47,7 @@ public class PaymentController {
         return paymentService.getByCustomer(userDetails.getUser(), cond, pageable);
     }
 
-    @Secured("ROLE_MANAGER")
+    @Secured({"ROLE_MANAGER", "ROLE_ADMIN"})
     @GetMapping("/manager")
     public ResponseEntity<ResDto<ResPaymentGetByUserIdDTO>> readPayment(@RequestBody ReqPaymentCondByManagerDTO condition,
                                                                         @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
