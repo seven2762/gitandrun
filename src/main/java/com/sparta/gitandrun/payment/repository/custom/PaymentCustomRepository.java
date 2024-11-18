@@ -10,5 +10,5 @@ public interface PaymentCustomRepository {
 
     Page<Payment> findMyPaymentsWithConditions(Long userId, ReqPaymentCondByCustomerDTO cond, Pageable pageable);
 
-    Page<Payment> findCustomerPaymentsWithConditions(ReqPaymentCondByManagerDTO condition, Pageable pageable);
+    Page<Payment> findAllPaymentsWithConditions(ReqPaymentCondByManagerDTO condition, Pageable pageable);
 }

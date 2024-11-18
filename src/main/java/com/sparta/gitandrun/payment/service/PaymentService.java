@@ -66,7 +66,7 @@ public class PaymentService {
     @Transactional(readOnly = true)
     public ResponseEntity<ResDto<ResPaymentGetByUserIdDTO>> getByManager(ReqPaymentCondByManagerDTO condition, Pageable pageable) {
 
-        Page<Payment> findPaymentPage = paymentRepository.findCustomerPaymentsWithConditions(condition, pageable);
+        Page<Payment> findPaymentPage = paymentRepository.findAllPaymentsWithConditions(condition, pageable);
 
         return new ResponseEntity<>(
                 ResDto.<ResPaymentGetByUserIdDTO>builder()

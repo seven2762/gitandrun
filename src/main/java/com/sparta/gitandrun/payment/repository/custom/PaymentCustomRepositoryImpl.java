@@ -64,7 +64,7 @@ public class PaymentCustomRepositoryImpl implements PaymentCustomRepository {
     }
 
     @Override
-    public Page<Payment> findCustomerPaymentsWithConditions(ReqPaymentCondByManagerDTO cond, Pageable pageable) {
+    public Page<Payment> findAllPaymentsWithConditions(ReqPaymentCondByManagerDTO cond, Pageable pageable) {
 
         List<Payment> results = queryFactory
                 .selectFrom(payment)
