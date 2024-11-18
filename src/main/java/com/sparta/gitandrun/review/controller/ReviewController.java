@@ -89,11 +89,12 @@ public class ReviewController {
             @RequestParam(required = false) Long userId,      // userId로 검색
             @RequestParam(required = false) UUID reviewId,    // reviewId로 검색
             @RequestParam(required = false) UUID storeId,     // storeId로 검색
+            @RequestParam(defaultValue = "false") boolean isDeleted, // 삭제 여부
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "createdAt") String sortBy) {
         Page<AdminReviewResponseDto> reviews = reviewService.searchReviewsWithFilters(
-                keyword, userId, reviewId, storeId, page, size, sortBy);
+                keyword, userId, reviewId, storeId, isDeleted, page, size, sortBy);
         return new ApiResDto("리뷰 조회 성공", 200, reviews);
     }
 

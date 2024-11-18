@@ -29,15 +29,17 @@ public interface ReviewRepository extends JpaRepository<Review, UUID> {
 
     // 관리자: 모든 리뷰 조회
     @Query("SELECT r FROM Review r " +
-            "WHERE (:keyword IS NULL OR LOWER(r.reviewContent) LIKE LOWER(CONCAT('%', :keyword, '%'))) " +
+            "WHERE (:keyword IS NULL OR :keyword = '' OR LOWER(r.reviewContent) LIKE LOWER(CONCAT('%', :keyword, '%'))) " +
             "AND (:userId IS NULL OR r.user.userId = :userId) " +
             "AND (:reviewId IS NULL OR r.reviewId = :reviewId) " +
-            "AND (:storeId IS NULL OR r.store.storeId = :storeId)")
+            "AND (:storeId IS NULL OR r.store.storeId = :storeId)" +
+            "AND r.isDeleted = :isDeleted")
     Page<Review> searchReviewsWithFilters(
             @Param("keyword") String keyword,
             @Param("userId") Long userId,
             @Param("reviewId") UUID reviewId,
             @Param("storeId") UUID storeId,
+            @Param("isDeleted") boolean isDeleted,
             Pageable pageable);
 
 

@@ -102,7 +102,7 @@ public class ReviewService {
     // 관리자 - 모든 리뷰 검색 (reviewContent, userId, reviewId, storeId)
     @Transactional(readOnly = true)
     public Page<AdminReviewResponseDto> searchReviewsWithFilters(
-            String keyword, Long userId, UUID reviewId, UUID storeId, int page, int size, String sortBy) {
+            String keyword, Long userId, UUID reviewId, UUID storeId, boolean isDeleted, int page, int size, String sortBy) {
         Pageable pageable = pageable(page, size, sortBy, true);
 
         // 필터 조건이 모두 비어 있는지 확인
@@ -117,10 +117,9 @@ public class ReviewService {
             reviewEmpty(allReviews);
             return allReviews.map(AdminReviewResponseDto::new);
         }
-
         // 필터 조건이 있을 경우 필터링해서 조회
         Page<Review> reviews = reviewRepository.searchReviewsWithFilters(
-                keyword, userId, reviewId, storeId, pageable);
+                keyword, userId, reviewId, storeId, isDeleted, pageable);
         reviewEmpty(reviews);
         return reviews.map(AdminReviewResponseDto::new);
     }
