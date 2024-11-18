@@ -90,7 +90,7 @@ public class ReviewService {
         return reviews.map(UserReviewResponseDto::new);
     }
 
-    // CUSTOEMR, OWNER - 본인이 작성한 리뷰 조회
+    // CUSTOEMR: 본인이 작성한 리뷰 조회
     @Transactional(readOnly = true)
     public Page<UserReviewResponseDto> getMyReviewsByUserId(Long userId, int page, int size, String sortBy) {
         Pageable pageable = pageable(page, size, sortBy, false);
@@ -102,7 +102,7 @@ public class ReviewService {
     // 관리자 - 모든 리뷰 검색 (reviewContent, userId, reviewId, storeId)
     @Transactional(readOnly = true)
     public Page<AdminReviewResponseDto> searchReviewsWithFilters(
-            String keyword, Long userId, UUID reviewId, UUID storeId, int page, int size, String sortBy) {
+            String keyword, Long userId, UUID reviewId, UUID storeId, boolean isDeleted, int page, int size, String sortBy) {
         Pageable pageable = pageable(page, size, sortBy, true);
 
         // 필터 조건이 모두 비어 있는지 확인
@@ -117,10 +117,9 @@ public class ReviewService {
             reviewEmpty(allReviews);
             return allReviews.map(AdminReviewResponseDto::new);
         }
-
         // 필터 조건이 있을 경우 필터링해서 조회
         Page<Review> reviews = reviewRepository.searchReviewsWithFilters(
-                keyword, userId, reviewId, storeId, pageable);
+                keyword, userId, reviewId, storeId, isDeleted, pageable);
         reviewEmpty(reviews);
         return reviews.map(AdminReviewResponseDto::new);
     }
@@ -150,7 +149,20 @@ public class ReviewService {
         Long userId = userDetails.getUser().getUserId();
         Role role = userDetails.getUser().getRole();
         checkPermission(review, userId, role);
-        review.setDeleted(true);
+        review.softDelete(userDetails.getUser());
+    }
+
+    //관리자 - 삭제된 리뷰 복구
+    @Transactional
+    public void restoreReview(UUID reviewId, UserDetailsImpl userDetails) {
+        Review review = getReview(reviewId);
+
+        // 삭제 여부 확인
+        if (!review.isDeleted()) {
+            throw new IllegalArgumentException("삭제되지 않은 리뷰입니다.");
+        }
+
+        review.restoreReview(userDetails.getUser());
     }
 
     //----------------------------------------------------------------
@@ -164,7 +176,7 @@ public class ReviewService {
     // 리뷰가 비어있는지 확인
     private void reviewEmpty(Page<Review> reviews) {
         if (reviews.isEmpty()) {
-            throw new IllegalArgumentException("리뷰가 존재하지 않습니다.");
+            throw new IllegalArgumentException("리뷰가 없습니다.");
         }
     }
 

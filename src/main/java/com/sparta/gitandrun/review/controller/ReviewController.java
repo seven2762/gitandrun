@@ -89,11 +89,12 @@ public class ReviewController {
             @RequestParam(required = false) Long userId,      // userId로 검색
             @RequestParam(required = false) UUID reviewId,    // reviewId로 검색
             @RequestParam(required = false) UUID storeId,     // storeId로 검색
+            @RequestParam(defaultValue = "false") boolean isDeleted, // 삭제 여부
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "createdAt") String sortBy) {
         Page<AdminReviewResponseDto> reviews = reviewService.searchReviewsWithFilters(
-                keyword, userId, reviewId, storeId, page, size, sortBy);
+                keyword, userId, reviewId, storeId, isDeleted, page, size, sortBy);
         return new ApiResDto("리뷰 조회 성공", 200, reviews);
     }
 
@@ -108,12 +109,22 @@ public class ReviewController {
     }
 
     //리뷰 삭제
-    @DeleteMapping("{reviewId}")
+    @DeleteMapping("/{reviewId}")
     public ResponseEntity<ApiResDto> deleteReview(
             @PathVariable UUID reviewId,
             @AuthenticationPrincipal UserDetailsImpl userDetails) {
         reviewService.deleteReview(reviewId, userDetails);
         return ResponseEntity.ok().body(new ApiResDto("리뷰 삭제 완료", HttpStatus.OK.value()));
+    }
+
+    //관리자 - 삭제된 리뷰 복구
+    @Secured({"ROLE_MANAGER", "ROLE_ADMIN"})
+    @PatchMapping("/admin/restore/{reviewId}")
+    public ApiResDto restoreReview(
+            @PathVariable UUID reviewId,
+            @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        reviewService.restoreReview(reviewId, userDetails);
+        return new ApiResDto("리뷰 복구 성공", 200);
     }
 }
 
