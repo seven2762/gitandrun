@@ -159,9 +159,9 @@ public class ReviewService {
         }
     }
 
-    // CUSTOMER 또는 OWNER 권한 확인
+    // CUSTOMER 권한 확인
     private void checkPermission(Review review, Long userId, Role role) {
-        if (role.equals(Role.CUSTOMER) || role.equals(Role.OWNER)) {
+        if (role.equals(Role.CUSTOMER)) {
             if (!review.getUser().getUserId().equals(userId)) {
                 throw new IllegalArgumentException("본인의 리뷰만 가능합니다.");
             }

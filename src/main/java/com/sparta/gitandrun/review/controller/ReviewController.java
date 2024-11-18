@@ -32,7 +32,7 @@ public class ReviewController {
     private final ReviewService reviewService;
 
     //리뷰 작성
-    @Secured({"ROLE_CUSTOMER", "ROLE_OWNER"})
+    @Secured("ROLE_CUSTOMER")
     @PostMapping("/{orderId}")
     public ResponseEntity<ApiResDto> createReview(
             @AuthenticationPrincipal UserDetailsImpl userDetails,
@@ -68,8 +68,8 @@ public class ReviewController {
         return new ApiResDto("리뷰 조회 성공", 200, reviews);
     }
 
-    // CUSTOEMR, OWNER - 본인이 작성한 리뷰 조회
-    @Secured({"ROLE_CUSTOMER", "ROLE_OWNER"})
+    // CUSTOEMR - 본인이 작성한 리뷰 조회
+    @Secured("ROLE_CUSTOMER")
     @GetMapping("/myReviews")
     public ResponseEntity<ApiResDto> getMyReviewsByUserId(
             @AuthenticationPrincipal UserDetailsImpl userDetails,
