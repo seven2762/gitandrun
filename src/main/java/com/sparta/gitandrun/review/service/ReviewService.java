@@ -61,6 +61,9 @@ public class ReviewService {
             throw new IllegalArgumentException("이미 리뷰가 작성된 주문입니다.");
         }
 
+        // 6. 리뷰 내용과 평점
+        validateReviewWrite(requestDto);
+
         Review review = new Review(requestDto, order.getUser(), order.getStore(), order);
         reviewRepository.save(review);
     }
@@ -124,7 +127,7 @@ public class ReviewService {
         return reviews.map(AdminReviewResponseDto::new);
     }
 
-    //리뷰 수정
+    // 리뷰 수정
     @Transactional
     public void updateReview(UUID reviewId, UserDetailsImpl userDetails, ReviewRequestDto requestDto) {
         Review review = getReview(reviewId);
@@ -177,6 +180,16 @@ public class ReviewService {
     private void reviewEmpty(Page<Review> reviews) {
         if (reviews.isEmpty()) {
             throw new IllegalArgumentException("리뷰가 없습니다.");
+        }
+    }
+
+    // 리뷰 내용과 평점 검증 메서드
+    private void validateReviewWrite(ReviewRequestDto requestDto) {
+        if (requestDto.getReviewContent() == null || requestDto.getReviewContent().trim().isEmpty()) {
+            throw new IllegalArgumentException("리뷰 내용은 필수입니다.");
+        }
+        if (requestDto.getReviewRating() == null) {
+            throw new IllegalArgumentException("평점은 필수입니다.");
         }
     }
 
