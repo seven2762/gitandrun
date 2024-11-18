@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.sparta.gitandrun.payment.entity.Payment;
 import com.sparta.gitandrun.payment.entity.enums.PaymentStatus;
 import com.sparta.gitandrun.store.entity.Store;
+import com.sparta.gitandrun.user.entity.User;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -20,19 +21,18 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ResPaymentGetByUserIdDTO {
+public class ResPaymentGetByManagerDTO {
 
     private PaymentPage paymentPage;
 
-    public static ResPaymentGetByUserIdDTO of(Page<Payment> paymentPage) {
-        return ResPaymentGetByUserIdDTO.builder()
+    public static ResPaymentGetByManagerDTO of(Page<Payment> paymentPage) {
+        return ResPaymentGetByManagerDTO.builder()
                 .paymentPage(new PaymentPage(paymentPage))
                 .build();
     }
 
     @Getter
     public static class PaymentPage extends PagedModel<PaymentPage.PaymentSummary> {
-
         public PaymentPage(Page<Payment> paymentPage) {
             super(
                     new PageImpl<>(
@@ -65,7 +65,6 @@ public class ResPaymentGetByUserIdDTO {
                         .build();
             }
 
-
             @Getter
             @Builder
             @NoArgsConstructor
@@ -74,6 +73,7 @@ public class ResPaymentGetByUserIdDTO {
             private static class PaymentDTO {
 
                 private UUID paymentId;
+                private Customer customer;
                 private int paymentPrice;
                 private String paymentStatus;
                 private LocalDateTime createdAt;
@@ -82,6 +82,7 @@ public class ResPaymentGetByUserIdDTO {
                 private static PaymentDTO from(Payment payment) {
                     return PaymentDTO.builder()
                             .paymentId(payment.getId())
+                            .customer(Customer.from(payment.getUser()))
                             .paymentPrice(payment.getPaymentPrice())
                             .paymentStatus(payment.getPaymentStatus().status)
                             .createdAt(payment.getCreatedAt())
@@ -90,6 +91,25 @@ public class ResPaymentGetByUserIdDTO {
                                             ? payment.getUpdatedAt() : null
                             )
                             .build();
+                }
+
+                @Getter
+                @Builder
+                @NoArgsConstructor
+                @AllArgsConstructor
+                private static class Customer {
+
+                    private Long userId;
+                    private String username;
+                    private String phone;
+
+                    private static Customer from(User user) {
+                        return Customer.builder()
+                                .userId(user.getUserId())
+                                .username(user.getUsername())
+                                .phone(user.getPhone())
+                                .build();
+                    }
                 }
 
             }
@@ -110,7 +130,7 @@ public class ResPaymentGetByUserIdDTO {
                             .build();
                 }
             }
-        }
 
+        }
     }
 }

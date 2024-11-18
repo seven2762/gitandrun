@@ -6,6 +6,7 @@ import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.sparta.gitandrun.order.dto.req.ReqOrderCondByCustomerDTO;
+import com.sparta.gitandrun.order.dto.req.ReqOrderCondByManagerDTO;
 import com.sparta.gitandrun.order.dto.req.ReqOrderCondByOwnerDTO;
 import com.sparta.gitandrun.order.entity.Order;
 import com.sparta.gitandrun.order.entity.OrderStatus;
@@ -22,44 +23,13 @@ import java.util.UUID;
 
 import static com.sparta.gitandrun.order.entity.QOrder.order;
 import static com.sparta.gitandrun.order.entity.QOrderMenu.orderMenu;
+import static org.springframework.util.StringUtils.hasText;
 
 @Repository
 @RequiredArgsConstructor
 public class OrderCustomRepositoryImpl implements OrderCustomRepository {
 
     private final JPAQueryFactory queryFactory;
-
-    @Override
-    public Page<Order> findOwnerOrderListWithConditions(Long userId, ReqOrderCondByOwnerDTO cond, Pageable pageable) {
-
-        List<Order> results = queryFactory
-                .select(order)
-                .from(order)
-                .where(
-                        deletedFalse(),
-                        storeIdOrUserIdEq(userId, cond.getStore().getId()),
-                        statusEq(cond.getCondition().getStatus()),
-                        typeEq(cond.getCondition().getType())
-                )
-                .orderBy(
-                        orderSpecifier(cond.getCondition().getSort())
-                )
-                .offset(pageable.getOffset())
-                .limit(pageable.getPageSize())
-                .fetch();
-
-        JPQLQuery<Long> countQuery = queryFactory
-                .select(order.count())
-                .from(order)
-                .where(
-                        deletedFalse(),
-                        storeIdOrUserIdEq(userId, cond.getStore().getId()),
-                        statusEq(cond.getCondition().getStatus()),
-                        typeEq(cond.getCondition().getType())
-                );
-
-        return PageableExecutionUtils.getPage(results, pageable, countQuery::fetchOne);
-    }
 
     @Override
     public Page<Order> findMyOrderListWithConditions(Long userId, ReqOrderCondByCustomerDTO cond, Pageable pageable) {
@@ -69,7 +39,8 @@ public class OrderCustomRepositoryImpl implements OrderCustomRepository {
                 .from(order)
                 .where(
                         order.user.userId.eq(userId),
-                        deletedFalse(),
+                        order.isDeleted.eq(false),
+                        storeNameLike(cond.getStore().getName()),
                         statusEq(cond.getCondition().getStatus()),
                         typeEq(cond.getCondition().getType())
                 )
@@ -85,7 +56,73 @@ public class OrderCustomRepositoryImpl implements OrderCustomRepository {
                 .from(order)
                 .where(
                         order.user.userId.eq(userId),
-                        deletedFalse(),
+                        order.isDeleted.eq(false),
+                        statusEq(cond.getCondition().getStatus()),
+                        typeEq(cond.getCondition().getType())
+                );
+
+        return PageableExecutionUtils.getPage(results, pageable, countQuery::fetchOne);
+    }
+
+    @Override
+    public Page<Order> findOwnerOrderListWithConditions(Long userId, ReqOrderCondByOwnerDTO cond, Pageable pageable) {
+
+        List<Order> results = queryFactory
+                .selectFrom(order)
+                .where(
+                        order.isDeleted.eq(false),
+                        usernameLike(cond.getCustomer().getName()),
+                        storeIdOrUserIdEq(userId, cond.getStore().getId()),
+                        statusEq(cond.getCondition().getStatus()),
+                        typeEq(cond.getCondition().getType())
+                )
+                .orderBy(
+                        orderSpecifier(cond.getCondition().getSort())
+                )
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetch();
+
+        JPQLQuery<Long> countQuery = queryFactory
+                .select(order.count())
+                .from(order)
+                .where(
+                        order.isDeleted.eq(false),
+                        usernameLike(cond.getCustomer().getName()),
+                        storeIdOrUserIdEq(userId, cond.getStore().getId()),
+                        statusEq(cond.getCondition().getStatus()),
+                        typeEq(cond.getCondition().getType())
+                );
+
+        return PageableExecutionUtils.getPage(results, pageable, countQuery::fetchOne);
+    }
+
+    @Override
+    public Page<Order> findAllOrderListWithConditions(ReqOrderCondByManagerDTO cond, Pageable pageable) {
+
+        List<Order> results = queryFactory
+                .selectFrom(order)
+                .where(
+                        usernameLike(cond.getCustomer().getName()),
+                        storeNameLike(cond.getStore().getName()),
+                        deletedEq(cond.getCondition().isDeleted()),
+                        statusEq(cond.getCondition().getStatus()),
+                        typeEq(cond.getCondition().getType())
+                )
+                .orderBy(
+                        orderSpecifier(cond.getCondition().getSort())
+                )
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetch();
+
+        JPQLQuery<Long> countQuery = queryFactory
+                .select(order.count())
+                .from(order)
+                .where(
+                        usernameLike(cond.getCustomer().getName()),
+                        storeNameLike(cond.getStore().getName()),
+                        deletedEq(cond.getCondition().isDeleted()),
                         statusEq(cond.getCondition().getStatus()),
                         typeEq(cond.getCondition().getType())
                 );
@@ -103,16 +140,24 @@ public class OrderCustomRepositoryImpl implements OrderCustomRepository {
         }
     }
 
-    private BooleanExpression deletedFalse() {
-        return order.isDeleted.eq(false);
+    private BooleanExpression usernameLike(String username) {
+        return !hasText(username) ? null : order.user.username.containsIgnoreCase(username);
+    }
+
+    private BooleanExpression storeNameLike(String storeName) {
+        return !hasText(storeName) ? null : order.store.storeName.containsIgnoreCase(storeName);
+    }
+
+    private BooleanExpression deletedEq(boolean cond) {
+        return order.isDeleted.eq(cond);
     }
 
     private BooleanExpression statusEq(String status) {
-        return order.orderStatus.eq(OrderStatus.fromString(status));
+        return status != null ? order.orderStatus.eq(OrderStatus.fromString(status)) : null;
     }
 
     private BooleanExpression typeEq(String type) {
-        return order.orderType.eq(OrderType.fromString(type));
+        return hasText(type) ? order.orderType.eq(OrderType.fromString(type)) : null;
     }
 
     private OrderSpecifier<?> orderSpecifier(String sort) {

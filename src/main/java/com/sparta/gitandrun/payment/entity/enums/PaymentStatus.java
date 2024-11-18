@@ -17,4 +17,12 @@ public enum PaymentStatus {
         public static final String PAID = "PAY_PAID";
     }
 
+    public static PaymentStatus fromString(String status) {
+        return switch (status.toUpperCase()) {
+            case Status.PENDING -> PENDING;
+            case Status.CANCEL -> CANCEL;
+            default -> PAID;
+        };
+    }
+
 }

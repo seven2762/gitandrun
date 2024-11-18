@@ -34,7 +34,7 @@ public class ReviewService {
 
     // 리뷰 작성
     @Transactional
-    public void createReview(ReviewRequestDto requestDto, Long userId, Long orderId) {
+    public void createReview(ReviewRequestDto requestDto, Long userId, UUID orderId) {
         // 1. 주문 조회
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 주문입니다."));

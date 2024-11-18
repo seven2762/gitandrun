@@ -4,12 +4,10 @@ package com.sparta.gitandrun.order.service;
 import com.sparta.gitandrun.menu.entity.Menu;
 import com.sparta.gitandrun.menu.repository.MenuRepository;
 import com.sparta.gitandrun.order.dto.req.ReqOrderCondByCustomerDTO;
+import com.sparta.gitandrun.order.dto.req.ReqOrderCondByManagerDTO;
 import com.sparta.gitandrun.order.dto.req.ReqOrderCondByOwnerDTO;
 import com.sparta.gitandrun.order.dto.req.ReqOrderPostDTO;
-import com.sparta.gitandrun.order.dto.res.ResDto;
-import com.sparta.gitandrun.order.dto.res.ResOrderGetByCustomerDTO;
-import com.sparta.gitandrun.order.dto.res.ResOrderGetByIdDTO;
-import com.sparta.gitandrun.order.dto.res.ResOrderGetByOwnerDTO;
+import com.sparta.gitandrun.order.dto.res.*;
 import com.sparta.gitandrun.order.entity.Order;
 import com.sparta.gitandrun.order.entity.OrderMenu;
 import com.sparta.gitandrun.order.repository.OrderMenuRepository;
@@ -109,10 +107,31 @@ public class OrderService {
     }
 
     /*
+        Manager 주문 조회
+    */
+    @Transactional(readOnly = true)
+    public ResponseEntity<ResDto<ResOrderGetByManagerDTO>> readByManager(ReqOrderCondByManagerDTO cond, Pageable pageable) {
+
+        Page<Order> findOrderPage = orderRepository.findAllOrderListWithConditions(cond, pageable);
+
+        List<OrderMenu> findOrderMenus = getOrderMenusByOrderIds(getIdsByOrders(findOrderPage));
+
+        return new ResponseEntity<>(
+                ResDto.<ResOrderGetByManagerDTO>builder()
+                        .code(HttpStatus.OK.value())
+                        .message("주문 조회에 성공했습니다.")
+                        .data(ResOrderGetByManagerDTO.of(findOrderPage, findOrderMenus))
+                        .build(),
+                HttpStatus.OK
+        );
+    }
+
+
+    /*
         주문 단일 및 상세 조회
     */
     @Transactional(readOnly = true)
-    public ResponseEntity<ResDto<ResOrderGetByIdDTO>> readById(Long orderId) {
+    public ResponseEntity<ResDto<ResOrderGetByIdDTO>> readById(UUID orderId) {
 
         Order findOrder = getOrderById(orderId);
 
@@ -130,7 +149,7 @@ public class OrderService {
 
     // 주문 취소
     @Transactional
-    public void cancelOrder(User user, Long orderId) {
+    public void cancelOrder(User user, UUID orderId) {
 
         Order order = user.getRole() == Role.CUSTOMER
                 ? getOrderByIdAndUser(user, orderId)
@@ -141,7 +160,7 @@ public class OrderService {
 
     // 주문 거절
     @Transactional
-    public void rejectOrder(User user, Long orderId) {
+    public void rejectOrder(User user, UUID orderId) {
 
         Order order = user.getRole() == Role.OWNER
                 ? getOrderByIdAndOwner(user, orderId)
@@ -153,7 +172,7 @@ public class OrderService {
 
     // 주문 삭제
     @Transactional
-    public void deleteOrder(User user, Long orderId) {
+    public void deleteOrder(User user, UUID orderId) {
         getOrderById(orderId).deleteOrder(user);
     }
 
@@ -194,27 +213,27 @@ public class OrderService {
         주문 조회 private 메서드
     */
 
-    private Order getOrderById(Long orderId) {
+    private Order getOrderById(UUID orderId) {
         return orderRepository.findByIdAndIsDeletedFalse(orderId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 항목입니다."));
     }
 
-    private Order getOrderByIdAndUser(User user, Long orderId) {
+    private Order getOrderByIdAndUser(User user, UUID orderId) {
         return orderRepository.findByIdAndUser_UserId(orderId, user.getUserId())
                 .orElseThrow(() -> new IllegalArgumentException("접근 권한이 없습니다."));
     }
 
-    private Order getOrderByIdAndOwner(User user, Long orderId) {
+    private Order getOrderByIdAndOwner(User user, UUID orderId) {
         return orderRepository.findByIdAndStore_User_UserId(orderId, user.getUserId())
                 .orElseThrow(() -> new IllegalArgumentException("접근 권한이 없습니다."));
     }
 
 
-    private List<OrderMenu> getOrderMenusByOrderIds(List<Long> orderIds) {
+    private List<OrderMenu> getOrderMenusByOrderIds(List<UUID> orderIds) {
         return orderMenuRepository.findByOrderIds(orderIds);
     }
 
-    private static List<Long> getIdsByOrders(Page<Order> orders) {
+    private static List<UUID> getIdsByOrders(Page<Order> orders) {
         return orders.getContent().stream()
                 .map(Order::getId)
                 .toList();

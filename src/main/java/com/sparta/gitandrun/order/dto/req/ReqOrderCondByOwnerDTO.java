@@ -10,12 +10,19 @@ import java.util.UUID;
 public class ReqOrderCondByOwnerDTO {
 
     private Store store;
+    private Customer customer;
     private Condition condition;
 
     @Getter
     @NoArgsConstructor
     public static class Store {
         private UUID id;
+    }
+
+    @Getter
+    @NoArgsConstructor
+    public static class Customer {
+        private String name;
     }
 
     @Getter

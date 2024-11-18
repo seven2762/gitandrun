@@ -6,6 +6,9 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.UuidGenerator;
+
+import java.util.UUID;
 
 import static jakarta.persistence.FetchType.LAZY;
 
@@ -14,9 +17,10 @@ import static jakarta.persistence.FetchType.LAZY;
 @Table(name = "p_order_menu")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class OrderMenu {
+
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
 
     @Column(nullable = false)
     private int orderPrice;

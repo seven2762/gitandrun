@@ -13,7 +13,7 @@ import org.springframework.stereotype.Repository;
 public interface ReviewRepository extends JpaRepository<Review, UUID> {
 
     // 해당 주문에 리뷰가 이미 존재하는지 확인
-    boolean existsByOrderId(Long orderId);
+    boolean existsByOrderId(UUID orderId);
 
     // CUSTOMER: 본인이 작성한 리뷰 조회
     @Query("SELECT r FROM Review r WHERE r.user.userId = :userId AND r.isDeleted = false")

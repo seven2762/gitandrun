@@ -2,12 +2,10 @@ package com.sparta.gitandrun.order.controller;
 
 import com.sparta.gitandrun.common.entity.ApiResDto;
 import com.sparta.gitandrun.order.dto.req.ReqOrderCondByCustomerDTO;
+import com.sparta.gitandrun.order.dto.req.ReqOrderCondByManagerDTO;
 import com.sparta.gitandrun.order.dto.req.ReqOrderCondByOwnerDTO;
 import com.sparta.gitandrun.order.dto.req.ReqOrderPostDTO;
-import com.sparta.gitandrun.order.dto.res.ResDto;
-import com.sparta.gitandrun.order.dto.res.ResOrderGetByCustomerDTO;
-import com.sparta.gitandrun.order.dto.res.ResOrderGetByIdDTO;
-import com.sparta.gitandrun.order.dto.res.ResOrderGetByOwnerDTO;
+import com.sparta.gitandrun.order.dto.res.*;
 import com.sparta.gitandrun.order.service.OrderService;
 import com.sparta.gitandrun.user.security.UserDetailsImpl;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +17,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.UUID;
 
 @RequestMapping("/order")
 @RestController
@@ -56,8 +56,7 @@ public class OrderController {
     /*
       본인 가게 주문 조회
       - 사장 권한의 유저가 본인 가게의 전체 주문 내역을 조회할 수 있음.
-  */
-
+    */
     @Secured("ROLE_OWNER")
     @GetMapping("/owner")
     public ResponseEntity<ResDto<ResOrderGetByOwnerDTO>> readByOwner(@AuthenticationPrincipal UserDetailsImpl userDetails,
@@ -68,10 +67,23 @@ public class OrderController {
     }
 
     /*
+        매니저 주문 조회
+         - 매니저 권한의 유저가 모든 가게 및 고객에 대한 주문 조회를 할 수 있음
+         - 조회 간 가게 이름별 / 고객 이름별 조회 가능
+    */
+    @Secured({"ROLE_MANAGER", "ROLE_ADMIN"})
+    @GetMapping("/manager")
+    public ResponseEntity<ResDto<ResOrderGetByManagerDTO>> readByManager(@RequestBody ReqOrderCondByManagerDTO cond,
+                                                                         @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+
+        return orderService.readByManager(cond, pageable);
+    }
+
+    /*
         주문 단일 및 상세 조회
     */
     @GetMapping("/{orderId}")
-    public ResponseEntity<ResDto<ResOrderGetByIdDTO>> readById(@PathVariable("orderId") Long orderId) {
+    public ResponseEntity<ResDto<ResOrderGetByIdDTO>> readById(@PathVariable("orderId") UUID orderId) {
         return orderService.readById(orderId);
     }
 
@@ -82,7 +94,7 @@ public class OrderController {
     @Secured({"ROLE_CUSTOMER", "ROLE_MANAGER"})
     @PatchMapping("/{orderId}/cancel")
     public ResponseEntity<ApiResDto> cancelOrder(@AuthenticationPrincipal UserDetailsImpl userDetails,
-                                                 @PathVariable("orderId") Long orderId) {
+                                                 @PathVariable("orderId") UUID orderId) {
 
         orderService.cancelOrder(userDetails.getUser(), orderId);
 
@@ -96,7 +108,7 @@ public class OrderController {
     @Secured({"ROLE_OWNER", "ROLE_MANAGER"})
     @PatchMapping("/{orderId}/reject")
     public ResponseEntity<ApiResDto> rejectOrder(@AuthenticationPrincipal UserDetailsImpl userDetails,
-                                                 @PathVariable("orderId") Long orderId) {
+                                                 @PathVariable("orderId") UUID orderId) {
 
         orderService.rejectOrder(userDetails.getUser(), orderId);
 
@@ -110,7 +122,7 @@ public class OrderController {
     @Secured("ROLE_ADMIN")
     @DeleteMapping("/{orderId}")
     public ResponseEntity<ApiResDto> deleteOrder(@AuthenticationPrincipal UserDetailsImpl userDetails,
-                                                 @PathVariable("orderId") Long orderId) {
+                                                 @PathVariable("orderId") UUID orderId) {
 
         orderService.deleteOrder(userDetails.getUser(), orderId);
 

@@ -21,7 +21,6 @@ public enum OrderType {
     }
 
     public static OrderType fromString(String type) {
-        if (type == null) return DELIVERY;
         return Objects.equals(type.toUpperCase(), OrderType.DELIVERY.getType())
                 ? DELIVERY : VISIT;
     }

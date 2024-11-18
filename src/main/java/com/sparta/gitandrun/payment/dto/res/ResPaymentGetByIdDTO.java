@@ -37,13 +37,13 @@ public class ResPaymentGetByIdDTO {
     @AllArgsConstructor
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private static class PaymentDTO {
-        private Long id;
+
+        private UUID id;
         private int paymentPrice;
         private String paymentStatus;
         private LocalDateTime createdAt;
         private LocalDateTime canceledAt;
         private OrderDTO orderDTO;
-
 
         private static PaymentDTO from(Payment payment, Order order, List<OrderMenu> orderMenus) {
             return PaymentDTO.builder()
@@ -64,7 +64,8 @@ public class ResPaymentGetByIdDTO {
         @NoArgsConstructor
         @AllArgsConstructor
         private static class OrderDTO {
-            private Long id;
+
+            private UUID id;
             private String status;
             private String type;
             private LocalDateTime createdAt;
@@ -88,13 +89,14 @@ public class ResPaymentGetByIdDTO {
             @NoArgsConstructor
             @AllArgsConstructor
             private static class OrderMenuDTO {
-                private Long id;
+
+                private UUID id;
                 private UUID menuId;
                 private String menuName;
                 private int menuPrice;
                 private int count;
 
-                private static Map<Long, List<OrderMenuDTO>> from(List<OrderMenu> orderMenus) {
+                private static Map<UUID, List<OrderMenuDTO>> from(List<OrderMenu> orderMenus) {
                     return orderMenus.stream()
                             .collect(Collectors.groupingBy(
                                     orderMenu -> orderMenu.getOrder().getId(),

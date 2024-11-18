@@ -12,7 +12,7 @@ public class AdminReviewResponseDto {
 
     private UUID reviewId;
     private Long userId;
-    private Long orderId;
+    private UUID orderId;
     private UUID storeId;
     private String reviewContent;
     private Short reviewRating;

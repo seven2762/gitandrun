@@ -1,11 +1,11 @@
-package com.sparta.gitandrun.order.dto.req;
+package com.sparta.gitandrun.payment.dto.req;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
-public class ReqOrderCondByCustomerDTO {
+public class ReqPaymentCondByCustomerDTO {
 
     private Store store;
     private Condition condition;
@@ -20,7 +20,6 @@ public class ReqOrderCondByCustomerDTO {
     @NoArgsConstructor
     public static class Condition {
         private String status;
-        private String type;
-        private String sort;
+        private String sortType;
     }
 }

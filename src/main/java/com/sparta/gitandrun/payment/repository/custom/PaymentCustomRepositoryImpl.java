@@ -5,11 +5,10 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.sparta.gitandrun.payment.dto.req.ReqPaymentCondByManagerDTO;
-import com.sparta.gitandrun.payment.dto.req.ReqPaymentCondDTO;
+import com.sparta.gitandrun.payment.dto.req.ReqPaymentCondByCustomerDTO;
 import com.sparta.gitandrun.payment.entity.Payment;
 import com.sparta.gitandrun.payment.entity.enums.PaymentStatus;
 import com.sparta.gitandrun.payment.entity.enums.SortType;
-import com.sparta.gitandrun.payment.entity.enums.StatusType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -21,6 +20,7 @@ import java.util.List;
 import static com.sparta.gitandrun.order.entity.QOrder.order;
 import static com.sparta.gitandrun.payment.entity.QPayment.payment;
 import static com.sparta.gitandrun.store.entity.QStore.store;
+import static org.springframework.util.StringUtils.hasText;
 
 @Repository
 @RequiredArgsConstructor
@@ -30,7 +30,7 @@ public class PaymentCustomRepositoryImpl implements PaymentCustomRepository {
 
     @Override
     public Page<Payment> findMyPaymentsWithConditions(Long userId,
-                                                      ReqPaymentCondDTO cond,
+                                                      ReqPaymentCondByCustomerDTO cond,
                                                       Pageable pageable) {
 
         List<Payment> results = queryFactory
@@ -38,11 +38,12 @@ public class PaymentCustomRepositoryImpl implements PaymentCustomRepository {
                 .join(payment.order, order).fetchJoin()
                 .join(payment.order.store, store).fetchJoin()
                 .where(
-                        deletedFalse(),
-                        userIdEq(userId),
-                        statusEq(cond.getPaymentStatus())
+                        payment.user.userId.eq(userId),
+                        payment.isDeleted.eq(false),
+                        storeNameLike(cond.getStore().getName()),
+                        statusEq(cond.getCondition().getStatus())
                 )
-                .orderBy(orderSpecifier(cond.getSortType()))
+                .orderBy(orderSpecifier(cond.getCondition().getSortType()))
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
@@ -53,22 +54,25 @@ public class PaymentCustomRepositoryImpl implements PaymentCustomRepository {
                 .join(payment.order, order).fetchJoin()
                 .join(payment.order.store, store).fetchJoin()
                 .where(
-                        userIdEq(userId),
-                        statusEq(cond.getPaymentStatus())
+                        payment.user.userId.eq(userId),
+                        payment.isDeleted.eq(false),
+                        storeNameLike(cond.getStore().getName()),
+                        statusEq(cond.getCondition().getStatus())
                 );
 
         return PageableExecutionUtils.getPage(results, pageable, countQuery::fetchOne);
     }
 
     @Override
-    public Page<Payment> findCustomerPaymentsWithConditions(ReqPaymentCondByManagerDTO cond,
-                                                            Pageable pageable) {
+    public Page<Payment> findAllPaymentsWithConditions(ReqPaymentCondByManagerDTO cond, Pageable pageable) {
 
         List<Payment> results = queryFactory
                 .selectFrom(payment)
                 .join(payment.order, order).fetchJoin()
                 .join(payment.order.store, store).fetchJoin()
                 .where(
+                        usernameLike(cond.getCustomer().getName()),
+                        storeNameLike(cond.getStore().getName()),
                         deletedEq(cond.getCondition().isDeleted()),
                         userIdEq(cond.getCustomer().getId()),
                         statusEq(cond.getCondition().getStatus())
@@ -84,6 +88,9 @@ public class PaymentCustomRepositoryImpl implements PaymentCustomRepository {
                 .join(payment.order, order).fetchJoin()
                 .join(payment.order.store, store).fetchJoin()
                 .where(
+                        usernameLike(cond.getCustomer().getName()),
+                        storeNameLike(cond.getStore().getName()),
+                        deletedEq(cond.getCondition().isDeleted()),
                         userIdEq(cond.getCustomer().getId()),
                         statusEq(cond.getCondition().getStatus())
                 );
@@ -91,26 +98,24 @@ public class PaymentCustomRepositoryImpl implements PaymentCustomRepository {
         return PageableExecutionUtils.getPage(results, pageable, countQuery::fetchOne);
     }
 
-    private BooleanExpression deletedFalse() {
-        return payment.isDeleted.eq(false);
+    private BooleanExpression usernameLike(String username) {
+        return !hasText(username) ? null : payment.user.username.containsIgnoreCase(username);
     }
 
-    private BooleanExpression deletedEq(boolean cond) {
-        return cond ? payment.isDeleted.eq(true) : payment.isDeleted.eq(false);
+    private BooleanExpression storeNameLike(String storeName) {
+        return !hasText(storeName) ? null : payment.order.store.storeName.containsIgnoreCase(storeName);
     }
 
     private BooleanExpression userIdEq(Long userId) {
-        return payment.user.userId.eq(userId);
+        return userId != null ? payment.user.userId.eq(userId) : null;
+    }
+
+    private BooleanExpression deletedEq(boolean cond) {
+        return payment.isDeleted.eq(cond);
     }
 
     private BooleanExpression statusEq(String status) {
-        StatusType statusType = StatusType.fromString(status);
-
-        return switch (statusType) {
-            case PAID -> payment.paymentStatus.eq(PaymentStatus.PAID);
-            case CANCEL -> payment.paymentStatus.eq(PaymentStatus.CANCEL);
-            case ALL -> payment.paymentStatus.in(PaymentStatus.PAID, PaymentStatus.CANCEL);
-        };
+        return status != null ? payment.paymentStatus.eq(PaymentStatus.fromString(status)) : null;
     }
 
     private OrderSpecifier<?> orderSpecifier(String order) {

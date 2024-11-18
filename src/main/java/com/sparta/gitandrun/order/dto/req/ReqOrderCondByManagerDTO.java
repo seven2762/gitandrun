@@ -5,9 +5,10 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
-public class ReqOrderCondByCustomerDTO {
+public class ReqOrderCondByManagerDTO {
 
     private Store store;
+    private Customer customer;
     private Condition condition;
 
     @Getter
@@ -18,9 +19,16 @@ public class ReqOrderCondByCustomerDTO {
 
     @Getter
     @NoArgsConstructor
+    public static class Customer {
+        private String name;
+    }
+
+    @Getter
+    @NoArgsConstructor
     public static class Condition {
         private String status;
         private String type;
         private String sort;
+        private boolean deleted;
     }
 }
