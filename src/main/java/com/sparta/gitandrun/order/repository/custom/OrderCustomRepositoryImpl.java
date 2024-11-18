@@ -39,7 +39,7 @@ public class OrderCustomRepositoryImpl implements OrderCustomRepository {
                 .from(order)
                 .where(
                         order.user.userId.eq(userId),
-                        deletedFalse(),
+                        order.isDeleted.eq(false),
                         storeNameLike(cond.getStore().getName()),
                         statusEq(cond.getCondition().getStatus()),
                         typeEq(cond.getCondition().getType())
@@ -56,7 +56,7 @@ public class OrderCustomRepositoryImpl implements OrderCustomRepository {
                 .from(order)
                 .where(
                         order.user.userId.eq(userId),
-                        deletedFalse(),
+                        order.isDeleted.eq(false),
                         statusEq(cond.getCondition().getStatus()),
                         typeEq(cond.getCondition().getType())
                 );
@@ -70,7 +70,7 @@ public class OrderCustomRepositoryImpl implements OrderCustomRepository {
         List<Order> results = queryFactory
                 .selectFrom(order)
                 .where(
-                        deletedFalse(),
+                        order.isDeleted.eq(false),
                         usernameLike(cond.getCustomer().getName()),
                         storeIdOrUserIdEq(userId, cond.getStore().getId()),
                         statusEq(cond.getCondition().getStatus()),
@@ -87,7 +87,8 @@ public class OrderCustomRepositoryImpl implements OrderCustomRepository {
                 .select(order.count())
                 .from(order)
                 .where(
-                        deletedFalse(),
+                        order.isDeleted.eq(false),
+                        usernameLike(cond.getCustomer().getName()),
                         storeIdOrUserIdEq(userId, cond.getStore().getId()),
                         statusEq(cond.getCondition().getStatus()),
                         typeEq(cond.getCondition().getType())
@@ -137,10 +138,6 @@ public class OrderCustomRepositoryImpl implements OrderCustomRepository {
         } else {
             return order.store.user.userId.eq(userId);
         }
-    }
-
-    private BooleanExpression deletedFalse() {
-        return order.isDeleted.eq(false);
     }
 
     private BooleanExpression usernameLike(String username) {

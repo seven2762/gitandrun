@@ -38,9 +38,9 @@ public class PaymentCustomRepositoryImpl implements PaymentCustomRepository {
                 .join(payment.order, order).fetchJoin()
                 .join(payment.order.store, store).fetchJoin()
                 .where(
-                        deletedFalse(),
+                        payment.user.userId.eq(userId),
+                        payment.isDeleted.eq(false),
                         storeNameLike(cond.getStore().getName()),
-                        userIdEq(userId),
                         statusEq(cond.getCondition().getStatus())
                 )
                 .orderBy(orderSpecifier(cond.getCondition().getSortType()))
@@ -54,9 +54,9 @@ public class PaymentCustomRepositoryImpl implements PaymentCustomRepository {
                 .join(payment.order, order).fetchJoin()
                 .join(payment.order.store, store).fetchJoin()
                 .where(
-                        deletedFalse(),
+                        payment.user.userId.eq(userId),
+                        payment.isDeleted.eq(false),
                         storeNameLike(cond.getStore().getName()),
-                        userIdEq(userId),
                         statusEq(cond.getCondition().getStatus())
                 );
 
@@ -96,10 +96,6 @@ public class PaymentCustomRepositoryImpl implements PaymentCustomRepository {
                 );
 
         return PageableExecutionUtils.getPage(results, pageable, countQuery::fetchOne);
-    }
-
-    private BooleanExpression deletedFalse() {
-        return payment.isDeleted.eq(false);
     }
 
     private BooleanExpression usernameLike(String username) {
