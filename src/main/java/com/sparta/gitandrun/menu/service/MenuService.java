@@ -7,7 +7,6 @@ import com.sparta.gitandrun.menu.entity.Menu;
 import com.sparta.gitandrun.menu.repository.MenuRepository;
 import com.sparta.gitandrun.store.entity.Store;
 import com.sparta.gitandrun.store.repository.StoreRepository;
-import com.sparta.gitandrun.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -25,7 +24,6 @@ public class MenuService {
 
     private final MenuRepository menuRepository;
     private final StoreRepository storeRepository;
-    private final UserRepository userRepository;
 
     //CREATE
     public MenuResponseDto createMenu(MenuRequestDto requestDto) {
@@ -128,9 +126,8 @@ public class MenuService {
     }
 
     private Store findStoreId(UUID storeId){
-        Store whatStore = storeRepository.findById(storeId)
+        return storeRepository.findById(storeId)
                 .orElseThrow(() -> new IllegalArgumentException("가게를 찾을 수 없습니다."));
-        return whatStore;
     }
 
 }

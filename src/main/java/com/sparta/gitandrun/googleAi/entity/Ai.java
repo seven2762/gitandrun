@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
@@ -24,8 +25,11 @@ public class Ai {
 
     private String answer;
 
+    private LocalDateTime createdAt;
+
     public Ai(AiDto aiDto){
         this.question = aiDto.getQuestion();
         this.answer = aiDto.getAnswer();
+        this.createdAt = LocalDateTime.now();
     }
 }
