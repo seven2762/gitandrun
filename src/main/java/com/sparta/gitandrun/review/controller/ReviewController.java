@@ -109,12 +109,22 @@ public class ReviewController {
     }
 
     //리뷰 삭제
-    @DeleteMapping("{reviewId}")
+    @DeleteMapping("/{reviewId}")
     public ResponseEntity<ApiResDto> deleteReview(
             @PathVariable UUID reviewId,
             @AuthenticationPrincipal UserDetailsImpl userDetails) {
         reviewService.deleteReview(reviewId, userDetails);
         return ResponseEntity.ok().body(new ApiResDto("리뷰 삭제 완료", HttpStatus.OK.value()));
+    }
+
+    //관리자 - 삭제된 리뷰 복구
+    @Secured({"ROLE_MANAGER", "ROLE_ADMIN"})
+    @PatchMapping("/admin/restore/{reviewId}")
+    public ApiResDto restoreReview(
+            @PathVariable UUID reviewId,
+            @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        reviewService.restoreReview(reviewId, userDetails);
+        return new ApiResDto("리뷰 복구 성공", 200);
     }
 }
 

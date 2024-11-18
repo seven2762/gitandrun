@@ -66,4 +66,11 @@ public class Review extends BaseEntity {
         this.setDeletedAt(LocalDateTime.now());
         this.setDeletedBy(user.getUsername());
     }
+
+    public void restoreReview(User user) {
+        this.isDeleted = false;
+        this.setDeletedAt(null);
+        this.setDeletedBy(null);
+        this.setUpdatedBy(user.getUsername());
+    }
 }

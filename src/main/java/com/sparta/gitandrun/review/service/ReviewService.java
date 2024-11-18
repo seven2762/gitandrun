@@ -90,7 +90,7 @@ public class ReviewService {
         return reviews.map(UserReviewResponseDto::new);
     }
 
-    // CUSTOEMR, OWNER - 본인이 작성한 리뷰 조회
+    // CUSTOEMR: 본인이 작성한 리뷰 조회
     @Transactional(readOnly = true)
     public Page<UserReviewResponseDto> getMyReviewsByUserId(Long userId, int page, int size, String sortBy) {
         Pageable pageable = pageable(page, size, sortBy, false);
@@ -152,6 +152,19 @@ public class ReviewService {
         review.softDelete(userDetails.getUser());
     }
 
+    //관리자 - 삭제된 리뷰 복구
+    @Transactional
+    public void restoreReview(UUID reviewId, UserDetailsImpl userDetails) {
+        Review review = getReview(reviewId);
+
+        // 삭제 여부 확인
+        if (!review.isDeleted()) {
+            throw new IllegalArgumentException("삭제되지 않은 리뷰입니다.");
+        }
+
+        review.restoreReview(userDetails.getUser());
+    }
+
     //----------------------------------------------------------------
 
     //리뷰 확인
@@ -163,7 +176,7 @@ public class ReviewService {
     // 리뷰가 비어있는지 확인
     private void reviewEmpty(Page<Review> reviews) {
         if (reviews.isEmpty()) {
-            throw new IllegalArgumentException("리뷰가 존재하지 않습니다.");
+            throw new IllegalArgumentException("리뷰가 없습니다.");
         }
     }
 
