@@ -87,6 +87,17 @@ public class MenuService {
         return menuList.map(menu -> new MenuResponseDto(menu));
     }
 
+    //하나의 가게에 있는 모든 삭제된 메뉴 검색
+    @Transactional(readOnly = true)
+    public Page<MenuResponseDto> getDetailDeletedMenu(UUID storeId, String sortBy, int page, int size) {
+        int realSize = ConfirmPageSize(size);
+        findStoreId(storeId);
+        Pageable pageable = PageRequest.of(page, realSize, Sort.by(sortBy).ascending());
+        Page<Menu> menuList = menuRepository.findAllByStoreIdDeleted(storeId, pageable);
+
+        return menuList.map(menu -> new MenuResponseDto(menu));
+    }
+
     //메뉴를 검색시 가게와 가게의 메뉴이름, 메뉴내용 검색
     @Transactional(readOnly = true)
     public Page<StoreWithMenusDto> getStoreAndMenus(String storeName, String sortBy, int page, int size) {
