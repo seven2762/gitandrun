@@ -13,6 +13,7 @@ import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.List;
 
 
@@ -67,8 +68,7 @@ public class AiService {
             jsonNode = objectMapper.readTree(response.body().string());
              }
         catch (IOException e) {
-            throw new RuntimeException("" +
-                    "잘못된 Response 입니다.");
+            throw new RuntimeException("잘못된 Response 입니다.");
         }
 
         String answer = jsonNode.path("candidates")
@@ -90,5 +90,11 @@ public class AiService {
         return aiRepository.findAll().stream()
                 .map(AiDto::new)
                 .toList();
+    }
+
+    @Transactional
+    public void deleteOldQuestion(){
+        LocalDateTime old = LocalDateTime.now().minusDays(14); // old는 현재보다 14일 이전
+        aiRepository.deleteOlder(old);
     }
 }
