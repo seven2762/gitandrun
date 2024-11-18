@@ -3,6 +3,7 @@ package com.sparta.gitandrun.user.controller;
 
 import com.sparta.gitandrun.common.entity.ApiResDto;
 import com.sparta.gitandrun.user.dto.request.SignUpReqDTO;
+import com.sparta.gitandrun.user.dto.request.UserChangeNicknameReqDto;
 import com.sparta.gitandrun.user.dto.request.UserChangePasswordReqDto;
 import com.sparta.gitandrun.user.dto.request.UserSearchReqDto;
 import com.sparta.gitandrun.user.dto.response.*;
@@ -45,6 +46,12 @@ public class UserController {
     ) {
         userService.changePassword(userDetails, request);
         return ResponseEntity.ok(new ApiResDto("비밀번호가 성공적으로 변경되었습니다." , 200));
+    }
+    @Secured({"ROLE_CUSTOMER", "ROLE_OWNER"})
+    @PutMapping("/nickname")
+    public ResponseEntity<ApiResDto> changeNickname(@AuthenticationPrincipal UserDetailsImpl userDetails, @Valid @RequestBody UserChangeNicknameReqDto request) {
+        userService.changeNickname(userDetails, request);
+        return ResponseEntity.ok(new ApiResDto("닉네임이 성공적으로 변경되었습니다.", 200));
     }
 
     @Secured({"ROLE_ADMIN", "ROLE_MANAGER"})
