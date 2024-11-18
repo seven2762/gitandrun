@@ -22,6 +22,7 @@ import java.util.UUID;
 
 import static com.sparta.gitandrun.order.entity.QOrder.order;
 import static com.sparta.gitandrun.order.entity.QOrderMenu.orderMenu;
+import static org.springframework.util.StringUtils.hasText;
 
 @Repository
 @RequiredArgsConstructor
@@ -37,6 +38,7 @@ public class OrderCustomRepositoryImpl implements OrderCustomRepository {
                 .from(order)
                 .where(
                         deletedFalse(),
+                        usernameLike(cond.getCustomer().getName()),
                         storeIdOrUserIdEq(userId, cond.getStore().getId()),
                         statusEq(cond.getCondition().getStatus()),
                         typeEq(cond.getCondition().getType())
@@ -70,6 +72,7 @@ public class OrderCustomRepositoryImpl implements OrderCustomRepository {
                 .where(
                         order.user.userId.eq(userId),
                         deletedFalse(),
+                        storeNameLike(cond.getStore().getName()),
                         statusEq(cond.getCondition().getStatus()),
                         typeEq(cond.getCondition().getType())
                 )
@@ -105,6 +108,14 @@ public class OrderCustomRepositoryImpl implements OrderCustomRepository {
 
     private BooleanExpression deletedFalse() {
         return order.isDeleted.eq(false);
+    }
+
+    private BooleanExpression usernameLike(String username) {
+        return !hasText(username) ? null : order.user.username.containsIgnoreCase(username);
+    }
+
+    private BooleanExpression storeNameLike(String storeName) {
+        return !hasText(storeName) ? null : order.store.storeName.containsIgnoreCase(storeName);
     }
 
     private BooleanExpression statusEq(String status) {

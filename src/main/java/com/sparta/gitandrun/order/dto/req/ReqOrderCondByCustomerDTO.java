@@ -7,7 +7,14 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ReqOrderCondByCustomerDTO {
 
+    private Store store;
     private Condition condition;
+
+    @Getter
+    @NoArgsConstructor
+    public static class Store {
+        private String name;
+    }
 
     @Getter
     @NoArgsConstructor
