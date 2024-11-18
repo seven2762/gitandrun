@@ -71,7 +71,8 @@ public class ResPaymentGetByManagerDTO {
             @AllArgsConstructor
             @JsonInclude(JsonInclude.Include.NON_NULL)
             private static class PaymentDTO {
-                private Long paymentId;
+
+                private UUID paymentId;
                 private Customer customer;
                 private int paymentPrice;
                 private String paymentStatus;

@@ -51,7 +51,7 @@ public class ResOrderGetByCustomerDTO {
         @AllArgsConstructor
         public static class OrderDTO {
 
-            private Long orderId;
+            private UUID orderId;
             private String status;
             private String type;
             private LocalDateTime createdAt;
@@ -92,13 +92,13 @@ public class ResOrderGetByCustomerDTO {
             @AllArgsConstructor
             public static class OrderMenuDTO {
 
-                private Long orderMenuId;
+                private UUID orderMenuId;
                 private UUID menuId;
                 private String menuName;
                 private int menuPrice;
                 private int count;
 
-                private static Map<Long, List<OrderMenuDTO>> from(List<OrderMenu> orderMenus) {
+                private static Map<UUID, List<OrderMenuDTO>> from(List<OrderMenu> orderMenus) {
                     return orderMenus.stream()
                             .collect(Collectors.groupingBy(
                                     orderMenu -> orderMenu.getOrder().getId(),

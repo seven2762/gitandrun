@@ -18,6 +18,8 @@ import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.UUID;
+
 @RequestMapping("/order")
 @RestController
 @RequiredArgsConstructor
@@ -81,7 +83,7 @@ public class OrderController {
         주문 단일 및 상세 조회
     */
     @GetMapping("/{orderId}")
-    public ResponseEntity<ResDto<ResOrderGetByIdDTO>> readById(@PathVariable("orderId") Long orderId) {
+    public ResponseEntity<ResDto<ResOrderGetByIdDTO>> readById(@PathVariable("orderId") UUID orderId) {
         return orderService.readById(orderId);
     }
 
@@ -92,7 +94,7 @@ public class OrderController {
     @Secured({"ROLE_CUSTOMER", "ROLE_MANAGER"})
     @PatchMapping("/{orderId}/cancel")
     public ResponseEntity<ApiResDto> cancelOrder(@AuthenticationPrincipal UserDetailsImpl userDetails,
-                                                 @PathVariable("orderId") Long orderId) {
+                                                 @PathVariable("orderId") UUID orderId) {
 
         orderService.cancelOrder(userDetails.getUser(), orderId);
 
@@ -106,7 +108,7 @@ public class OrderController {
     @Secured({"ROLE_OWNER", "ROLE_MANAGER"})
     @PatchMapping("/{orderId}/reject")
     public ResponseEntity<ApiResDto> rejectOrder(@AuthenticationPrincipal UserDetailsImpl userDetails,
-                                                 @PathVariable("orderId") Long orderId) {
+                                                 @PathVariable("orderId") UUID orderId) {
 
         orderService.rejectOrder(userDetails.getUser(), orderId);
 
@@ -120,7 +122,7 @@ public class OrderController {
     @Secured("ROLE_ADMIN")
     @DeleteMapping("/{orderId}")
     public ResponseEntity<ApiResDto> deleteOrder(@AuthenticationPrincipal UserDetailsImpl userDetails,
-                                                 @PathVariable("orderId") Long orderId) {
+                                                 @PathVariable("orderId") UUID orderId) {
 
         orderService.deleteOrder(userDetails.getUser(), orderId);
 

@@ -37,7 +37,7 @@ public class ReviewController {
     public ResponseEntity<ApiResDto> createReview(
             @AuthenticationPrincipal UserDetailsImpl userDetails,
             @RequestBody @Valid ReviewRequestDto requestDto,
-            @PathVariable Long orderId) {
+            @PathVariable UUID orderId) {
         Long userId = userDetails.getUser().getUserId();
         reviewService.createReview(requestDto, userId, orderId);
         return ResponseEntity.ok().body(new ApiResDto("리뷰 작성 완료", HttpStatus.OK.value()));

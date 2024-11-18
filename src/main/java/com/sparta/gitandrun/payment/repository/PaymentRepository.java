@@ -7,12 +7,13 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.Optional;
+import java.util.UUID;
 
-public interface PaymentRepository extends JpaRepository<Payment, Long>, PaymentCustomRepository {
+public interface PaymentRepository extends JpaRepository<Payment, UUID>, PaymentCustomRepository {
 
     @Query("select p from Payment p where p.id = :paymentId and p.paymentStatus = 'PAID'")
-    Optional<Payment> findPaidPaymentById(@Param("paymentId") Long paymentId);
+    Optional<Payment> findPaidPaymentById(@Param("paymentId") UUID paymentId);
 
     @Query("select p from Payment p where p.id = :paymentId and p.user.userId = :userId and p.paymentStatus = 'PAID'")
-    Optional<Payment> findPaidPaymentByIdAndUserId(@Param("paymentId") Long paymentId, @Param("userId") Long userId);
+    Optional<Payment> findPaidPaymentByIdAndUserId(@Param("paymentId") UUID paymentId, @Param("userId") Long userId);
 }

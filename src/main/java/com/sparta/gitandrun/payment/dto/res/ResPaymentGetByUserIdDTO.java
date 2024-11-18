@@ -73,7 +73,7 @@ public class ResPaymentGetByUserIdDTO {
             @JsonInclude(JsonInclude.Include.NON_NULL)
             private static class PaymentDTO {
 
-                private Long paymentId;
+                private UUID paymentId;
                 private int paymentPrice;
                 private String paymentStatus;
                 private LocalDateTime createdAt;

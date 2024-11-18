@@ -21,6 +21,8 @@ import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.UUID;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/pay")
@@ -74,7 +76,7 @@ public class PaymentController {
         결제 상세 조회
     */
     @GetMapping("/{paymentId}")
-    public ResponseEntity<ResDto<ResPaymentGetByIdDTO>> readPayment(@PathVariable("paymentId")Long paymentId) {
+    public ResponseEntity<ResDto<ResPaymentGetByIdDTO>> readPayment(@PathVariable("paymentId") UUID paymentId) {
         return paymentService.getBy(paymentId);
     }
 
@@ -86,7 +88,7 @@ public class PaymentController {
     @Secured({"ROLE_CUSTOMER", "ROLE_MANAGER"})
     @PatchMapping("/{paymentId}")
     public ResponseEntity<ApiResDto> cancelPayment(@AuthenticationPrincipal UserDetailsImpl userDetails,
-                                                   @PathVariable("paymentId")Long paymentId) {
+                                                   @PathVariable("paymentId")UUID paymentId) {
 
         paymentService.cancelPayment(userDetails.getUser(), paymentId);
 
@@ -100,7 +102,7 @@ public class PaymentController {
     @Secured("ROLE_ADMIN")
     @DeleteMapping("/{paymentId}")
     public ResponseEntity<ApiResDto> deletePayment(@AuthenticationPrincipal UserDetailsImpl userDetails,
-                                                   @PathVariable("paymentId")Long paymentId) {
+                                                   @PathVariable("paymentId")UUID paymentId) {
 
         paymentService.deletePayment(userDetails.getUser(), paymentId);
 
