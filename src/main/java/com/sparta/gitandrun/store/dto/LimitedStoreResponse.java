@@ -16,7 +16,6 @@ public class LimitedStoreResponse {
     private String address;
     private String addressDetail;
     private String zipCode;
-    private Long userId;
     private Double averageRating;
 
     public LimitedStoreResponse(Store store, Double averageRating) {
@@ -27,7 +26,6 @@ public class LimitedStoreResponse {
         this.address = store.getAddress().getAddress();  // Address 필드 사용
         this.addressDetail = store.getAddress().getAddressDetail();  // Address 필드 사용
         this.zipCode = store.getAddress().getZipCode();  // Address 필드 사용
-        this.userId = store.getUser().getUserId();
         this.averageRating = averageRating != null
                 ? BigDecimal.valueOf(averageRating).setScale(2, RoundingMode.HALF_UP).doubleValue()
                 : null;    }
