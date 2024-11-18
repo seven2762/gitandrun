@@ -76,7 +76,10 @@ public class User extends BaseEntity {
         this.password = password;
         this.initAuditInfo(this);
     }
-
+    public void changeNickname(String nickname) {
+        this.nickName = nickname;
+        this.initAuditInfo(this);
+    }
     public void softDelete() {
         this.isDeleted = true;
     }

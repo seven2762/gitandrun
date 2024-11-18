@@ -1,6 +1,7 @@
 package com.sparta.gitandrun.user.service;
 
 import com.sparta.gitandrun.user.dto.request.SignUpReqDTO;
+import com.sparta.gitandrun.user.dto.request.UserChangeNicknameReqDto;
 import com.sparta.gitandrun.user.dto.request.UserChangePasswordReqDto;
 import com.sparta.gitandrun.user.dto.request.UserSearchReqDto;
 import com.sparta.gitandrun.user.dto.response.*;
@@ -35,12 +36,20 @@ public class UserService {
 
     @Transactional
     public SignUpResDTO signUp(SignUpReqDTO signUpReqDTO) {
-        
+
         validateDuplicateUser(signUpReqDTO);
+        validateDuplicateNickname(signUpReqDTO.getNickName()); // 회원가입시에는 현재 닉네임이 없으므로 null
+
         Role role = validateAndGetRole(signUpReqDTO.getRole());
         User user = User.createUser(signUpReqDTO, role, passwordEncoder);
         userRepository.save(user);
         return SignUpResDTO.from("good~!");
+    }
+    //닉네임 중복확인
+    private void validateDuplicateNickname(String nickname) {
+        if (userRepository.findByNickName(nickname).isPresent()) {
+            throw new UserException(ErrorCode.DUPLICATE_NICKNAME);
+        }
     }
 
     public Role validateAndGetRole(Role requestRole) {
@@ -71,6 +80,7 @@ public class UserService {
         }
     }
 
+
     @Transactional
     public void softDeleteUser(String phone) {
         User user = userRepository.findActiveUserByPhone(phone)
@@ -86,6 +96,17 @@ public class UserService {
         request.validate(userDetails.getUser(), passwordEncoder);
         // 영속 상태의 엔티티 수정 -> 더티체킹 동작
         user.changePassword(passwordEncoder.encode(request.getNewPassword()));
+    }
+
+    @Transactional
+    public void changeNickname(UserDetailsImpl userDetails, UserChangeNicknameReqDto request) {
+        User user = userRepository.findById(userDetails.getUser().getUserId())
+                .orElseThrow(() -> new UserException(ErrorCode.USER_NOT_FOUND));
+        if (request.getNewNickname().equals(user.getNickName())) {
+            throw new UserException(ErrorCode.SAME_NICKNAME);
+        }
+        validateDuplicateNickname(request.getNewNickname());
+        user.changeNickname(request.getNewNickname());
     }
 
 
