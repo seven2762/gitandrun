@@ -193,12 +193,21 @@ public class ReviewService {
         }
     }
 
-    // CUSTOMER 권한 확인
+    // 수정, 삭제 권한 확인
     private void checkPermission(Review review, Long userId, Role role) {
-        if (role.equals(Role.CUSTOMER)) {
+        // 관리자는 모든 리뷰 수정 가능
+        if (role.equals(Role.ADMIN) || role.equals(Role.MANAGER)) {
+        }
+
+        // 고객은 본인 리뷰만 가능
+        else if (role.equals(Role.CUSTOMER)) {
             if (!review.getUser().getUserId().equals(userId)) {
                 throw new IllegalArgumentException("본인의 리뷰만 가능합니다.");
             }
+        }
+        // 나머지는 수정 불가
+        else {
+            throw new IllegalArgumentException("권한이 없습니다.");
         }
     }
 
