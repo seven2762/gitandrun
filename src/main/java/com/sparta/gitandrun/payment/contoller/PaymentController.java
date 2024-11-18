@@ -6,6 +6,7 @@ import com.sparta.gitandrun.payment.dto.req.ReqPaymentCondByManagerDTO;
 import com.sparta.gitandrun.payment.dto.req.ReqPaymentCondByCustomerDTO;
 import com.sparta.gitandrun.payment.dto.req.ReqPaymentPostDTO;
 import com.sparta.gitandrun.payment.dto.res.ResPaymentGetByIdDTO;
+import com.sparta.gitandrun.payment.dto.res.ResPaymentGetByManagerDTO;
 import com.sparta.gitandrun.payment.dto.res.ResPaymentGetByUserIdDTO;
 import com.sparta.gitandrun.payment.service.PaymentService;
 import com.sparta.gitandrun.user.security.UserDetailsImpl;
@@ -49,10 +50,10 @@ public class PaymentController {
 
     @Secured({"ROLE_MANAGER", "ROLE_ADMIN"})
     @GetMapping("/manager")
-    public ResponseEntity<ResDto<ResPaymentGetByUserIdDTO>> readPayment(@RequestBody ReqPaymentCondByManagerDTO condition,
-                                                                        @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+    public ResponseEntity<ResDto<ResPaymentGetByManagerDTO>> readPayment(@RequestBody ReqPaymentCondByManagerDTO cond,
+                                                                         @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
 
-        return paymentService.getByManager(condition, pageable);
+        return paymentService.getByManager(cond, pageable);
     }
 
 

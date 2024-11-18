@@ -9,6 +9,7 @@ import com.sparta.gitandrun.payment.dto.req.ReqPaymentCondByManagerDTO;
 import com.sparta.gitandrun.payment.dto.req.ReqPaymentCondByCustomerDTO;
 import com.sparta.gitandrun.payment.dto.req.ReqPaymentPostDTO;
 import com.sparta.gitandrun.payment.dto.res.ResPaymentGetByIdDTO;
+import com.sparta.gitandrun.payment.dto.res.ResPaymentGetByManagerDTO;
 import com.sparta.gitandrun.payment.dto.res.ResPaymentGetByUserIdDTO;
 import com.sparta.gitandrun.payment.entity.Payment;
 import com.sparta.gitandrun.payment.repository.PaymentRepository;
@@ -64,15 +65,15 @@ public class PaymentService {
         매니저 결제 목록 조회
     */
     @Transactional(readOnly = true)
-    public ResponseEntity<ResDto<ResPaymentGetByUserIdDTO>> getByManager(ReqPaymentCondByManagerDTO condition, Pageable pageable) {
+    public ResponseEntity<ResDto<ResPaymentGetByManagerDTO>> getByManager(ReqPaymentCondByManagerDTO cond, Pageable pageable) {
 
-        Page<Payment> findPaymentPage = paymentRepository.findAllPaymentsWithConditions(condition, pageable);
+        Page<Payment> findPaymentPage = paymentRepository.findAllPaymentsWithConditions(cond, pageable);
 
         return new ResponseEntity<>(
-                ResDto.<ResPaymentGetByUserIdDTO>builder()
+                ResDto.<ResPaymentGetByManagerDTO>builder()
                         .code(HttpStatus.OK.value())
                         .message("결제 목록 조회에 성공했습니다.")
-                        .data(ResPaymentGetByUserIdDTO.of(findPaymentPage))
+                        .data(ResPaymentGetByManagerDTO.of(findPaymentPage))
                         .build(),
                 HttpStatus.OK
         );
