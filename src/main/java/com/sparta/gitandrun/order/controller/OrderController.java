@@ -20,7 +20,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
-@RequestMapping("/order")
 @RestController
 @RequiredArgsConstructor
 public class OrderController {
@@ -31,7 +30,7 @@ public class OrderController {
         주문 생성
     */
     @Secured("ROLE_CUSTOMER")
-    @PostMapping
+    @PostMapping("/orders")
     public ResponseEntity<ApiResDto> createOrder(@AuthenticationPrincipal UserDetailsImpl userDetails,
                                                  @RequestBody ReqOrderPostDTO dto) {
 
@@ -45,7 +44,7 @@ public class OrderController {
        - 유저 본인의 주문 내역을 조회할 수 있음.
    */
     @Secured("ROLE_CUSTOMER")
-    @GetMapping("/customer")
+    @PostMapping("/customer/orders/search")
     public ResponseEntity<ResDto<ResOrderGetByCustomerDTO>> readByCustomer(@AuthenticationPrincipal UserDetailsImpl userDetails,
                                                                            @RequestBody ReqOrderCondByCustomerDTO cond,
                                                                            @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
@@ -58,7 +57,7 @@ public class OrderController {
       - 사장 권한의 유저가 본인 가게의 전체 주문 내역을 조회할 수 있음.
     */
     @Secured("ROLE_OWNER")
-    @GetMapping("/owner")
+    @PostMapping("/owner/orders/search")
     public ResponseEntity<ResDto<ResOrderGetByOwnerDTO>> readByOwner(@AuthenticationPrincipal UserDetailsImpl userDetails,
                                                                      @RequestBody ReqOrderCondByOwnerDTO cond,
                                                                      @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
@@ -72,7 +71,7 @@ public class OrderController {
          - 조회 간 가게 이름별 / 고객 이름별 조회 가능
     */
     @Secured({"ROLE_MANAGER", "ROLE_ADMIN"})
-    @GetMapping("/manager")
+    @PostMapping("/manager/orders/search")
     public ResponseEntity<ResDto<ResOrderGetByManagerDTO>> readByManager(@RequestBody ReqOrderCondByManagerDTO cond,
                                                                          @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
 
@@ -82,7 +81,7 @@ public class OrderController {
     /*
         주문 단일 및 상세 조회
     */
-    @GetMapping("/{orderId}")
+    @GetMapping("/orders/{orderId}")
     public ResponseEntity<ResDto<ResOrderGetByIdDTO>> readById(@PathVariable("orderId") UUID orderId) {
         return orderService.readById(orderId);
     }
@@ -92,7 +91,7 @@ public class OrderController {
        - 고객과 매니저만이 주문을 취소할 수 있다.
    */
     @Secured({"ROLE_CUSTOMER", "ROLE_MANAGER"})
-    @PatchMapping("/{orderId}/cancel")
+    @PatchMapping("/orders/{orderId}/cancel")
     public ResponseEntity<ApiResDto> cancelOrder(@AuthenticationPrincipal UserDetailsImpl userDetails,
                                                  @PathVariable("orderId") UUID orderId) {
 
@@ -106,7 +105,7 @@ public class OrderController {
        - 사장과 매니저가 주문을 취소할 수 있다.
    */
     @Secured({"ROLE_OWNER", "ROLE_MANAGER"})
-    @PatchMapping("/{orderId}/reject")
+    @PatchMapping("/orders/{orderId}/reject")
     public ResponseEntity<ApiResDto> rejectOrder(@AuthenticationPrincipal UserDetailsImpl userDetails,
                                                  @PathVariable("orderId") UUID orderId) {
 
@@ -120,7 +119,7 @@ public class OrderController {
         - 어드민은 주문을 삭제할 수 있다.
     */
     @Secured("ROLE_ADMIN")
-    @DeleteMapping("/{orderId}")
+    @DeleteMapping("/orders/{orderId}")
     public ResponseEntity<ApiResDto> deleteOrder(@AuthenticationPrincipal UserDetailsImpl userDetails,
                                                  @PathVariable("orderId") UUID orderId) {
 
