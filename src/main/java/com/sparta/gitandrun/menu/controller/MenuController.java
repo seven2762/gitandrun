@@ -12,7 +12,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
-import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -43,7 +42,7 @@ public class MenuController {
     @DeleteMapping("/{menuId}")
     public ResponseEntity<ApiResDto> deleteMenu(@PathVariable("menuId") UUID menuId){
         menuService.deleteMenu(menuId);
-        return ResponseEntity.ok().body(new ApiResDto("삭제 완료", HttpStatus.OK.value()));
+        return ResponseEntity.ok().body(new ApiResDto("메뉴 삭제 완료", HttpStatus.OK.value()));
     }
 
     //READ
@@ -55,11 +54,11 @@ public class MenuController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size){
         Page<MenuResponseDto> AllMenuPage = menuService.getAllMenus(sortBy, page, size);
-        return ResponseEntity.ok().body(new ApiResDto("가게에 대한 구체적인 메뉴 검색 완료", HttpStatus.OK.value(), AllMenuPage));
+        return ResponseEntity.ok().body(new ApiResDto("메뉴에 대한 구체적인 정보 검색 완료", HttpStatus.OK.value(), AllMenuPage));
     }
 
       //READ
-      //StoreId에 해당하는 모든 메뉴에 대한 필드 조회
+      //StoreId에 해당하는 모든 메뉴에 대한 필드 조회 ( not Deleted)
       @Secured({"ROLE_OWNER","ROLE_MANAGER","ROLE_ADMIN"})
       @GetMapping("/search/{storeId}")
       public ResponseEntity<ApiResDto> getDetailMenu(
@@ -72,20 +71,33 @@ public class MenuController {
       }
 
     //READ
+    //StoreId에 해당하는 모든 삭제된 메뉴에 대한 필드 조회 (Deleted)
+    @Secured({"ROLE_OWNER","ROLE_MANAGER","ROLE_ADMIN"})
+    @GetMapping("/search/deleted/{storeId}")
+    public ResponseEntity<ApiResDto> getDetailDeletedMenu(
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @PathVariable UUID storeId){
+        Page<MenuResponseDto> DetailMenus = menuService.getDetailDeletedMenu(storeId, sortBy, page, size);
+        return ResponseEntity.ok().body(new ApiResDto("가게에서 삭제된 메뉴 검색 완료", HttpStatus.OK.value(), DetailMenus));
+    }
+
+    //READ
     //가게 이름에 메뉴명이 들어가는 가게 검색 및 가게의 메뉴를 모두 조회
     @GetMapping("/search/store")
     public ResponseEntity<ApiResDto> getStoreAndMenus(
             @RequestParam String storeName,
             @RequestParam(defaultValue = "createdAt") String sortBy,
-            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
-        Page<StoreWithMenusDto> StoreAndMenu = menuService.getStoreAndMenus(storeName, sortBy, page-1, size);
+        Page<StoreWithMenusDto> StoreAndMenu = menuService.getStoreAndMenus(storeName, sortBy, page, size);
         return ResponseEntity.ok().body(new ApiResDto("메뉴명으로 가게 검색 완료", HttpStatus.OK.value(), StoreAndMenu));
     }
 
     //READ ony One
     @GetMapping("/{menuid}")
-    @Secured({"ROLE_MANAGER","ROLE_ADMIN"})
+    @Secured({"ROLE_MANAGER","ROLE_ADMIN", "ROLE_OWNER"})
     public MenuResponseDto getOneMenu(@PathVariable("menuid") UUID menuId){
         return menuService.getOneMenu(menuId);
     }
