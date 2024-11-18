@@ -54,7 +54,7 @@ public class MenuController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size){
         Page<MenuResponseDto> AllMenuPage = menuService.getAllMenus(sortBy, page, size);
-        return ResponseEntity.ok().body(new ApiResDto("가게에 대한 구체적인 메뉴 검색 완료", HttpStatus.OK.value(), AllMenuPage));
+        return ResponseEntity.ok().body(new ApiResDto("메뉴에 대한 구체적인 정보 검색 완료", HttpStatus.OK.value(), AllMenuPage));
     }
 
       //READ
