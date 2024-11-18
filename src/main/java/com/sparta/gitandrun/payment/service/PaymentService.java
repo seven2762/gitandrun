@@ -33,6 +33,9 @@ public class PaymentService {
     private final OrderRepository orderRepository;
     private final OrderMenuRepository orderMenuRepository;
 
+    /*
+        결제 생성
+    */
     @Transactional
     public void createPayment(User user, ReqPaymentPostDTO dto) {
 
@@ -62,7 +65,7 @@ public class PaymentService {
     }
 
     /*
-        매니저 결제 목록 조회
+        MANAGER, ADMIN 결제 목록 전체 조회
     */
     @Transactional(readOnly = true)
     public ResponseEntity<ResDto<ResPaymentGetByManagerDTO>> getByManager(ReqPaymentCondByManagerDTO cond, Pageable pageable) {
@@ -79,6 +82,10 @@ public class PaymentService {
         );
     }
 
+
+    /*
+         결제 상세 조회
+    */
     @Transactional(readOnly = true)
     public ResponseEntity<ResDto<ResPaymentGetByIdDTO>> getBy(Long paymentId) {
 
@@ -98,7 +105,7 @@ public class PaymentService {
 
 
     /*
-        결제 취소
+        MANAGER, ADMIN 결제 취소
     */
     @Transactional
     public void cancelPayment(User user, Long paymentId) {
@@ -111,6 +118,9 @@ public class PaymentService {
         payment.cancelPayment(user);
     }
 
+    /*
+        ADMIN 결제 삭제
+    */
     @Transactional
     public void deletePayment(User user, Long paymentId) {
         getPayment(paymentId).deletePayment(user);

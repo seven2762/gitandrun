@@ -29,6 +29,11 @@ public class PaymentController {
 
     private final PaymentService paymentService;
 
+
+
+    /*
+        결제 생성
+    */
     @Secured("ROLE_CUSTOMER")
     @PostMapping
     public ResponseEntity<ApiResDto> createPayment(@AuthenticationPrincipal UserDetailsImpl userDetails,
@@ -39,6 +44,10 @@ public class PaymentController {
         return ResponseEntity.ok().body(new ApiResDto("결제 성공", HttpStatus.OK.value()));
     }
 
+
+    /*
+        본인 결제 조회
+    */
     @Secured("ROLE_CUSTOMER")
     @GetMapping
     public ResponseEntity<ResDto<ResPaymentGetByUserIdDTO>> readPayment(@AuthenticationPrincipal UserDetailsImpl userDetails,
@@ -48,6 +57,10 @@ public class PaymentController {
         return paymentService.getByCustomer(userDetails.getUser(), cond, pageable);
     }
 
+
+    /*
+        MANAGER, ADMIN 결제 목록 전체 조회
+    */
     @Secured({"ROLE_MANAGER", "ROLE_ADMIN"})
     @GetMapping("/manager")
     public ResponseEntity<ResDto<ResPaymentGetByManagerDTO>> readPayment(@RequestBody ReqPaymentCondByManagerDTO cond,
@@ -57,11 +70,19 @@ public class PaymentController {
     }
 
 
+    /*
+        결제 상세 조회
+    */
     @GetMapping("/{paymentId}")
     public ResponseEntity<ResDto<ResPaymentGetByIdDTO>> readPayment(@PathVariable("paymentId")Long paymentId) {
         return paymentService.getBy(paymentId);
     }
 
+
+
+    /*
+        MANAGER, ADMIN 결제 취소
+    */
     @Secured({"ROLE_CUSTOMER", "ROLE_MANAGER"})
     @PatchMapping("/{paymentId}")
     public ResponseEntity<ApiResDto> cancelPayment(@AuthenticationPrincipal UserDetailsImpl userDetails,
@@ -72,6 +93,10 @@ public class PaymentController {
         return ResponseEntity.ok().body(new ApiResDto("취소 성공", HttpStatus.OK.value()));
     }
 
+
+    /*
+      ADMIN 결제 삭제
+    */
     @Secured("ROLE_ADMIN")
     @DeleteMapping("/{paymentId}")
     public ResponseEntity<ApiResDto> deletePayment(@AuthenticationPrincipal UserDetailsImpl userDetails,
