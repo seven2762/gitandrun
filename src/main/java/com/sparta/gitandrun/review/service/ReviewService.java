@@ -67,7 +67,7 @@ public class ReviewService {
         }
 
         Pageable pageable = pageable(page, size, sortBy, false);
-        Page<Review> reviews = reviewRepository.findByStoreIdAndUserId(storeId, userId, pageable);
+        Page<Review> reviews = reviewRepository.findByStoreIdAndUserId(storeId, pageable);
         reviewEmpty(reviews);
         return reviews.map(UserReviewResponseDto::new);
     }
