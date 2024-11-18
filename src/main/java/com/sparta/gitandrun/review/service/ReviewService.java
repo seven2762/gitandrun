@@ -61,6 +61,9 @@ public class ReviewService {
             throw new IllegalArgumentException("이미 리뷰가 작성된 주문입니다.");
         }
 
+        // 6. 리뷰 내용과 평점
+        validateReviewWrite(requestDto);
+
         Review review = new Review(requestDto, order.getUser(), order.getStore(), order);
         reviewRepository.save(review);
     }
@@ -124,7 +127,7 @@ public class ReviewService {
         return reviews.map(AdminReviewResponseDto::new);
     }
 
-    //리뷰 수정
+    // 리뷰 수정
     @Transactional
     public void updateReview(UUID reviewId, UserDetailsImpl userDetails, ReviewRequestDto requestDto) {
         Review review = getReview(reviewId);
@@ -180,12 +183,31 @@ public class ReviewService {
         }
     }
 
-    // CUSTOMER 권한 확인
+    // 리뷰 내용과 평점 검증 메서드
+    private void validateReviewWrite(ReviewRequestDto requestDto) {
+        if (requestDto.getReviewContent() == null || requestDto.getReviewContent().trim().isEmpty()) {
+            throw new IllegalArgumentException("리뷰 내용은 필수입니다.");
+        }
+        if (requestDto.getReviewRating() == null) {
+            throw new IllegalArgumentException("평점은 필수입니다.");
+        }
+    }
+
+    // 수정, 삭제 권한 확인
     private void checkPermission(Review review, Long userId, Role role) {
-        if (role.equals(Role.CUSTOMER)) {
+        // 관리자는 모든 리뷰 수정 가능
+        if (role.equals(Role.ADMIN) || role.equals(Role.MANAGER)) {
+        }
+
+        // 고객은 본인 리뷰만 가능
+        else if (role.equals(Role.CUSTOMER)) {
             if (!review.getUser().getUserId().equals(userId)) {
                 throw new IllegalArgumentException("본인의 리뷰만 가능합니다.");
             }
+        }
+        // 나머지는 수정 불가
+        else {
+            throw new IllegalArgumentException("권한이 없습니다.");
         }
     }
 

@@ -98,9 +98,10 @@ public class ReviewController {
         return new ApiResDto("리뷰 조회 성공", 200, reviews);
     }
 
-    //리뷰 수정
+    //고객 - 리뷰 수정
+    @Secured("ROLE_CUSTOMER")
     @PatchMapping("/{reviewId}")
-    public ResponseEntity<ApiResDto> updateReview(
+    public ResponseEntity<ApiResDto> updateReviewUser(
             @AuthenticationPrincipal UserDetailsImpl userDetails,
             @PathVariable UUID reviewId,
             @RequestBody @Valid ReviewRequestDto requestDto) {
@@ -108,9 +109,31 @@ public class ReviewController {
         return ResponseEntity.ok().body(new ApiResDto("리뷰 수정 완료", HttpStatus.OK.value()));
     }
 
-    //리뷰 삭제
+    //관리자 - 리뷰 수정
+    @Secured({"ROLE_MANAGER", "ROLE_ADMIN"})
+    @PatchMapping("/admin/{reviewId}")
+    public ResponseEntity<ApiResDto> updateReviewAdmin(
+            @AuthenticationPrincipal UserDetailsImpl userDetails,
+            @PathVariable UUID reviewId,
+            @RequestBody @Valid ReviewRequestDto requestDto) {
+        reviewService.updateReview(reviewId, userDetails, requestDto);
+        return ResponseEntity.ok().body(new ApiResDto("리뷰 수정 완료", HttpStatus.OK.value()));
+    }
+
+    //고객 - 리뷰 삭제
+    @Secured("ROLE_CUSTOMER")
     @DeleteMapping("/{reviewId}")
-    public ResponseEntity<ApiResDto> deleteReview(
+    public ResponseEntity<ApiResDto> deleteReviewUser(
+            @PathVariable UUID reviewId,
+            @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        reviewService.deleteReview(reviewId, userDetails);
+        return ResponseEntity.ok().body(new ApiResDto("리뷰 삭제 완료", HttpStatus.OK.value()));
+    }
+
+    //관리자 - 리뷰 삭제
+    @Secured({"ROLE_MANAGER", "ROLE_ADMIN"})
+    @DeleteMapping("/admin/{reviewId}")
+    public ResponseEntity<ApiResDto> deleteReviewAdmin(
             @PathVariable UUID reviewId,
             @AuthenticationPrincipal UserDetailsImpl userDetails) {
         reviewService.deleteReview(reviewId, userDetails);
