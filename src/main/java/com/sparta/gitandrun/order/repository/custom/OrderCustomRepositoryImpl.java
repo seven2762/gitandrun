@@ -68,8 +68,7 @@ public class OrderCustomRepositoryImpl implements OrderCustomRepository {
     public Page<Order> findOwnerOrderListWithConditions(Long userId, ReqOrderCondByOwnerDTO cond, Pageable pageable) {
 
         List<Order> results = queryFactory
-                .select(order)
-                .from(order)
+                .selectFrom(order)
                 .where(
                         deletedFalse(),
                         usernameLike(cond.getCustomer().getName()),
@@ -98,14 +97,14 @@ public class OrderCustomRepositoryImpl implements OrderCustomRepository {
     }
 
     @Override
-    public Page<Order> findManagerOrderListWithConditions(ReqOrderCondByManagerDTO cond, Pageable pageable) {
+    public Page<Order> findAllOrderListWithConditions(ReqOrderCondByManagerDTO cond, Pageable pageable) {
 
         List<Order> results = queryFactory
-                .select(order)
-                .from(order)
+                .selectFrom(order)
                 .where(
                         usernameLike(cond.getCustomer().getName()),
                         storeNameLike(cond.getStore().getName()),
+                        deletedEq(cond.getCondition().isDeleted()),
                         statusEq(cond.getCondition().getStatus()),
                         typeEq(cond.getCondition().getType())
                 )
@@ -122,6 +121,7 @@ public class OrderCustomRepositoryImpl implements OrderCustomRepository {
                 .where(
                         usernameLike(cond.getCustomer().getName()),
                         storeNameLike(cond.getStore().getName()),
+                        deletedEq(cond.getCondition().isDeleted()),
                         statusEq(cond.getCondition().getStatus()),
                         typeEq(cond.getCondition().getType())
                 );
@@ -151,12 +151,16 @@ public class OrderCustomRepositoryImpl implements OrderCustomRepository {
         return !hasText(storeName) ? null : order.store.storeName.containsIgnoreCase(storeName);
     }
 
+    private BooleanExpression deletedEq(boolean cond) {
+        return order.isDeleted.eq(cond);
+    }
+
     private BooleanExpression statusEq(String status) {
         return order.orderStatus.eq(OrderStatus.fromString(status));
     }
 
     private BooleanExpression typeEq(String type) {
-        return order.orderType.eq(OrderType.fromString(type));
+        return hasText(type) ? order.orderType.eq(OrderType.fromString(type)) : null;
     }
 
     private OrderSpecifier<?> orderSpecifier(String sort) {

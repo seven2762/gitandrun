@@ -112,7 +112,7 @@ public class OrderService {
     @Transactional(readOnly = true)
     public ResponseEntity<ResDto<ResOrderGetByManagerDTO>> readByManager(ReqOrderCondByManagerDTO cond, Pageable pageable) {
 
-        Page<Order> findOrderPage = orderRepository.findManagerOrderListWithConditions(cond, pageable);
+        Page<Order> findOrderPage = orderRepository.findAllOrderListWithConditions(cond, pageable);
 
         List<OrderMenu> findOrderMenus = getOrderMenusByOrderIds(getIdsByOrders(findOrderPage));
 

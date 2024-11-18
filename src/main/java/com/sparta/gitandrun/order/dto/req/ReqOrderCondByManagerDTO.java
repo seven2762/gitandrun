@@ -29,5 +29,6 @@ public class ReqOrderCondByManagerDTO {
         private String status;
         private String type;
         private String sort;
+        private boolean deleted;
     }
 }

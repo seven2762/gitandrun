@@ -13,5 +13,5 @@ public interface OrderCustomRepository {
 
     Page<Order> findOwnerOrderListWithConditions(Long userId, ReqOrderCondByOwnerDTO cond, Pageable pageable);
 
-    Page<Order> findManagerOrderListWithConditions(ReqOrderCondByManagerDTO cond, Pageable pageable);
+    Page<Order> findAllOrderListWithConditions(ReqOrderCondByManagerDTO cond, Pageable pageable);
 }
