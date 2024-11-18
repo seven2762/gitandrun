@@ -2,9 +2,8 @@ package com.sparta.gitandrun.payment.contoller;
 
 import com.sparta.gitandrun.common.entity.ApiResDto;
 import com.sparta.gitandrun.order.dto.res.ResDto;
-import com.sparta.gitandrun.payment.contoller.docs.PaymentControllerDocs;
-import com.sparta.gitandrun.payment.dto.req.ReqPaymentCondByManagerDTO;
 import com.sparta.gitandrun.payment.dto.req.ReqPaymentCondByCustomerDTO;
+import com.sparta.gitandrun.payment.dto.req.ReqPaymentCondByManagerDTO;
 import com.sparta.gitandrun.payment.dto.req.ReqPaymentPostDTO;
 import com.sparta.gitandrun.payment.dto.res.ResPaymentGetByIdDTO;
 import com.sparta.gitandrun.payment.dto.res.ResPaymentGetByManagerDTO;
@@ -27,7 +26,7 @@ import java.util.UUID;
 @RestController
 @RequiredArgsConstructor
 @Slf4j(topic = "Payment-Controller")
-public class PaymentController implements PaymentControllerDocs {
+public class PaymentController {
 
     private final PaymentService paymentService;
 
