@@ -12,6 +12,8 @@ import com.sparta.gitandrun.store.entity.Store;
 import com.sparta.gitandrun.store.repository.StoreRepository;
 import com.sparta.gitandrun.user.entity.Role;
 import com.sparta.gitandrun.user.security.UserDetailsImpl;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -47,7 +49,14 @@ public class ReviewService {
             throw new IllegalArgumentException("완료된 주문만 리뷰 작성이 가능합니다.");
         }
 
-        // 4. 중복 리뷰 확인
+        // 4. 리뷰 작성 기한 확인: 주문 완료 시점(updatedAt)으로부터 3일 이내에만 작성 가능
+        LocalDateTime completedAt = order.getUpdatedAt();
+        long daysBetween = ChronoUnit.DAYS.between(completedAt, LocalDateTime.now());
+        if (daysBetween > 3) {
+            throw new IllegalArgumentException("리뷰 작성 기한이 지났습니다. 주문 완료 후 3일 이내에 작성할 수 있습니다.");
+        }
+
+        // 5. 중복 리뷰 확인
         if (reviewRepository.existsByOrderId(orderId)) {
             throw new IllegalArgumentException("이미 리뷰가 작성된 주문입니다.");
         }
@@ -56,7 +65,7 @@ public class ReviewService {
         reviewRepository.save(review);
     }
 
-    // OWNER: 본인 가게 리뷰만 조회
+    // OWNER: 본인 가게 리뷰 조회
     @Transactional(readOnly = true)
     public Page<UserReviewResponseDto> getOwnerReviewsByStore(Long userId, UUID storeId, int page, int size, String sortBy) {
         List<Store> stores = storeRepository.findByUser_UserId(userId);
@@ -67,14 +76,14 @@ public class ReviewService {
         }
 
         Pageable pageable = pageable(page, size, sortBy, false);
-        Page<Review> reviews = reviewRepository.findByStoreIdAndUserId(storeId, userId, pageable);
+        Page<Review> reviews = reviewRepository.findByStoreIdAndUserId(storeId, pageable);
         reviewEmpty(reviews);
         return reviews.map(UserReviewResponseDto::new);
     }
 
-    // 모든 가게 리뷰 조회 (OWNER 제외)
+    // 모든 가게 리뷰 조회
     @Transactional(readOnly = true)
-    public Page<UserReviewResponseDto> getCustomerReviewsByStore(UUID storeId, int page, int size, String sortBy) {
+    public Page<UserReviewResponseDto> getReviewsByStore(UUID storeId, int page, int size, String sortBy) {
         Pageable pageable = pageable(page, size, sortBy, false);
         Page<Review> reviews = reviewRepository.findByStoreId(storeId, pageable);
         reviewEmpty(reviews);
@@ -159,9 +168,9 @@ public class ReviewService {
         }
     }
 
-    // CUSTOMER 또는 OWNER 권한 확인
+    // CUSTOMER 권한 확인
     private void checkPermission(Review review, Long userId, Role role) {
-        if (role.equals(Role.CUSTOMER) || role.equals(Role.OWNER)) {
+        if (role.equals(Role.CUSTOMER)) {
             if (!review.getUser().getUserId().equals(userId)) {
                 throw new IllegalArgumentException("본인의 리뷰만 가능합니다.");
             }

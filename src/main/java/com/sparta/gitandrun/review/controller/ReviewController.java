@@ -32,7 +32,7 @@ public class ReviewController {
     private final ReviewService reviewService;
 
     //리뷰 작성
-    @Secured({"ROLE_CUSTOMER", "ROLE_OWNER"})
+    @Secured("ROLE_CUSTOMER")
     @PostMapping("/{orderId}")
     public ResponseEntity<ApiResDto> createReview(
             @AuthenticationPrincipal UserDetailsImpl userDetails,
@@ -43,9 +43,9 @@ public class ReviewController {
         return ResponseEntity.ok().body(new ApiResDto("리뷰 작성 완료", HttpStatus.OK.value()));
     }
 
-    // OWNER: 본인 가게 리뷰만 조회
+    // OWNER: 본인 가게 리뷰 조회
     @Secured("ROLE_OWNER")
-    @GetMapping("/owner/{storeId}")
+    @GetMapping("/myStore/{storeId}")
     public ApiResDto getOwnerReviewsByStore(
             @AuthenticationPrincipal UserDetailsImpl userDetails,
             @PathVariable UUID storeId,
@@ -57,20 +57,19 @@ public class ReviewController {
         return new ApiResDto("리뷰 조회 성공", 200, reviews);
     }
 
-    // 모든 가게 리뷰 조회 (OWNER 제외)
-    @Secured({"ROLE_ADMIN", "ROLE_MANAGER", "ROLE_CUSTOMER"})
+    // 모든 가게 리뷰 조회
     @GetMapping("/store/{storeId}")
-    public ApiResDto getCustomerReviewsByStore(
+    public ApiResDto getReviewsByStore(
             @PathVariable UUID storeId,
             @RequestParam(defaultValue="0") int page,
             @RequestParam(defaultValue="10") int size,
             @RequestParam(defaultValue = "createdAt") String sortBy) {
-        Page<UserReviewResponseDto> reviews = reviewService.getCustomerReviewsByStore(storeId, page, size, sortBy);
+        Page<UserReviewResponseDto> reviews = reviewService.getReviewsByStore(storeId, page, size, sortBy);
         return new ApiResDto("리뷰 조회 성공", 200, reviews);
     }
 
-    // CUSTOEMR, OWNER - 본인이 작성한 리뷰 조회
-    @Secured({"ROLE_CUSTOMER", "ROLE_OWNER"})
+    // CUSTOEMR - 본인이 작성한 리뷰 조회
+    @Secured("ROLE_CUSTOMER")
     @GetMapping("/myReviews")
     public ResponseEntity<ApiResDto> getMyReviewsByUserId(
             @AuthenticationPrincipal UserDetailsImpl userDetails,
