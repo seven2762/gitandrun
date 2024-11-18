@@ -43,9 +43,9 @@ public class ReviewController {
         return ResponseEntity.ok().body(new ApiResDto("리뷰 작성 완료", HttpStatus.OK.value()));
     }
 
-    // OWNER: 본인 가게 리뷰만 조회
+    // OWNER: 본인 가게 리뷰 조회
     @Secured("ROLE_OWNER")
-    @GetMapping("/owner/{storeId}")
+    @GetMapping("/myStore/{storeId}")
     public ApiResDto getOwnerReviewsByStore(
             @AuthenticationPrincipal UserDetailsImpl userDetails,
             @PathVariable UUID storeId,

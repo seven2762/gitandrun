@@ -56,7 +56,7 @@ public class ReviewService {
         reviewRepository.save(review);
     }
 
-    // OWNER: 본인 가게 리뷰만 조회
+    // OWNER: 본인 가게 리뷰 조회
     @Transactional(readOnly = true)
     public Page<UserReviewResponseDto> getOwnerReviewsByStore(Long userId, UUID storeId, int page, int size, String sortBy) {
         List<Store> stores = storeRepository.findByUser_UserId(userId);
