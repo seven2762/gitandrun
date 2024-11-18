@@ -51,6 +51,7 @@ public class ResOrderGetByManagerDTO {
         @NoArgsConstructor
         @AllArgsConstructor
         private static class OrderDTO {
+
             private Long orderId;
             private Customer customer;
             private String status;
@@ -94,6 +95,7 @@ public class ResOrderGetByManagerDTO {
             @NoArgsConstructor
             @AllArgsConstructor
             private static class OrderMenuDTO {
+
                 private Long orderMenuId;
                 private UUID menuId;
                 private String menuName;
@@ -128,10 +130,12 @@ public class ResOrderGetByManagerDTO {
             @AllArgsConstructor
             private static class Customer {
 
+                private Long customerId;
                 private String name;
 
                 private static Customer from(User user) {
                     return Customer.builder()
+                            .customerId(user.getUserId())
                             .name(user.getUsername())
                             .build();
                 }
@@ -145,10 +149,12 @@ public class ResOrderGetByManagerDTO {
             @AllArgsConstructor
             private static class StoreDTO {
 
+                private UUID storeId;
                 private String name;
 
                 private static StoreDTO from(Store store) {
                     return StoreDTO.builder()
+                            .storeId(store.getStoreId())
                             .name(store.getStoreName())
                             .build();
                 }

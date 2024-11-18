@@ -128,10 +128,12 @@ public class ResOrderGetByCustomerDTO {
             @AllArgsConstructor
             private static class StoreDTO {
 
+                private UUID storeId;
                 private String name;
 
-                private static StoreDTO from (Store store) {
+                private static StoreDTO from(Store store) {
                     return StoreDTO.builder()
+                            .storeId(store.getStoreId())
                             .name(store.getStoreName())
                             .build();
                 }

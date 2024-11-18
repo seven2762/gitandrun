@@ -43,7 +43,6 @@ public class ResPaymentGetByManagerDTO {
             );
         }
 
-
         @Getter
         @Builder
         @NoArgsConstructor
@@ -52,7 +51,6 @@ public class ResPaymentGetByManagerDTO {
 
             private PaymentDTO paymentDTO;
             private StoreDTO storeDTO;
-
 
             private static List<PaymentSummary> from(List<Payment> payments) {
                 return payments.stream()

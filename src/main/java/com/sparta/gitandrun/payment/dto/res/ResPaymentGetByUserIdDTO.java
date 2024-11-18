@@ -14,6 +14,7 @@ import org.springframework.data.web.PagedModel;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 @Getter
 @Builder
@@ -99,10 +100,12 @@ public class ResPaymentGetByUserIdDTO {
             @AllArgsConstructor
             private static class StoreDTO {
 
+                private UUID storeId;
                 private String name;
 
                 private static StoreDTO from(Store store) {
                     return StoreDTO.builder()
+                            .storeId(store.getStoreId())
                             .name(store.getStoreName())
                             .build();
                 }

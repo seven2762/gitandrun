@@ -48,6 +48,7 @@ public class ResOrderGetByOwnerDTO {
         @NoArgsConstructor
         @AllArgsConstructor
         private static class OrderDTO {
+
             private Long orderId;
             private String status;
             private String type;
@@ -86,7 +87,8 @@ public class ResOrderGetByOwnerDTO {
             @NoArgsConstructor
             @AllArgsConstructor
             private static class Customer {
-                private long userId;
+
+                private Long userId;
                 private String nickName;
                 private String phone;
                 private String zipcode;
@@ -110,6 +112,7 @@ public class ResOrderGetByOwnerDTO {
             @NoArgsConstructor
             @AllArgsConstructor
             private static class OrderMenuDTO {
+
                 private Long orderMenuId;
                 private UUID menuId;
                 private String menuName;

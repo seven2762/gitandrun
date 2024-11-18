@@ -104,6 +104,7 @@ public class ResOrderGetByIdDTO {
         @NoArgsConstructor
         @AllArgsConstructor
         private static class StoreDTO {
+
             private UUID storeId;
             private String zipcode;
             private String address;

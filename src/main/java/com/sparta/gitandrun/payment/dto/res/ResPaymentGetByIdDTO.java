@@ -37,13 +37,13 @@ public class ResPaymentGetByIdDTO {
     @AllArgsConstructor
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private static class PaymentDTO {
+
         private Long id;
         private int paymentPrice;
         private String paymentStatus;
         private LocalDateTime createdAt;
         private LocalDateTime canceledAt;
         private OrderDTO orderDTO;
-
 
         private static PaymentDTO from(Payment payment, Order order, List<OrderMenu> orderMenus) {
             return PaymentDTO.builder()
@@ -64,6 +64,7 @@ public class ResPaymentGetByIdDTO {
         @NoArgsConstructor
         @AllArgsConstructor
         private static class OrderDTO {
+
             private Long id;
             private String status;
             private String type;
@@ -88,6 +89,7 @@ public class ResPaymentGetByIdDTO {
             @NoArgsConstructor
             @AllArgsConstructor
             private static class OrderMenuDTO {
+
                 private Long id;
                 private UUID menuId;
                 private String menuName;
