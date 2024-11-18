@@ -120,9 +120,20 @@ public class ReviewController {
         return ResponseEntity.ok().body(new ApiResDto("리뷰 수정 완료", HttpStatus.OK.value()));
     }
 
-    //리뷰 삭제
+    //고객 - 리뷰 삭제
+    @Secured("ROLE_CUSTOMER")
     @DeleteMapping("/{reviewId}")
-    public ResponseEntity<ApiResDto> deleteReview(
+    public ResponseEntity<ApiResDto> deleteReviewUser(
+            @PathVariable UUID reviewId,
+            @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        reviewService.deleteReview(reviewId, userDetails);
+        return ResponseEntity.ok().body(new ApiResDto("리뷰 삭제 완료", HttpStatus.OK.value()));
+    }
+
+    //관리자 - 리뷰 삭제
+    @Secured({"ROLE_MANAGER", "ROLE_ADMIN"})
+    @DeleteMapping("/admin/{reviewId}")
+    public ResponseEntity<ApiResDto> deleteReviewAdmin(
             @PathVariable UUID reviewId,
             @AuthenticationPrincipal UserDetailsImpl userDetails) {
         reviewService.deleteReview(reviewId, userDetails);
