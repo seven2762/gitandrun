@@ -13,6 +13,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import java.time.LocalDateTime;
 import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -58,5 +59,11 @@ public class Review extends BaseEntity {
         this.reviewContent = requestDto.getReviewContent();
         this.reviewRating = requestDto.getReviewRating();
         initAuditInfo(user);
+    }
+
+    public void softDelete(User user) {
+        this.isDeleted = true;
+        this.setDeletedAt(LocalDateTime.now());
+        this.setDeletedBy(user.getUsername());
     }
 }

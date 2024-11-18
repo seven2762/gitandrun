@@ -149,7 +149,7 @@ public class ReviewService {
         Long userId = userDetails.getUser().getUserId();
         Role role = userDetails.getUser().getRole();
         checkPermission(review, userId, role);
-        review.setDeleted(true);
+        review.softDelete(userDetails.getUser());
     }
 
     //----------------------------------------------------------------
