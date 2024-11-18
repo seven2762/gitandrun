@@ -98,9 +98,21 @@ public class ReviewController {
         return new ApiResDto("리뷰 조회 성공", 200, reviews);
     }
 
-    //리뷰 수정
+    //고객 - 리뷰 수정
+    @Secured("ROLE_CUSTOMER")
     @PatchMapping("/{reviewId}")
-    public ResponseEntity<ApiResDto> updateReview(
+    public ResponseEntity<ApiResDto> updateReviewUser(
+            @AuthenticationPrincipal UserDetailsImpl userDetails,
+            @PathVariable UUID reviewId,
+            @RequestBody @Valid ReviewRequestDto requestDto) {
+        reviewService.updateReview(reviewId, userDetails, requestDto);
+        return ResponseEntity.ok().body(new ApiResDto("리뷰 수정 완료", HttpStatus.OK.value()));
+    }
+
+    //관리자 - 리뷰 수정
+    @Secured({"ROLE_MANAGER", "ROLE_ADMIN"})
+    @PatchMapping("/admin/{reviewId}")
+    public ResponseEntity<ApiResDto> updateReviewAdmin(
             @AuthenticationPrincipal UserDetailsImpl userDetails,
             @PathVariable UUID reviewId,
             @RequestBody @Valid ReviewRequestDto requestDto) {
