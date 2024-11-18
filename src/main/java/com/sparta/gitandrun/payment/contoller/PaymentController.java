@@ -3,7 +3,7 @@ package com.sparta.gitandrun.payment.contoller;
 import com.sparta.gitandrun.common.entity.ApiResDto;
 import com.sparta.gitandrun.order.dto.res.ResDto;
 import com.sparta.gitandrun.payment.dto.req.ReqPaymentCondByManagerDTO;
-import com.sparta.gitandrun.payment.dto.req.ReqPaymentCondDTO;
+import com.sparta.gitandrun.payment.dto.req.ReqPaymentCondByCustomerDTO;
 import com.sparta.gitandrun.payment.dto.req.ReqPaymentPostDTO;
 import com.sparta.gitandrun.payment.dto.res.ResPaymentGetByIdDTO;
 import com.sparta.gitandrun.payment.dto.res.ResPaymentGetByUserIdDTO;
@@ -41,10 +41,10 @@ public class PaymentController {
     @Secured("ROLE_CUSTOMER")
     @GetMapping
     public ResponseEntity<ResDto<ResPaymentGetByUserIdDTO>> readPayment(@AuthenticationPrincipal UserDetailsImpl userDetails,
-                                                                        @RequestBody ReqPaymentCondDTO condition,
+                                                                        @RequestBody ReqPaymentCondByCustomerDTO cond,
                                                                         @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
 
-        return paymentService.getByCustomer(userDetails.getUser(), condition, pageable);
+        return paymentService.getByCustomer(userDetails.getUser(), cond, pageable);
     }
 
     @Secured("ROLE_MANAGER")
