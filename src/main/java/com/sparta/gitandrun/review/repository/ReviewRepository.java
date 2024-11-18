@@ -7,7 +7,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.UUID;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
 
+@Repository
 public interface ReviewRepository extends JpaRepository<Review, UUID> {
 
     // 해당 주문에 리뷰가 이미 존재하는지 확인
@@ -36,4 +38,8 @@ public interface ReviewRepository extends JpaRepository<Review, UUID> {
             @Param("reviewId") UUID reviewId,
             @Param("storeId") UUID storeId,
             Pageable pageable);
+
+
+    @Query("SELECT AVG(r.reviewRating) FROM Review r WHERE r.store.storeId = :storeId AND r.isDeleted = false")
+    Double findAverageRatingByStoreId(@Param("storeId") UUID storeId);
 }
