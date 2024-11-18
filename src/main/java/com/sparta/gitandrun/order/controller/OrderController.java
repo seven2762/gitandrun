@@ -2,12 +2,10 @@ package com.sparta.gitandrun.order.controller;
 
 import com.sparta.gitandrun.common.entity.ApiResDto;
 import com.sparta.gitandrun.order.dto.req.ReqOrderCondByCustomerDTO;
+import com.sparta.gitandrun.order.dto.req.ReqOrderCondByManagerDTO;
 import com.sparta.gitandrun.order.dto.req.ReqOrderCondByOwnerDTO;
 import com.sparta.gitandrun.order.dto.req.ReqOrderPostDTO;
-import com.sparta.gitandrun.order.dto.res.ResDto;
-import com.sparta.gitandrun.order.dto.res.ResOrderGetByCustomerDTO;
-import com.sparta.gitandrun.order.dto.res.ResOrderGetByIdDTO;
-import com.sparta.gitandrun.order.dto.res.ResOrderGetByOwnerDTO;
+import com.sparta.gitandrun.order.dto.res.*;
 import com.sparta.gitandrun.order.service.OrderService;
 import com.sparta.gitandrun.user.security.UserDetailsImpl;
 import lombok.RequiredArgsConstructor;
@@ -56,8 +54,7 @@ public class OrderController {
     /*
       본인 가게 주문 조회
       - 사장 권한의 유저가 본인 가게의 전체 주문 내역을 조회할 수 있음.
-  */
-
+    */
     @Secured("ROLE_OWNER")
     @GetMapping("/owner")
     public ResponseEntity<ResDto<ResOrderGetByOwnerDTO>> readByOwner(@AuthenticationPrincipal UserDetailsImpl userDetails,
@@ -65,6 +62,19 @@ public class OrderController {
                                                                      @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
 
         return orderService.readByOwner(userDetails.getUser(), cond, pageable);
+    }
+
+    /*
+        매니저 주문 조회
+         - 매니저 권한의 유저가 모든 가게 및 고객에 대한 주문 조회를 할 수 있음
+         - 조회 간 가게 이름별 / 고객 이름별 조회 가능
+    */
+    @Secured("ROLE_MANAGER")
+    @GetMapping("/manager")
+    public ResponseEntity<ResDto<ResOrderGetByManagerDTO>> readByManager(@RequestBody ReqOrderCondByManagerDTO cond,
+                                                                         @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+
+        return orderService.readByManager(cond, pageable);
     }
 
     /*

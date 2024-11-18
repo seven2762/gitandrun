@@ -6,6 +6,7 @@ import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.sparta.gitandrun.order.dto.req.ReqOrderCondByCustomerDTO;
+import com.sparta.gitandrun.order.dto.req.ReqOrderCondByManagerDTO;
 import com.sparta.gitandrun.order.dto.req.ReqOrderCondByOwnerDTO;
 import com.sparta.gitandrun.order.entity.Order;
 import com.sparta.gitandrun.order.entity.OrderStatus;
@@ -29,6 +30,39 @@ import static org.springframework.util.StringUtils.hasText;
 public class OrderCustomRepositoryImpl implements OrderCustomRepository {
 
     private final JPAQueryFactory queryFactory;
+
+    @Override
+    public Page<Order> findMyOrderListWithConditions(Long userId, ReqOrderCondByCustomerDTO cond, Pageable pageable) {
+
+        List<Order> results = queryFactory
+                .select(order)
+                .from(order)
+                .where(
+                        order.user.userId.eq(userId),
+                        deletedFalse(),
+                        storeNameLike(cond.getStore().getName()),
+                        statusEq(cond.getCondition().getStatus()),
+                        typeEq(cond.getCondition().getType())
+                )
+                .orderBy(
+                        orderSpecifier(cond.getCondition().getSort())
+                )
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetch();
+
+        JPQLQuery<Long> countQuery = queryFactory
+                .select(order.count())
+                .from(order)
+                .where(
+                        order.user.userId.eq(userId),
+                        deletedFalse(),
+                        statusEq(cond.getCondition().getStatus()),
+                        typeEq(cond.getCondition().getType())
+                );
+
+        return PageableExecutionUtils.getPage(results, pageable, countQuery::fetchOne);
+    }
 
     @Override
     public Page<Order> findOwnerOrderListWithConditions(Long userId, ReqOrderCondByOwnerDTO cond, Pageable pageable) {
@@ -64,14 +98,13 @@ public class OrderCustomRepositoryImpl implements OrderCustomRepository {
     }
 
     @Override
-    public Page<Order> findMyOrderListWithConditions(Long userId, ReqOrderCondByCustomerDTO cond, Pageable pageable) {
+    public Page<Order> findManagerOrderListWithConditions(ReqOrderCondByManagerDTO cond, Pageable pageable) {
 
         List<Order> results = queryFactory
                 .select(order)
                 .from(order)
                 .where(
-                        order.user.userId.eq(userId),
-                        deletedFalse(),
+                        usernameLike(cond.getCustomer().getName()),
                         storeNameLike(cond.getStore().getName()),
                         statusEq(cond.getCondition().getStatus()),
                         typeEq(cond.getCondition().getType())
@@ -87,8 +120,8 @@ public class OrderCustomRepositoryImpl implements OrderCustomRepository {
                 .select(order.count())
                 .from(order)
                 .where(
-                        order.user.userId.eq(userId),
-                        deletedFalse(),
+                        usernameLike(cond.getCustomer().getName()),
+                        storeNameLike(cond.getStore().getName()),
                         statusEq(cond.getCondition().getStatus()),
                         typeEq(cond.getCondition().getType())
                 );

@@ -4,12 +4,10 @@ package com.sparta.gitandrun.order.service;
 import com.sparta.gitandrun.menu.entity.Menu;
 import com.sparta.gitandrun.menu.repository.MenuRepository;
 import com.sparta.gitandrun.order.dto.req.ReqOrderCondByCustomerDTO;
+import com.sparta.gitandrun.order.dto.req.ReqOrderCondByManagerDTO;
 import com.sparta.gitandrun.order.dto.req.ReqOrderCondByOwnerDTO;
 import com.sparta.gitandrun.order.dto.req.ReqOrderPostDTO;
-import com.sparta.gitandrun.order.dto.res.ResDto;
-import com.sparta.gitandrun.order.dto.res.ResOrderGetByCustomerDTO;
-import com.sparta.gitandrun.order.dto.res.ResOrderGetByIdDTO;
-import com.sparta.gitandrun.order.dto.res.ResOrderGetByOwnerDTO;
+import com.sparta.gitandrun.order.dto.res.*;
 import com.sparta.gitandrun.order.entity.Order;
 import com.sparta.gitandrun.order.entity.OrderMenu;
 import com.sparta.gitandrun.order.repository.OrderMenuRepository;
@@ -107,6 +105,27 @@ public class OrderService {
                 HttpStatus.OK
         );
     }
+
+    /*
+        Manager 주문 조회
+    */
+    @Transactional(readOnly = true)
+    public ResponseEntity<ResDto<ResOrderGetByManagerDTO>> readByManager(ReqOrderCondByManagerDTO cond, Pageable pageable) {
+
+        Page<Order> findOrderPage = orderRepository.findManagerOrderListWithConditions(cond, pageable);
+
+        List<OrderMenu> findOrderMenus = getOrderMenusByOrderIds(getIdsByOrders(findOrderPage));
+
+        return new ResponseEntity<>(
+                ResDto.<ResOrderGetByManagerDTO>builder()
+                        .code(HttpStatus.OK.value())
+                        .message("주문 조회에 성공했습니다.")
+                        .data(ResOrderGetByManagerDTO.of(findOrderPage, findOrderMenus))
+                        .build(),
+                HttpStatus.OK
+        );
+    }
+
 
     /*
         주문 단일 및 상세 조회
