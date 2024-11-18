@@ -156,7 +156,7 @@ public class OrderCustomRepositoryImpl implements OrderCustomRepository {
     }
 
     private BooleanExpression statusEq(String status) {
-        return order.orderStatus.eq(OrderStatus.fromString(status));
+        return status != null ? order.orderStatus.eq(OrderStatus.fromString(status)) : null;
     }
 
     private BooleanExpression typeEq(String type) {
