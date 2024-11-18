@@ -74,6 +74,7 @@ public class PaymentCustomRepositoryImpl implements PaymentCustomRepository {
                 .join(payment.order.store, store).fetchJoin()
                 .where(
                         usernameLike(cond.getCustomer().getName()),
+                        storeNameLike(cond.getStore().getName()),
                         deletedEq(cond.getCondition().isDeleted()),
                         userIdEq(cond.getCustomer().getId()),
                         statusEq(cond.getCondition().getStatus())

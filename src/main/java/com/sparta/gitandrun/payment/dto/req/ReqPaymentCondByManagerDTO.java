@@ -8,8 +8,15 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ReqPaymentCondByManagerDTO {
 
+    private Store store;
     private Customer customer;
     private Condition condition;
+
+    @Getter
+    @NoArgsConstructor
+    public static class Store {
+        private String name;
+    }
 
     @Getter
     @NoArgsConstructor
