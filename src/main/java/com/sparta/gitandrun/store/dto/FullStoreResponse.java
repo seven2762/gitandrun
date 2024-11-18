@@ -3,6 +3,8 @@ package com.sparta.gitandrun.store.dto;
 import com.sparta.gitandrun.store.entity.Store;
 import lombok.Data;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -23,8 +25,10 @@ public class FullStoreResponse {
     private String addressDetail;
     private String zipCode;
     private Long userId;
+    private Double averageRating;
 
-    public FullStoreResponse(Store store) {
+
+    public FullStoreResponse(Store store, Double averageRating) {
         this.storeId = store.getStoreId();
         this.categoryId = store.getCategory().getId();
         this.storeName = store.getStoreName();
@@ -40,5 +44,7 @@ public class FullStoreResponse {
         this.addressDetail = store.getAddress().getAddressDetail();  // Address 필드 사용
         this.zipCode = store.getAddress().getZipCode();  // Address 필드 사용
         this.userId = store.getUser().getUserId();
-    }
+        this.averageRating = averageRating != null
+                ? BigDecimal.valueOf(averageRating).setScale(2, RoundingMode.HALF_UP).doubleValue()
+                : null;    }
 }

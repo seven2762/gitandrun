@@ -7,11 +7,13 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+@Repository
 public interface StoreRepository extends JpaRepository<Store, UUID> {
     Optional<Store> findById(UUID storeId); // Store의 ID로 조회하는 메서드
 
@@ -66,4 +68,5 @@ public interface StoreRepository extends JpaRepository<Store, UUID> {
             "OR LOWER(s.category.name) LIKE LOWER(CONCAT('%', :keyword, '%'))) " +
             "AND s.isDeleted = false")
     Page<Store> searchStoresAndIsDeletedFalse(@Param("keyword") String keyword, Pageable pageable);
+
 }

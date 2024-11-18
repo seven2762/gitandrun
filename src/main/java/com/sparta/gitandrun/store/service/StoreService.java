@@ -4,6 +4,7 @@ import com.sparta.gitandrun.category.entity.Category;
 import com.sparta.gitandrun.category.repository.CategoryRepository;
 import com.sparta.gitandrun.region.entity.Region;
 import com.sparta.gitandrun.region.repository.RegionRepository;
+import com.sparta.gitandrun.review.repository.ReviewRepository;
 import com.sparta.gitandrun.store.dto.FullStoreResponse;
 import com.sparta.gitandrun.store.dto.LimitedStoreResponse;
 import com.sparta.gitandrun.store.dto.StoreRequestDto;
@@ -34,12 +35,14 @@ public class StoreService {
 
     private final StoreRepository storeRepository;
     private final UserRepository userRepository;
+    private final ReviewRepository reviewRepository;
     private final RegionRepository regionRepository;
     private final CategoryRepository categoryRepository;
 
-    public StoreService(StoreRepository storeRepository, UserRepository userRepository, RegionRepository regionRepository, CategoryRepository categoryRepository) {
+    public StoreService(StoreRepository storeRepository, UserRepository userRepository, ReviewRepository reviewRepository, RegionRepository regionRepository, CategoryRepository categoryRepository) {
         this.storeRepository = storeRepository;
         this.userRepository = userRepository;
+        this.reviewRepository = reviewRepository;
         this.regionRepository = regionRepository;
         this.categoryRepository = categoryRepository;
     }
@@ -99,60 +102,69 @@ public class StoreService {
     // ADMIN 전체 가게 조회
     @Transactional(readOnly = true)
     public List<FullStoreResponse> getAllStoresForAdmin() {
-        // 모든 가게 정보 조회
         List<Store> stores = storeRepository.findAll();
-        // FullStoreResponse DTO로 변환하여 반환
         return stores.stream()
-                .map(FullStoreResponse::new)
+                .map(store -> {
+                    Double averageRating = reviewRepository.findAverageRatingByStoreId(store.getStoreId());
+                    return new FullStoreResponse(store, averageRating != null ? averageRating : 0.0);
+                })
                 .collect(Collectors.toList());
     }
 
     // ~ADMIN 전체 가게 조회
     @Transactional(readOnly = true)
     public List<LimitedStoreResponse> getAllStoresForUser() {
-        // Soft-delete되지 않은 가게만 조회
         List<Store> stores = storeRepository.findByIsDeletedFalse();
-
-        // LimitedStoreResponse DTO로 변환하여 반환
         return stores.stream()
-                .map(LimitedStoreResponse::new)
+                .map(store -> {
+                    Double averageRating = reviewRepository.findAverageRatingByStoreId(store.getStoreId());
+                    return new LimitedStoreResponse(store, averageRating != null ? averageRating : 0.0);
+                })
                 .collect(Collectors.toList());
     }
 
-    // Soft-Delete된 가게만 조회
+    // Soft-delete 가게 조회 (관리자 전용)
     @Transactional(readOnly = true)
     public List<FullStoreResponse> getSoftDeletedStores() {
         List<Store> stores = storeRepository.findByIsDeletedTrue();
         return stores.stream()
-                .map(FullStoreResponse::new)
+                .map(store -> {
+                    Double averageRating = reviewRepository.findAverageRatingByStoreId(store.getStoreId());
+                    return new FullStoreResponse(store, averageRating != null ? averageRating : 0.0);
+                })
                 .collect(Collectors.toList());
     }
 
-    // Soft-Delete되지 않은 가게만 조회
+    // Soft-delete되지 않은 가게만 조회
     @Transactional(readOnly = true)
     public List<FullStoreResponse> getNonDeletedStores() {
         List<Store> stores = storeRepository.findByIsDeletedFalse();
         return stores.stream()
-                .map(FullStoreResponse::new)
+                .map(store -> {
+                    Double averageRating = reviewRepository.findAverageRatingByStoreId(store.getStoreId());
+                    return new FullStoreResponse(store, averageRating != null ? averageRating : 0.0);
+                })
                 .collect(Collectors.toList());
     }
 
 
+    // 가게 상세 정보 조회 (리뷰 평균 별점 포함)
     @Transactional(readOnly = true)
     public ResponseEntity<?> getStoreDetails(UUID storeId, Long userId) {
-        User user = getUser(userId); // 로그인한 유저 조회
-        Store store = getStore(storeId); // 가게 정보 조회
+        User user = getUser(userId);
+        Store store = getStore(storeId);
 
-        // 삭제된 가게에 대한 접근 제한 (ADMIN만 가능)
+        // 삭제된 가게 접근 제한 (관리자만 가능)
         if (store.isDeleted() && user.getRole() != Role.ADMIN) {
             throw new IllegalArgumentException("삭제된 가게에 접근할 권한이 없습니다.");
         }
 
-        // 유저의 역할에 따라 FullStoreResponse 또는 LimitedStoreResponse 반환
+        Double averageRating = reviewRepository.findAverageRatingByStoreId(storeId);
+
         if (user.getRole() == Role.ADMIN) {
-            return ResponseEntity.ok(new FullStoreResponse(store)); // 관리자일 경우 모든 정보 제공
+            return ResponseEntity.ok(new FullStoreResponse(store, averageRating != null ? averageRating : 0.0));
         } else {
-            return ResponseEntity.ok(generateLimitedStoreDetails(store)); // 그 외 유저는 제한된 정보만 제공
+            return ResponseEntity.ok(new LimitedStoreResponse(store, averageRating != null ? averageRating : 0.0));
         }
     }
 
@@ -258,7 +270,6 @@ public class StoreService {
     @Transactional(readOnly = true)
     public Page<?> searchStoresByCategory(UUID categoryId, String sortField, int page, int size, boolean isAdmin) {
         validatePageSize(size);
-
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, sortField));
 
         Page<Store> stores;
@@ -268,7 +279,11 @@ public class StoreService {
             stores = storeRepository.findByCategoryIdAndIsDeletedFalse(categoryId, pageable);
         }
 
-        return isAdmin ? stores.map(FullStoreResponse::new) : stores.map(LimitedStoreResponse::new);
+        return stores.map(store -> {
+            Double averageRating = reviewRepository.findAverageRatingByStoreId(store.getStoreId());
+            return isAdmin ? new FullStoreResponse(store, averageRating != null ? averageRating : 0.0)
+                    : new LimitedStoreResponse(store, averageRating != null ? averageRating : 0.0);
+        });
     }
 
 
@@ -278,16 +293,19 @@ public class StoreService {
         }
     }
 
+    // 키워드로 검색 (Soft-delete 포함)
     @Transactional(readOnly = true)
     public Page<?> searchStoresByKeyword(String keyword, String sortField, int page, int size, boolean isAdmin) {
         validatePageSize(size);
-
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, sortField));
 
         Page<Store> stores = storeRepository.searchStoresWithKeywordAndRole(keyword, isAdmin, pageable);
 
-        // 관리자와 사용자에 따른 결과 매핑
-        return isAdmin ? stores.map(FullStoreResponse::new) : stores.map(LimitedStoreResponse::new);
+        return stores.map(store -> {
+            Double averageRating = reviewRepository.findAverageRatingByStoreId(store.getStoreId());
+            return isAdmin ? new FullStoreResponse(store, averageRating != null ? averageRating : 0.0)
+                    : new LimitedStoreResponse(store, averageRating != null ? averageRating : 0.0);
+        });
     }
 
 
@@ -333,12 +351,6 @@ public class StoreService {
         return filteredStoreDetails;
     }
 
-    private Page<?> mapStoreResponse(Page<Store> stores, Role role) {
-        return role == Role.ADMIN ?
-                stores.map(FullStoreResponse::new) :
-                stores.map(LimitedStoreResponse::new);
-    }
-
 //    private void populateStoreFields(Store store, StoreRequestDto storeRequestDto, String userId) {
 //        if (storeRequestDto.getStoreName() != null) store.setStoreName(storeRequestDto.getStoreName());
 //        if (storeRequestDto.getPhone() != null) store.setPhone(storeRequestDto.getPhone());
@@ -368,32 +380,56 @@ public class StoreService {
         List<Store> stores = storeRepository.findByRegionName(regionName);
 
         return stores.stream()
-                .map(store -> user.getRole() == Role.ADMIN ? new FullStoreResponse(store) : new LimitedStoreResponse(store))
+                .map(store -> {
+                    Double averageRating = reviewRepository.findAverageRatingByStoreId(store.getStoreId());
+                    if (user.getRole() == Role.ADMIN) {
+                        return new FullStoreResponse(store, averageRating != null ? averageRating : 0.0);
+                    } else {
+                        return new LimitedStoreResponse(store, averageRating != null ? averageRating : 0.0);
+                    }
+                })
                 .collect(Collectors.toList());
     }
+
 
     public Page<?> searchDeletedStoresByCategory(UUID categoryId, String sortField, int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, sortField));
         Page<Store> stores = storeRepository.findByCategoryIdAndIsDeletedTrue(categoryId, pageable);
-        return stores.map(FullStoreResponse::new); // 관리자 전용 FullStoreResponse 반환
+
+        return stores.map(store -> {
+            Double averageRating = reviewRepository.findAverageRatingByStoreId(store.getStoreId());
+            return new FullStoreResponse(store, averageRating != null ? averageRating : 0.0);
+        });
     }
 
     public Page<?> searchNonDeletedStoresByCategory(UUID categoryId, String sortField, int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, sortField));
         Page<Store> stores = storeRepository.findByCategoryIdAndIsDeletedFalse(categoryId, pageable);
-        return stores.map(FullStoreResponse::new); // 관리자 전용 FullStoreResponse 반환
+
+        return stores.map(store -> {
+            Double averageRating = reviewRepository.findAverageRatingByStoreId(store.getStoreId());
+            return new FullStoreResponse(store, averageRating != null ? averageRating : 0.0);
+        });
     }
 
     public Page<?> searchDeletedStoresByKeyword(String keyword, String sortField, int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, sortField));
         Page<Store> stores = storeRepository.searchStoresAndIsDeletedTrue(keyword, pageable);
-        return stores.map(FullStoreResponse::new); // 관리자 전용 FullStoreResponse 반환
+
+        return stores.map(store -> {
+            Double averageRating = reviewRepository.findAverageRatingByStoreId(store.getStoreId());
+            return new FullStoreResponse(store, averageRating != null ? averageRating : 0.0);
+        });
     }
 
     public Page<?> searchNonDeletedStoresByKeyword(String keyword, String sortField, int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, sortField));
         Page<Store> stores = storeRepository.searchStoresAndIsDeletedFalse(keyword, pageable);
-        return stores.map(FullStoreResponse::new); // 관리자 전용 FullStoreResponse 반환
+
+        return stores.map(store -> {
+            Double averageRating = reviewRepository.findAverageRatingByStoreId(store.getStoreId());
+            return new FullStoreResponse(store, averageRating != null ? averageRating : 0.0);
+        });
     }
 
 }
